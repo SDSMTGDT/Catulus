@@ -5,7 +5,9 @@ PhysObject.__index = PhysObject
 -- Syntax is very weird in this section, but it's necessary for classes
 setmetatable(PhysObject, {
     __call = function(cls, ...)
-    return cls.new(...)
+      local self = setmetatable({}, cls)
+      self:_init(...)
+      return self
     end,
   }
 )
@@ -17,9 +19,7 @@ setmetatable(PhysObject, {
 --
 -- Constructor
 --
-function PhysObject.new( )
-  local self = setmetatable({} , PhysObject)
-  
+function PhysObject:_init( )
   -- Declare object properties
   self.position = {}
   self.velocity = {}
@@ -39,9 +39,6 @@ function PhysObject.new( )
   self.acceleration.x = 0
   self.acceleration.y = 0
   self.acceleration.z = 0
-  
-  -- Return self
-  return self
 end
 
 --
@@ -60,7 +57,7 @@ end
 --
 -- PhysObject:getPosition
 --
-function PhysObject:getPostion( )
+function PhysObject:getPosition( )
   return self.position.x, self.position.y, self.position.z
 end
 
