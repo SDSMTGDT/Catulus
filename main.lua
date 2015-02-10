@@ -30,6 +30,14 @@ function love.update( dt )
     end
   end
   
+  if love.keyboard.isDown( "a" ) then
+    player.position.x = player.position.x - 4
+  end
+  
+  if love.keyboard.isDown( "d" ) then
+    player.position.x = player.position.x + 4
+  end
+  
   player:update()
   print(love.timer.getFPS())
 end
@@ -42,6 +50,7 @@ function love.keypressed( key, isrepeat )
   if key == "escape" then
     love.event.quit()
   end
+
 end
 
 function love.draw( )
