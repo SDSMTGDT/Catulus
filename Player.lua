@@ -20,7 +20,7 @@ end
 function Player:draw( )
   local x, y = self:getPosition( )
   love.graphics.setColor( 255, 255, 255 )
-  love.graphics.rectangle( "fill", x, y, 20, 20 )
+  love.graphics.rectangle( "fill", x, y, 32, 64 )
 end
  
 

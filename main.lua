@@ -1,14 +1,17 @@
 require "Player"
+require "Block"
 
 player = Player()
+blocks = {}
 
 function love.load( )
   player:setPosition( 100 , 100 )
-  player:setAcceleration( 0, 0.1 )
-end
-
-function love.draw( )
-  player:draw()
+  player:setAcceleration( 0, 0.25 )
+  
+  -- Build level
+  for i=0, (512-32) do
+    table.insert(blocks, Block(i, 512-32))
+  end
 end
 
 function love.update( dt )
@@ -16,6 +19,35 @@ function love.update( dt )
     love.timer.sleep( 1/60 - dt )
   end
   
+  for k,block in pairs(blocks) do
+    local px, py = player:getPosition()
+    
+    if px <= block.position.x + 32 and px + 32 >= block.position.x then
+      if py + player.velocity.y + 64 >= block.position.y and py + player.velocity.y <= block.position.y + 32 then
+        player.position.y = block.position.y - 64
+        player.velocity.y = 0
+      end
+    end
+  end
+  
   player:update()
   print(love.timer.getFPS())
+end
+
+function love.keypressed( key, isrepeat )
+  if key == " " then
+    player.velocity.y = -8
+  end
+  
+  if key == "escape" then
+    love.event.quit()
+  end
+end
+
+function love.draw( )
+  for key,value in pairs(blocks) do
+    value:draw()
+  end
+
+  player:draw()
 end
