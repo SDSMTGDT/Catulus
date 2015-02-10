@@ -5,6 +5,7 @@ player = Player()
 blocks = {}
 
 function love.load( )
+  -- Starting position & gravity
   player:setPosition( 100 , 100 )
   player:setAcceleration( 0, 0.25 )
   
@@ -19,6 +20,7 @@ function love.update( dt )
     love.timer.sleep( 1/60 - dt )
   end
   
+  --Sloppy collision checking
   for k,block in pairs(blocks) do
     local px, py = player:getPosition()
     
@@ -30,6 +32,7 @@ function love.update( dt )
     end
   end
   
+  --Simple character movement on the x axis
   if love.keyboard.isDown( "a" ) then
     player.position.x = player.position.x - 4
   end
@@ -43,10 +46,13 @@ function love.update( dt )
 end
 
 function love.keypressed( key, isrepeat )
+  
+  --Jump
   if key == " " then
     player.velocity.y = -8
   end
   
+  --Escape
   if key == "escape" then
     love.event.quit()
   end
@@ -54,9 +60,11 @@ function love.keypressed( key, isrepeat )
 end
 
 function love.draw( )
+
+  --Draw in the platform
   for key,value in pairs(blocks) do
     value:draw()
   end
-
+  
   player:draw()
 end
