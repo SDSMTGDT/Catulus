@@ -35,10 +35,12 @@ function love.update( dt )
   --Simple character movement on the x axis
   if love.keyboard.isDown( "a" ) then
     player.position.x = player.position.x - 4
+    playerDirection = "left"
   end
   
   if love.keyboard.isDown( "d" ) then
     player.position.x = player.position.x + 4
+    playerDirection = "right"
   end
   
   player:update()
@@ -50,6 +52,7 @@ function love.keypressed( key, isrepeat )
   --Jump
   if key == " " then
     player.velocity.y = -8
+    playerDirection = "jump"
   end
   
   --Escape
@@ -66,5 +69,5 @@ function love.draw( )
     value:draw()
   end
   
-  player:draw()
+  player:draw( playerDirection )
 end
