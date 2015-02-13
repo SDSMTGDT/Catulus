@@ -34,13 +34,23 @@ function love.update( dt )
   
   --Simple character movement on the x axis
   if love.keyboard.isDown( "a" ) then
-    player.position.x = player.position.x - 4
-    playerDirection = "left"
+    if player.velocity.x > -player.velocity.max.x then
+      player.velocity.x = player.velocity.x - 0.375
+    end
+    
+    if player.velocity.x < 0 then
+      playerDirection = "left"
+    end
   end
   
   if love.keyboard.isDown( "d" ) then
-    player.position.x = player.position.x + 4
-    playerDirection = "right"
+    if player.velocity.x < player.velocity.max.x then
+      player.velocity.x = player.velocity.x + 0.375
+    end
+    
+    if player.velocity.x > 0 then
+      playerDirection = "right"
+    end
   end
   
   player:update()

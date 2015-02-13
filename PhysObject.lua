@@ -21,9 +21,15 @@ setmetatable(PhysObject, {
 --
 function PhysObject:_init( )
   -- Declare object properties
+  self.size = {}
   self.position = {}
   self.velocity = {}
   self.acceleration = {}
+  
+  -- Initialize Size
+  self.size.width = 0
+  self.size.height = 0
+  self.size.depth = 0
   
   -- Initialize location
   self.position.x = 0
@@ -39,6 +45,28 @@ function PhysObject:_init( )
   self.acceleration.x = 0
   self.acceleration.y = 0
   self.acceleration.z = 0
+end
+
+--
+-- PhysObject:setSize
+--
+function PhysObject:setSize( w, h, d )
+  -- Handle optional argument d
+  d = d or self.size.depth
+  
+  -- Set size
+  self.size.width = w
+  self.size.height = h
+  self.size.depth = d
+end
+
+--
+-- PhysObject
+--
+function PhysObject:getBoundingBox()
+  return self.position.y, self.position.x + self.size.width,
+    self.position.y + self.size.height, self.position.x,
+    self.position.z, self.position.z + self.size.depth
 end
 
 --

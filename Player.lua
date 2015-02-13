@@ -15,6 +15,7 @@ setmetatable(Player, {
 
 function Player:_init( )
   PhysObject._init( self )
+  self.velocity.max = {x = 4, y = -1}
 end
 
 function Player:draw( playerDirection )
