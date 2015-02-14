@@ -92,7 +92,7 @@ end
 --
 -- PhysObject:setVelocity
 --
-function PhysObject:setVelocity( x, y )
+function PhysObject:setVelocity( x, y, z )
   -- Handle optional argument z
   z = z or self.velocity.z
   
