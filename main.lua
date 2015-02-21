@@ -53,6 +53,16 @@ function love.update( dt )
     end
   end
   
+  
+  --Friction
+  if player.velocity.x > 0 and player.velocity.y == 0 then
+  player.velocity.x = player.velocity.x - 0.130
+  end
+  
+  if player.velocity.x < 0 and player.velocity.y == 0 then
+  player.velocity.x = player.velocity.x + 0.130
+  end
+  
   player:update()
   print(love.timer.getFPS())
 end
