@@ -57,11 +57,11 @@ function love.update( dt )
   
   --Friction
   if player.velocity.x > 0 and player.velocity.y == 0 then
-  player.velocity.x = player.velocity.x - 0.130
+  player.velocity.x = player.velocity.x - 0.125
   end
   
   if player.velocity.x < 0 and player.velocity.y == 0 then
-  player.velocity.x = player.velocity.x + 0.130
+  player.velocity.x = player.velocity.x + 0.125
   end
   
   player:update()
