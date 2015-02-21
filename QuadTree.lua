@@ -43,9 +43,9 @@ function QuadTree:clear( )
   
   -- Recursively clear nodes
   for i = 1, 4 do
-    if self.quadNodes[i] ~= nil then
-      self.quadNodes[i]:clear()
-      self.quadNodes[i] = nil
+    if self.nodes[i] ~= nil then
+      self.nodes[i]:clear()
+      self.nodes[i] = nil
     end    
   end
 end
@@ -56,7 +56,7 @@ end
 function QuadTree:isLeaf( )
 
   for i = 1, 4 do
-    if self.quadNodes[i] ~= nil then
+    if self.nodes[i] ~= nil then
       return false
     end
   end
@@ -72,10 +72,10 @@ function QuadTree:split( )
   local subWidth = (self.right + self.left) / 2
   local subHeight = (self.top + self.bottom) / 2
   
-  self.nodes[1] = QuadTree( lvl+1, self.top, self.right, subHeight, subWidth )
-  self.nodes[2] = QuadTree( lvl+1, self.top, subWidth, subHeight, self.left )
-  self.nodes[3] = QuadTree( lvl+1, subHeight, subWidth, self.bottom, self.left )
-  self.nodes[4] = QuadTree( lvl+1, subHeight, self.right, self.bottom, subWidth )
+  self.nodes[1] = QuadTree( self.level+1, self.top, self.right, subHeight, subWidth )
+  self.nodes[2] = QuadTree( self.level+1, self.top, subWidth, subHeight, self.left )
+  self.nodes[3] = QuadTree( self.level+1, subHeight, subWidth, self.bottom, self.left )
+  self.nodes[4] = QuadTree( self.level+1, subHeight, self.right, self.bottom, subWidth )
 
 end
 
@@ -90,6 +90,7 @@ function QuadTree:getIndex( top, right, bottom, left )
   
   -- Check upper half
   if top >= self.top and bottom < subHeight then
+    
     
     -- Check right side (Q I)
     if left >= subWidth and right < self.right then
@@ -119,17 +120,22 @@ end
 --
 -- QuadTree:insert
 --
-function QuadTree:insert( object )
+function QuadTree:insert( object, top, right, bottom, left )
+  
+  -- Optional arguments
+  if left == nil then
+    top, right, bottom, left = object:getBoundingBox()
+  end
   
   -- Check for recursive insertion
   if self:isLeaf() == false then
     
     -- Find subnode object belongs in
-    local index = self:getIndex(object)
+    local index = self:getIndex(top, right, bottom, left)
     
     -- Insert into subnode, return
     if index ~= 0 then
-      self.nodes[index]:insert(object)
+      self.nodes[index]:insert(object, top, right, bottom, left)
       return
     
     -- If not fitting in subnode, insert into current node, return
@@ -142,10 +148,11 @@ function QuadTree:insert( object )
   
     -- Doesn't belong in subnode, insert into current node
     table.insert(self.objects, object)
-  
+    
     -- Split if necessary, possible, and not done yet
     if table.getn(self.objects) > self.maxObjects and self.level < self.maxLevels then
-    
+      
+      
       -- Split if not splitted so far
       self:split()
       
@@ -154,12 +161,13 @@ function QuadTree:insert( object )
       while i <= table.getn(self.objects) do
         
         -- Figure out what child object belongs in
-        local index = self:getIndex(object)
+        top, right, bottom, left = self.objects[i]:getBoundingBox()
+        local index = self:getIndex(top, right, bottom, left)
         
         if index ~= 0 then
           -- Insert object into child, delete from self
-          self.nodes[index]:insert(object)
-          table.remove(self.objects, object, i)
+          self.nodes[index]:insert(self.objects[i])
+          table.remove(self.objects, i)
         else
           -- Object remains in current
           i = i + 1
@@ -186,4 +194,13 @@ function QuadTree:retrieve( list, top, right, bottom, left )
   
   return list
   
+end
+
+function QuadTree:draw( )
+  love.graphics.rectangle("line", self.left, self.top, self.right - self.left, self.bottom - self.top)
+  for i in pairs(self.nodes) do
+    if i ~= nil then
+      self.nodes[i]:draw()
+    end
+  end
 end

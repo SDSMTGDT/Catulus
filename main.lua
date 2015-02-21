@@ -4,6 +4,7 @@ require "QuadTree"
 
 player = Player()
 blocks = {}
+quadtree = QuadTree(1, 0, 512, 512, 0)
 
 function love.load( )
   -- Starting position & gravity
@@ -65,7 +66,7 @@ function love.update( dt )
   end
   
   player:update()
-  print(love.timer.getFPS())
+  love.graphics.print(love.timer.getFPS(), 0, 0)
 end
 
 function love.keypressed( key, isrepeat )
@@ -80,10 +81,19 @@ function love.keypressed( key, isrepeat )
   if key == "escape" then
     love.event.quit()
   end
+  
+end
 
+function love.mousepressed( x, y, button )
+  local block = Block(x,y)
+  block:setSize(8,8)
+  table.insert(blocks, block)
+  quadtree:insert(block)
 end
 
 function love.draw( )
+  
+  quadtree:draw()
 
   --Draw in the platform
   for key,value in pairs(blocks) do
