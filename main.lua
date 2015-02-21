@@ -1,5 +1,6 @@
 require "Player"
 require "Block"
+require "QuadTree"
 
 player = Player()
 blocks = {}

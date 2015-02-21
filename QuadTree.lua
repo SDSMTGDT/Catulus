@@ -2,7 +2,6 @@
 QuadTree = {}
 QuadTree.__index = QuadTree
 
-
 setmetatable(QuadTree, {
     __call = function(cls, ...)
       local self = setmetatable({}, cls)
@@ -15,7 +14,7 @@ setmetatable(QuadTree, {
 -- 
 -- QuadTree constructor
 --
-function QuadTree: _init( lvl, posX, posY, width, height )
+function QuadTree: _init( lvl, top, right, bottom, left )
 
   self.maxObjects = 10
   self.maxLevels = 5
@@ -23,13 +22,12 @@ function QuadTree: _init( lvl, posX, posY, width, height )
   self.level = lvl
   self.objects = {}
 
-  self.quadNodes = {}
+  self.nodes = {nil, nil, nil, nil}
   
-  self.widthX = width
-  self.heightY = height
-  
-  self.positionX = posX
-  self.positionY = posY
+  self.top = top
+  self.right = right
+  self.bottom = bottom
+  self.left = left
   
 end
 
@@ -38,11 +36,15 @@ end
 --
 function QuadTree:clear( )
   
-  objects.clear()
+  -- Clear objects list
+  for i in pairs(objects) do
+    objects[i] = nil
+  end
   
-  for i = 0, 3 do
-    if self.quadNodes[i] ~= nil
-      self.quadNodes[i].clear
+  -- Recursively clear nodes
+  for i = 1, 4 do
+    if self.quadNodes[i] ~= nil then
+      self.quadNodes[i]:clear()
       self.quadNodes[i] = nil
     end    
   end
@@ -53,38 +55,135 @@ end
 --
 function QuadTree:isLeaf( )
 
-  for i = 0, 3 do
-    if self.quadNodes[i] ~= nil
-      return true
+  for i = 1, 4 do
+    if self.quadNodes[i] ~= nil then
+      return false
     end
   end
-  return false
+  return true
 
 end
 
 --
 -- QuadTree:split
 --
-function QuadTree:split()
+function QuadTree:split( )
 
-  local subWidth = self.width / 2
-  local subHeight = self.height / 2
+  local subWidth = (self.right + self.left) / 2
+  local subHeight = (self.top + self.bottom) / 2
   
-  local x = self.positionX
-  local y = self.positionY
-  
-  quadNodes[0] = QuadTree( lvl+1, x + subWidth, y , subWidth, subHeight )
-  quadNodes[1] = QuadTree( lvl+1, x, y, subWidth, subHeight )
-  quadNodes[2] = QuadTree( lvl+1, x, y + subHeight, subWidth, y + subHeight )
-  quadNodes[3] = QuadTree( lvl+1, x + subWidth, y + subHeight, subWidth, subHeight )
+  self.nodes[1] = QuadTree( lvl+1, self.top, self.right, subHeight, subWidth )
+  self.nodes[2] = QuadTree( lvl+1, self.top, subWidth, subHeight, self.left )
+  self.nodes[3] = QuadTree( lvl+1, subHeight, subWidth, self.bottom, self.left )
+  self.nodes[4] = QuadTree( lvl+1, subHeight, self.right, self.bottom, subWidth )
 
 end
 
 --
 -- QuadTree:getIndex
 --
-function QuadTree:getIndex()
+function QuadTree:getIndex( top, right, bottom, left )
 
+  local index = 0
+  local subWidth = (self.right + self.left) / 2
+  local subHeight = (self.top + self.bottom) / 2
+  
+  -- Check upper half
+  if top >= self.top and bottom < subHeight then
+    
+    -- Check right side (Q I)
+    if left >= subWidth and right < self.right then
+      index = 1
+      
+    -- Check left side (Q II)
+    elseif left >= self.left and right < subWidth then
+      index = 2
+    end
+    
+  -- Check lower half
+  elseif top >= subHeight and bottom < self.bottom then
+    
+    -- Check left side (Q III)
+    if left >= self.left and right < subWidth then
+      index = 3
+      
+    -- Check right side (Q IV)
+    elseif left >= subWidth and right < self.right then
+      index = 4
+    end
+  end
+  
+  return index
+end
 
+--
+-- QuadTree:insert
+--
+function QuadTree:insert( object )
+  
+  -- Check for recursive insertion
+  if self:isLeaf() == false then
+    
+    -- Find subnode object belongs in
+    local index = self:getIndex(object)
+    
+    -- Insert into subnode, return
+    if index ~= 0 then
+      self.nodes[index]:insert(object)
+      return
+    
+    -- If not fitting in subnode, insert into current node, return
+    else
+      table.insert(self.objects, object)
+      return
+    end
+  
+  else      -- Is leaf, might have to split
+  
+    -- Doesn't belong in subnode, insert into current node
+    table.insert(self.objects, object)
+  
+    -- Split if necessary, possible, and not done yet
+    if table.getn(self.objects) > self.maxObjects and self.level < self.maxLevels then
+    
+      -- Split if not splitted so far
+      self:split()
+      
+      -- Distribute objects into child nodes
+      local i = 1
+      while i <= table.getn(self.objects) do
+        
+        -- Figure out what child object belongs in
+        local index = self:getIndex(object)
+        
+        if index ~= 0 then
+          -- Insert object into child, delete from self
+          self.nodes[index]:insert(object)
+          table.remove(self.objects, object, i)
+        else
+          -- Object remains in current
+          i = i + 1
+        end
+      end
+    end
+  end
+end
 
+--
+-- QuadTree:retrieve
+--
+function QuadTree:retrieve( list, top, right, bottom, left )
+  
+  local index = self:getIndex(top, right, bottom, left)
+  
+  if index ~= -1 and self:isLeaf() == false then
+    self.nodes[index]:retrieve(list, top, right, bottom, left)
+  end
+  
+  for o in pairs(self.objects) do
+    table.insert(list, o)
+  end
+  
+  return list
+  
 end
