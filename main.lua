@@ -10,6 +10,7 @@ function love.load( )
   -- Starting position & gravity
   player:setPosition( 100 , 100 )
   player:setAcceleration( 0, 0.25 )
+  player:setSize(32, 64)
   
   -- Build level
   for i=0, (512-32) do
@@ -22,15 +23,13 @@ function love.update( dt )
     love.timer.sleep( 1/60 - dt )
   end
   
+  player:update()
+  
   --Sloppy collision checking
   for k,block in pairs(blocks) do
-    local px, py = player:getPosition()
-    
-    if px <= block.position.x + 32 and px + 32 >= block.position.x then
-      if py + player.velocity.y + 64 >= block.position.y and py + player.velocity.y <= block.position.y + 32 then
-        player.position.y = block.position.y - 64
-        player.velocity.y = 0
-      end
+    if player:collidesWith(block) then
+      player.position.y = block.position.y - 64
+      player.velocity.y = 0
     end
   end
   
@@ -65,7 +64,6 @@ function love.update( dt )
   player.velocity.x = player.velocity.x + 0.125
   end
   
-  player:update()
   love.graphics.print(love.timer.getFPS(), 0, 0)
 end
 

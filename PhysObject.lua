@@ -151,7 +151,7 @@ function PhysObject:draw( )
   -- Must be defined on a per-object basis
 end
 
-function PhysObect:collidesWith( other )
+function PhysObject:collidesWith( other )
   local t1, r1, b1, l1 = self:getBoundingBox()
   local t2, r2, b2, l2 = other:getBoundingBox()
   
