@@ -37,8 +37,8 @@ end
 function QuadTree:clear( )
   
   -- Clear objects list
-  for i in pairs(objects) do
-    objects[i] = nil
+  for i in pairs(self.objects) do
+    self.objects[i] = nil
   end
   
   -- Recursively clear nodes

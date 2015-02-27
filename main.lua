@@ -83,10 +83,16 @@ function love.keypressed( key, isrepeat )
 end
 
 function love.mousepressed( x, y, button )
-  local block = Block(x,y)
-  block:setSize(8,8)
-  table.insert(blocks, block)
-  quadtree:insert(block)
+  if button == "l" then
+    local block = Block(x,y)
+    block:setSize(8,8)
+    table.insert(blocks, block)
+    quadtree:insert(block)
+  end
+  
+  if button == "r" then
+    quadtree:clear()
+   end
 end
 
 function love.draw( )
