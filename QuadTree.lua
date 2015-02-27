@@ -118,6 +118,22 @@ function QuadTree:getIndex( top, right, bottom, left )
 end
 
 --
+-- QuadTree:getFullIndex
+--
+function QuadTree:getFullIndex( top, right, bottom, left )
+  
+  -- Find subnode
+  local i = self:getIndex(top, right, bottom, left)
+  
+  -- Recursively get full index, return as string
+  if i ~= 0 and self.nodes[i] ~= nil then
+    return i..(self.nodes[i]:getFullIndex(top, right, bottom, left))
+  else
+    return ""
+  end
+end
+
+--
 -- QuadTree:insert
 --
 function QuadTree:insert( object, top, right, bottom, left )
@@ -127,52 +143,70 @@ function QuadTree:insert( object, top, right, bottom, left )
     top, right, bottom, left = object:getBoundingBox()
   end
   
-  -- Check for recursive insertion
-  if self:isLeaf() == false then
+  -- Determine if table needs to be split
+  if table.getn(self.objects) >= self.maxObjects and self.level < self.maxLevels and self:isLeaf() == true then
     
-    -- Find subnode object belongs in
-    local index = self:getIndex(top, right, bottom, left)
-    
-    -- Insert into subnode, return
-    if index ~= 0 then
-      self.nodes[index]:insert(object, top, right, bottom, left)
-      return
-    
-    -- If not fitting in subnode, insert into current node, return
-    else
-      table.insert(self.objects, object)
-      return
-    end
-  
-  else      -- Is leaf, might have to split
-  
-    -- Doesn't belong in subnode, insert into current node
-    table.insert(self.objects, object)
-    
-    -- Split if necessary, possible, and not done yet
-    if table.getn(self.objects) > self.maxObjects and self.level < self.maxLevels then
-      
-      
-      -- Split if not splitted so far
-      self:split()
-      
-      -- Distribute objects into child nodes
-      local i = 1
-      while i <= table.getn(self.objects) do
-        
-        -- Figure out what child object belongs in
-        top, right, bottom, left = self.objects[i]:getBoundingBox()
-        local index = self:getIndex(top, right, bottom, left)
-        
-        if index ~= 0 then
-          -- Insert object into child, delete from self
-          self.nodes[index]:insert(self.objects[i])
-          table.remove(self.objects, i)
-        else
-          -- Object remains in current
-          i = i + 1
-        end
+    -- Split if not splitted so far
+    self:split()
+
+    -- Distribute objects into child nodes
+    local i = 1
+    while i <= table.getn(self.objects) do
+
+      -- Figure out what child object belongs in
+      top, right, bottom, left = self.objects[i]:getBoundingBox()
+      local index = self:getIndex(top, right, bottom, left)
+
+      if index ~= 0 then
+        -- Insert object into child, delete from self
+        self.nodes[index]:insert(self.objects[i])
+        table.remove(self.objects, i)
+      else
+        -- Object remains in current
+        i = i + 1
       end
+    end
+  end
+  
+
+  -- Find subnode object belongs in
+  local index = self:getIndex(top, right, bottom, left)
+
+  -- Insert into subnode, return
+  if index ~= 0 and self.nodes[index] ~= nil then
+    return index .. self.nodes[index]:insert(object, top, right, bottom, left)
+
+  -- If not fitting in subnode, insert into current node, return
+  else
+    table.insert(self.objects, object)
+    return ""
+  end
+
+end
+
+--
+-- QuadTree:remove
+--
+function QuadTree:remove( object, path )
+  if path == nil or path:len()==0 then
+    for k,v in pairs(self.objects) do
+      if v == object then
+        table.remove(self.objects, k)
+        return true
+      end
+    end
+    for k in pairs(self.nodes) do
+      if self.nodes[k]:remove(object) == true then
+        return true
+      end
+    end
+    return false
+  else
+    local t = tonumber(path:sub(1,1))
+    if self.nodes[t] ~= nil then
+      return self.nodes[t]:remove(object, path:sub(2))
+    else
+      return false
     end
   end
 end

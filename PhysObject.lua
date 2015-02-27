@@ -1,3 +1,5 @@
+require "Secretary"
+
 -- Required fluff for classes
 PhysObject = {}
 PhysObject.__index = PhysObject
@@ -45,6 +47,16 @@ function PhysObject:_init( )
   self.acceleration.x = 0
   self.acceleration.y = 0
   self.acceleration.z = 0
+  
+  -- Register with object manager
+  Secretary.registerObject(self)
+end
+
+--
+-- PhysObject:getInstanceId
+--
+function PhysObject:getInstanceId( )
+  return self.id
 end
 
 --

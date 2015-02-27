@@ -7,6 +7,8 @@ blocks = {}
 quadtree = QuadTree(1, 0, 512, 512, 0)
 
 function love.load( )
+  print(player.__index)
+  
   -- Starting position & gravity
   player:setPosition( 100 , 100 )
   player:setAcceleration( 0, 0.25 )
