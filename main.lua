@@ -29,7 +29,7 @@ function love.update( dt )
   
   --Sloppy collision checking
   for k,block in pairs(blocks) do
-    if player:collidesWith(block) then
+    if player:collidesWith(block:getBoundingBox()) then
       player.position.y = block.position.y - 64
       player.velocity.y = 0
     end

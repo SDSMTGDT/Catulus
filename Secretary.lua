@@ -1,6 +1,7 @@
 require "QuadTree"
 
 -- Required fluff for classes
+require "functions"
 Secretary = {}
 Secretary.__index = Secretary
 
@@ -20,6 +21,11 @@ Secretary.tree = QuadTree( 1, -1000, 1000, -1000, 1000 )
 Secretary.objectNodes = {}
 
 function Secretary.registerObject(object)
+  
+  --Check that object is an instance of PhysObject
+  if instanceOf( object, PhysObject ) == false then
+    return false
+  end
   
   -- Make sure object is valid and ID is unset
   if object == nil or object.id ~= nil then
@@ -48,3 +54,41 @@ function Secretary.updateObject(object)
     Secretary.objectNodes[object.id] = path
   end
 end
+
+function Secretary.collidesWith( top, right, bottom, left, object )
+  local list = {}
+  local i = 1
+  Secretary.tree:retrieve( list, top, right, bottom, left )
+  
+  while i <= #list do
+    if object:collidesWith(list[i]:getBoundingBox()) == true then
+      i = i + 1
+    else
+      list:remove(i)
+    end
+  end
+  
+  return list
+end
+
+function Secretary.getObject( id )
+  return Secretary.objects[id]
+end
+
+function Secretary.remove( object )
+  assert( type(object) == "number" or instanceOf( object, PhysObject ), "Invalid parameter type" )
+  local id = object
+  
+  if type(id) == "number" then
+    object = Secretary.objects[id]
+    assert( object , "Invalid object ID "..id ) 
+  else
+    id = object:getInstanceId()
+  end
+  
+  Secretary.tree:remove(object, Secretary.objectNodes[id])
+  Secretary.objects[id] = nil
+  Secretary.objectNodes[id] = nil
+end
+
+  

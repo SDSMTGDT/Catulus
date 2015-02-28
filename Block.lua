@@ -5,6 +5,7 @@ Block.__index = Block
 
 setmetatable(Block, {
     __index = PhysObject,
+    __metatable = PhysObject,
     __call = function(cls, ...)
       local self = setmetatable({}, cls)
       self:_init(...)

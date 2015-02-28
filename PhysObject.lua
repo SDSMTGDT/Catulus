@@ -163,9 +163,8 @@ function PhysObject:draw( )
   -- Must be defined on a per-object basis
 end
 
-function PhysObject:collidesWith( other )
+function PhysObject:collidesWith( t2, r2, b2, l2 )
   local t1, r1, b1, l1 = self:getBoundingBox()
-  local t2, r2, b2, l2 = other:getBoundingBox()
   
   if b1 > t2 and t1 < b2 and r1 > l2 and l1 < r2 then
     return true

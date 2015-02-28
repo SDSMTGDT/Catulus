@@ -5,6 +5,7 @@ Player.__index = Player
 
 setmetatable(Player, {
     __index = PhysObject,
+    __metatable = PhysObject,
     __call = function(cls, ...)
       local self = setmetatable({}, cls)
       self:_init(...)
