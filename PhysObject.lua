@@ -22,7 +22,10 @@ setmetatable(PhysObject, {
 -- Constructor
 --
 function PhysObject:_init( )
+
   -- Declare object properties
+  self.id = nil
+  self.visible = true
   self.size = {}
   self.position = {}
   self.velocity = {}
@@ -59,6 +62,20 @@ function PhysObject:getInstanceId( )
   return self.id
 end
 
+--
+-- PhysObject:setVisible
+--
+function PhysObject:setVisible( visible )
+  self.visible = visible
+end
+
+--
+-- PhysObject:isVisible
+--
+function PhysObject:isVisible()
+  return self.visible
+end
+  
 --
 -- PhysObject:setSize
 --
@@ -160,6 +177,10 @@ end
 -- PhysObject:draw
 --
 function PhysObject:draw( )
+  -- Must be defined on a per-object basis
+end
+
+function PhysObject:onCollisionCheck( )
   -- Must be defined on a per-object basis
 end
 

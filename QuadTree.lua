@@ -218,11 +218,11 @@ function QuadTree:retrieve( list, top, right, bottom, left )
   
   local index = self:getIndex(top, right, bottom, left)
   
-  if index ~= -1 and self:isLeaf() == false then
+  if index ~= 0 and self:isLeaf() == false then
     self.nodes[index]:retrieve(list, top, right, bottom, left)
   end
   
-  for o in pairs(self.objects) do
+  for i,o in pairs(self.objects) do
     table.insert(list, o)
   end
   

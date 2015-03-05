@@ -3,8 +3,6 @@ require "Block"
 require "QuadTree"
 
 player = Player()
-blocks = {}
-quadtree = QuadTree(1, 0, 512, 512, 0)
 
 function love.load( )
   print(player.__index)
@@ -16,24 +14,18 @@ function love.load( )
   
   -- Build level
   for i=0, (512-32) do
-    table.insert(blocks, Block(i, 512-32))
+    Block(i, 512-32)
   end
 end
 
 function love.update( dt )
+  
   if dt < 1/60 then
     love.timer.sleep( 1/60 - dt )
   end
   
-  player:update()
-  
-  --Sloppy collision checking
-  for k,block in pairs(blocks) do
-    if player:collidesWith(block:getBoundingBox()) then
-      player.position.y = block.position.y - 64
-      player.velocity.y = 0
-    end
-  end
+  Secretary.updatePhysics()
+  Secretary.checkCollisions()
   
   --Simple character movement on the x axis
   if love.keyboard.isDown( "a" ) then
@@ -88,23 +80,11 @@ function love.mousepressed( x, y, button )
   if button == "l" then
     local block = Block(x,y)
     block:setSize(8,8)
-    table.insert(blocks, block)
-    quadtree:insert(block)
   end
-  
-  if button == "r" then
-    quadtree:clear()
-   end
 end
 
 function love.draw( )
   
-  quadtree:draw()
-
-  --Draw in the platform
-  for key,value in pairs(blocks) do
-    value:draw()
-  end
+  Secretary.drawObjects( )
   
-  player:draw( playerDirection )
 end

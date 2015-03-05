@@ -55,16 +55,16 @@ function Secretary.updateObject(object)
   end
 end
 
-function Secretary.collidesWith( top, right, bottom, left, object )
+function Secretary.getCollisions( top, right, bottom, left )
   local list = {}
   local i = 1
   Secretary.tree:retrieve( list, top, right, bottom, left )
   
   while i <= #list do
-    if object:collidesWith(list[i]:getBoundingBox()) == true then
+    if list[i]:collidesWith(top, right, bottom, left) == true then
       i = i + 1
     else
-      list:remove(i)
+      table.remove(list, i)
     end
   end
   
@@ -91,4 +91,21 @@ function Secretary.remove( object )
   Secretary.objectNodes[id] = nil
 end
 
+function Secretary.drawObjects( )
+  for i, o in pairs(Secretary.objects) do
+    o:draw()
+  end
+end
   
+function Secretary.updatePhysics( )
+  for i, o in pairs(Secretary.objects) do
+    o:update()
+  end
+end
+
+function Secretary.checkCollisions( )
+  for i, o in pairs(Secretary.objects) do
+    o:onCollisionCheck( )
+  end
+end
+
