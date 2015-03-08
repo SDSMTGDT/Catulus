@@ -38,15 +38,15 @@ function Player:draw( playerDirection )
 
   love.graphics.rectangle( "fill", x, y, 32, 64 )
 end
- 
+
 function Player:onCollisionCheck( )
   local list = Secretary.getCollisions( self:getBoundingBox() )
   
   for i,o in pairs(list) do
-    if player ~= o then
-      if player:collidesWith(o:getBoundingBox()) then
-        player.position.y = o.position.y - 64
-        player.velocity.y = 0
+    if self ~= o and instanceOf(o, Block) then
+      if self:collidesWith(o:getBoundingBox()) then
+        self.position.y = o.position.y - self.size.height
+        self.velocity.y = 0
       end
     end
   end
