@@ -1,3 +1,5 @@
+require "Secretary"
+
 -- Required fluff for classes
 PhysObject = {}
 PhysObject.__index = PhysObject
@@ -20,7 +22,10 @@ setmetatable(PhysObject, {
 -- Constructor
 --
 function PhysObject:_init( )
+
   -- Declare object properties
+  self.id = nil
+  self.visible = true
   self.size = {}
   self.position = {}
   self.velocity = {}
@@ -45,8 +50,32 @@ function PhysObject:_init( )
   self.acceleration.x = 0
   self.acceleration.y = 0
   self.acceleration.z = 0
+  
+  -- Register with object manager
+  Secretary.registerObject(self)
 end
 
+--
+-- PhysObject:getInstanceId
+--
+function PhysObject:getInstanceId( )
+  return self.id
+end
+
+--
+-- PhysObject:setVisible
+--
+function PhysObject:setVisible( visible )
+  self.visible = visible
+end
+
+--
+-- PhysObject:isVisible
+--
+function PhysObject:isVisible()
+  return self.visible
+end
+  
 --
 -- PhysObject:setSize
 --
@@ -149,4 +178,18 @@ end
 --
 function PhysObject:draw( )
   -- Must be defined on a per-object basis
+end
+
+function PhysObject:onCollisionCheck( )
+  -- Must be defined on a per-object basis
+end
+
+function PhysObject:collidesWith( t2, r2, b2, l2 )
+  local t1, r1, b1, l1 = self:getBoundingBox()
+  
+  if b1 > t2 and t1 < b2 and r1 > l2 and l1 < r2 then
+    return true
+  else
+    return false
+  end
 end
