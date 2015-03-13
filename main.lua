@@ -18,14 +18,22 @@ function love.load( )
   end
 end
 
+function love.draw( )
+  Secretary.onDraw()
+end
+
 function love.update( dt )
   
+  -- Regulate the framerate
   if dt < 1/60 then
     love.timer.sleep( 1/60 - dt )
   end
   
-  Secretary.updatePhysics()
-  Secretary.checkCollisions()
+  -- Call step-based events
+  Secretary.onPrePhysics()
+  Secretary.onPhysics()
+  Secretary.onPostPhysics()
+  Secretary.onStep()
   
   --Simple character movement on the x axis
   if love.keyboard.isDown( "a" ) then
@@ -62,6 +70,7 @@ function love.update( dt )
 end
 
 function love.keypressed( key, isrepeat )
+  Secretary.onKeyboardDown(key, isrepeat)
   
   --Jump
   if key == " " then
@@ -73,18 +82,36 @@ function love.keypressed( key, isrepeat )
   if key == "escape" then
     love.event.quit()
   end
-  
+end
+
+function love.keyreleased( key )
+  Secretary.onKeyboardUp(key)
 end
 
 function love.mousepressed( x, y, button )
-  if button == "l" then
-    local block = Block(x,y)
-    block:setSize(8,8)
-  end
+  Secretary.onMouseDown(x, y, button)
 end
 
-function love.draw( )
-  
-  Secretary.drawObjects( )
-  
+function love.mousereleased( x, y, button )
+  Secretary.onMouseUp(x, y, button)
+end
+
+function love.mousemoved( x, y, dx, dy )
+  Secretary.onMouseMove(x, y, dx, dy)
+end
+
+function love.joystickpressed( joystick, button )
+  Secretary.onJoystickDown(joystick, button)
+end
+
+function love.joystickreleased( joystick, button )
+  Secretary.onJoystickUp(joystick, button)
+end
+
+function love.joystickadded( joystick )
+  Secretary.onJoystickAdded(joystick)
+end
+
+function love.joystickremoved( joystick )
+  Secretary.onJoystickRemoved(joystick)
 end

@@ -3,27 +3,29 @@
 EventType = {
   DRAW = 1,
   STEP = 2,
-  PHYSICS = 3,
-  KEYBOARD_DOWN = 4,
-  KEYBOARD_UP = 5,
-  MOUSE_DOWN = 6,
-  MOUSE_UP = 7,
-  MOUSE_MOVE = 8,
-  JOYSTICK_DOWN = 9,
-  JOYSTICK_UP = 10,
-  JOYSTICK_ADD = 11,
-  JOYSTICK_REMOVE = 12,
+  PRE_PHYSICS = 3,
+  PHYSICS = 4,
+  POST_PHYSICS = 5,
+  KEYBOARD_DOWN = 6,
+  KEYBOARD_UP = 7,
+  MOUSE_DOWN = 8,
+  MOUSE_UP = 9,
+  MOUSE_MOVE = 10,
+  JOYSTICK_DOWN = 11,
+  JOYSTICK_UP = 12,
+  JOYSTICK_ADD = 13,
+  JOYSTICK_REMOVE = 14,
   
   values = function( )
     local i = 0
     return function()
       i = i + 1
-      if i <= 12 then return i end
+      if i <= 14 then return i end
     end
   end,
   
   fromId = function( id )
-    if id > 12 or id < 1 then
+    if id > 14 or id < 1 then
       return nil
     else
       return id

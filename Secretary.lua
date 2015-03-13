@@ -81,11 +81,35 @@ function Secretary.updateObject(object)
 end
 
 
+--
+-- Gets a list of all registered objets whose bouding boxes intersect with the
+-- supplied bounds.
+--
+-- Parameters
+--   top - required - number
+--     Top coordinate of the bouding box to check.
+--   right - required - number
+--     Right coordinate of the bouding box to check.
+--   bottom - required - number
+--     Bottom coordinate of the bounding box to check.
+--   left - required - number
+--     Left coordinate of the bounding box to check.
+--
+-- Return
+--   Table containing indexed array of objects whose bounding boxes intersect
+--     with the supplied coordinates.
+--
 function Secretary.getCollisions( top, right, bottom, left )
+  assert(top and right and bottom and left, "parameter(s) cannot be nil")
+  
+  -- Initialize variables
   local list = {}
   local i = 1
+  
+  -- Retrieve list of all possible collisions from tree
   Secretary.tree:retrieve( list, top, right, bottom, left )
   
+  -- Remove objects from list that we do not collide with
   while i <= #list do
     if list[i]:collidesWith(top, right, bottom, left) == true then
       i = i + 1
@@ -94,15 +118,44 @@ function Secretary.getCollisions( top, right, bottom, left )
     end
   end
   
+  -- Return our compiled list
   return list
 end
 
 
+--
+-- Gets a reference to the object registered under the given instance id.
+--
+-- Parameters
+--   id - required - number
+--     The instance id of the object to retrieve.
+--
+-- Return
+--   Reference to the object with instance id equal to id, or nil if no objects
+--     match the given id.
+--
 function Secretary.getObject( id )
+  
+  -- Validate arguments
+  assert(id, "id cannot be nil")
+  assert(type(id) == "number", "id must be a number")
+  
+  -- Look up entry in table (returns null if no entry exists)
   return Secretary.objects[id]
 end
 
 
+--
+-- Removes an object from the Secretary. Removes any callbacks associated with
+-- the object and removes object from collision checks.
+-- 
+-- Parameters
+--   object - required - number or PhysObject
+--     The object or the instace id of the object to delete from the secretary.
+-- 
+-- Return
+--   nil
+--
 function Secretary.remove( object )
   -- Validate arguments
   assert( type(object) == "number" or instanceOf( object, PhysObject ), "Invalid parameter type" )
@@ -127,35 +180,86 @@ function Secretary.remove( object )
   end
 end
 
-function Secretary.drawObjects( )
-  for i, o in pairs(Secretary.objects) do
-    o:draw()
-  end
-end
-  
-function Secretary.updatePhysics( )
-  for i, o in pairs(Secretary.objects) do
-    o:update()
-  end
-end
 
-function Secretary.checkCollisions( )
-  for i, o in pairs(Secretary.objects) do
-    o:onCollisionCheck( )
-  end
-end
+--------------------------------------------------------------------------------
+--                               EVENT FUNCTIONS                              --
+--------------------------------------------------------------------------------
 
 
+-- Called every draw step
+function Secretary.onDraw()
+  Secretary.executeCallbacks(EventType.DRAW)
+end
+
+-- Called every game step
+function Secretary.onStep()
+  Secretary.executeCallbacks(EventType.STEP)
+end
+
+-- Called before every physics event
+function Secretary.onPrePhysics()
+  Secretary.executeCallbacks(EventType.PRE_PHYSICS)
+end
+
+-- CAlled every step to execute physics
+function Secretary.onPhysics()
+  Secretary.executeCallbacks(EventType.PHYSICS)
+end
+
+-- Called after physics event
+function Secretary.onPostPhysics()
+  Secretary.executeCallbacks(EventType.POST_PHYSICS)
+end
+
+-- Called when a keyboard button is pressed
 function Secretary.onKeyboardDown( key, isrepeat )
   Secretary.executeCallbacks(EventType.KEYBOARD_DOWN, key, isrepeat)
 end
 
-
+-- Called when a keyboard button is released
 function Secretary.onKeyboardUp( key )
   Secretary.executeCallbacks(EventType.KEYBOARD_UP, key )
 end
 
+-- Called when a mouse button is pressed
+function Secretary.onMouseDown(x, y, button)
+  Secretary.executeCallbacks(EventType.MOUSE_DOWN, x, y, button)
+end
 
+-- Called when a mouse button is released
+function Secretary.onMouseUp(x, y, button)
+  Secretary.executeCallbacks(EventType.MOUSE_UP, x, y, button)
+end
+
+-- Called when the mouse is moved
+function Secretary.onMouseMove(x, y, dx, dy)
+  Secretary.executeCallbacks(EventType.MOUSE_MOVE, x, y, dx, dy)
+end
+
+-- Called when a joystick button is pressed
+function Secretary.onJoystickDown(joystick, button)
+  Secretary.executeCallbacks(EventType.JOYSTICK_DOWN, joystick, button)
+end
+
+-- Called when a joystick button is released
+function Secretary.onJoystickUp(joystick, button)
+  Secretary.executeCallbacks(EventType.JOYSTICK_UP, joystick, button)
+end
+
+-- Called when a joystick is connected
+function Secretary.onJoystickAdd(joystick)
+  Secretary.executeCallbacks(EventType.JOYSTICK_ADD, joystick)
+end
+
+-- Called when a joystick is released
+function Secretary.onJoystickRemove(joystick)
+  Secretary.executeCallbacks(EventType.JOYSTICK_REMOVE, joystick)
+end
+
+
+-- Generic function that executes callbacks for a given event type
+-- Handles errors and takes any variable number of arguments and passes
+-- them along to the callbacks.
 function Secretary.executeCallbacks( eventType, ... )
   assert(EventType.fromId(eventType), "Invalid event type: "..eventType)
   
