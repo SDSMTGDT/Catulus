@@ -54,17 +54,17 @@ function Secretary.registerEvent(object, eventType, callback)
   assert (eventType ~= nil, "Argument(s) cannot be nil")
   assert (callback ~= nil, "Argument(s) cannot be nil")
   
-  local etype = EventType.fromId(etype)
+  local etype = EventType.fromId(eventType)
   assert (etype ~= nil, "eventType must be a valid EventType")
   
-  assert (type(object.getInstanceId) ~= "function", "Object missing getInstanceId() method")
+  assert (type(object.getInstanceId) == "function", "Object missing getInstanceId() method")
   
   local id = object:getInstanceId()
   assert (type(id) == "number", "Object ID must be of type number")
   assert (Secretary.objects[id] == object, "Object not registered with Secretary")
   
   assert (type(callback) == "function", "Callback must be a function")
-  assert (Secregary.callbacks[etype][id] == nil, "Event type already registered for that object")
+  assert (Secretary.callbacks[etype][id] == nil, "Event type already registered for that object")
   
   Secretary.callbacks[etype][id] = callback
 end
@@ -262,6 +262,7 @@ end
 -- them along to the callbacks.
 function Secretary.executeCallbacks( eventType, ... )
   assert(EventType.fromId(eventType), "Invalid event type: "..eventType)
+  local arg = {...}
   
   -- Execute all registered callbacks registered with Secretary
   for i,callback in pairs(Secretary.callbacks[eventType]) do
@@ -271,7 +272,7 @@ function Secretary.executeCallbacks( eventType, ... )
       
       -- Use xpcall to prevent errors from destroying everything
       local success, errmessage = xpcall(
-        function() return callback(unpack(arg)) end,
+        function() return callback(Secretary.objects[i], unpack(arg)) end,
         catchError    -- function to handle errors
       )
       

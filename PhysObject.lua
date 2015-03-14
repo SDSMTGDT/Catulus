@@ -53,6 +53,8 @@ function PhysObject:_init( )
   
   -- Register with object manager
   Secretary.registerObject(self)
+  Secretary.registerEvent(self, EventType.PHYSICS, self.update)
+  Secretary.registerEvent(self, EventType.DRAW, self.draw)
 end
 
 --
@@ -177,10 +179,6 @@ end
 -- PhysObject:draw
 --
 function PhysObject:draw( )
-  -- Must be defined on a per-object basis
-end
-
-function PhysObject:onCollisionCheck( )
   -- Must be defined on a per-object basis
 end
 

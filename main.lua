@@ -1,3 +1,4 @@
+require "Secretary"
 require "Player"
 require "Block"
 require "QuadTree"
@@ -13,7 +14,7 @@ function love.load( )
   player:setSize(32, 64)
   
   -- Build level
-  for i=0, (512-32) do
+  for i=0, (512-32), 32 do
     Block(i, 512-32)
   end
 end
@@ -35,48 +36,11 @@ function love.update( dt )
   Secretary.onPostPhysics()
   Secretary.onStep()
   
-  --Simple character movement on the x axis
-  if love.keyboard.isDown( "a" ) then
-    if player.velocity.x > -player.velocity.max.x then
-      player.velocity.x = player.velocity.x - 0.375
-    end
-    
-    if player.velocity.x < 0 then
-      playerDirection = "left"
-    end
-  end
-  
-  if love.keyboard.isDown( "d" ) then
-    if player.velocity.x < player.velocity.max.x then
-      player.velocity.x = player.velocity.x + 0.375
-    end
-    
-    if player.velocity.x > 0 then
-      playerDirection = "right"
-    end
-  end
-  
-  
-  --Friction
-  if player.velocity.x > 0 and player.velocity.y == 0 then
-  player.velocity.x = player.velocity.x - 0.125
-  end
-  
-  if player.velocity.x < 0 and player.velocity.y == 0 then
-  player.velocity.x = player.velocity.x + 0.125
-  end
-  
   love.graphics.print(love.timer.getFPS(), 0, 0)
 end
 
 function love.keypressed( key, isrepeat )
   Secretary.onKeyboardDown(key, isrepeat)
-  
-  --Jump
-  if key == " " then
-    player.velocity.y = -8
-    playerDirection = "jump"
-  end
   
   --Escape
   if key == "escape" then
