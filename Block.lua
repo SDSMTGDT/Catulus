@@ -14,10 +14,10 @@ setmetatable(Block, {
   }
 )
 
-function Block:_init(x, y)
+function Block:_init(x, y, w, h)
   PhysObject._init( self )
   self:setPosition(x, y)
-  self:setSize(32, 32)
+  self:setSize(w or 32, h or 32)
 end
 
 function Block:draw()
