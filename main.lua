@@ -11,12 +11,15 @@ function love.load( )
   -- Starting position & gravity
   player:setPosition( 100 , 100 )
   player:setAcceleration( 0, 0.25 )
-  player:setSize(32, 64)
   
   -- Build level
-  for i=0, (512-32), 32 do
-    Block(i, 512-32)
+  for i=0, (512-32-32), 32 do
+    Block(i, 0)
+    Block(512-32, i)
+    Block(512-32-i, 512-32)
+    Block(0, 512-32-i)
   end
+  Block(256, 256)
 end
 
 function love.draw( )
