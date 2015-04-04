@@ -22,7 +22,6 @@ setmetatable(PhysObject, {
 -- Constructor
 --
 function PhysObject:_init( )
-
   -- Declare object properties
   self.id = nil
   self.visible = true
