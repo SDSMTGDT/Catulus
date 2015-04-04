@@ -64,7 +64,6 @@ function Secretary.registerEvent(object, eventType, callback)
   assert (Secretary.objects[id] == object, "Object not registered with Secretary")
   
   assert (type(callback) == "function", "Callback must be a function")
-  assert (Secretary.callbacks[etype][id] == nil, "Event type already registered for that object")
   
   Secretary.callbacks[etype][id] = callback
 end
