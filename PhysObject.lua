@@ -91,6 +91,13 @@ function PhysObject:setSize( w, h, d )
 end
 
 --
+-- PhysObject:getSize
+--
+function PhysObject:getSize()
+  return self.size.width, self.size.height, self.size.depth
+end
+
+--
 -- PhysObject
 --
 function PhysObject:getBoundingBox()

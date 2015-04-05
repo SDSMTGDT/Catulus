@@ -18,6 +18,8 @@ function Actor:_init( )
   PhysObject._init( self )
   self.horizontalStep = 0
   
+  self:setAcceleration( 0, 0.25 )
+  
   Secretary.registerEvent(self, EventType.POST_PHYSICS, self.onPostPhysics)
 end
 
