@@ -1,6 +1,7 @@
 require "Secretary"
 require "Player"
 require "Block"
+require "Enemy"
 require "QuadTree"
 
 player = Player()
@@ -10,7 +11,6 @@ function love.load( )
   
   -- Starting position & gravity
   player:setPosition( 100 , 100 )
-  player:setAcceleration( 0, 0.25 )
   
   -- Build level
   for i=0, (512-32-32), 32 do
@@ -48,6 +48,14 @@ function love.keypressed( key, isrepeat )
   --Escape
   if key == "escape" then
     love.event.quit()
+  elseif key == "return" then
+    local enemy = Enemy()
+    enemy:setPosition(64, 64)
+    if math.random(2) == 1 then
+      enemy:moveLeft()
+    else
+      enemy:moveRight()
+    end
   end
 end
 

@@ -22,7 +22,6 @@ setmetatable(PhysObject, {
 -- Constructor
 --
 function PhysObject:_init( )
-
   -- Declare object properties
   self.id = nil
   self.visible = true
@@ -89,6 +88,13 @@ function PhysObject:setSize( w, h, d )
   self.size.width = w
   self.size.height = h
   self.size.depth = d
+end
+
+--
+-- PhysObject:getSize
+--
+function PhysObject:getSize()
+  return self.size.width, self.size.height, self.size.depth
 end
 
 --
