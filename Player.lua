@@ -19,7 +19,7 @@ function Player:_init( )
   
   self.velocity.max = {x = 4, y = -1}
   self.image = love.graphics.newImage("gfx/character.png")
-  self:setSize(32, 96)
+  self:setSize(32, 48)
   
   Secretary.registerEvent(self, EventType.POST_PHYSICS, self.onCollisionCheck)
   Secretary.registerEvent(self, EventType.STEP, self.onStep)
@@ -54,7 +54,7 @@ function Player:draw( )
   -- animate
   love.graphics.draw(self.image, (x+32), y, rotation, -1, 1)
 
-  love.graphics.rectangle( "fill", x, y+32, 32, 64 )
+  love.graphics.rectangle( "fill", x, y+32, 32, 16 )
 end
 
 function Player:onCollisionCheck( )
