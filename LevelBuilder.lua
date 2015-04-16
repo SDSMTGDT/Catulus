@@ -2,7 +2,7 @@
 function buildLevelFromFile(filename)
   assert(type(filename) == "string", "Unexpected argument type expected")
   
-  local file = io.open(filename, "r")
+  local file = io.open(love.filesystem.getSourceBaseDirectory().."/"..love.filesystem.getIdentity().."/levels/"..filename, "r")
   
   local width = 0
   local height = 0
@@ -50,6 +50,4 @@ function buildLevelFromFile(filename)
       
     end
   end
-  
-  
 end
