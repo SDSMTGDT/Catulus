@@ -50,4 +50,10 @@ function buildLevelFromFile(filename)
       
     end
   end
+  
+  local room = {}
+  room.width = width * 16
+  room.height = height * 16
+  
+  return room
 end

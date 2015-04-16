@@ -12,7 +12,7 @@ B      BB      B
 B      BB      B
 B      BB      B
 B      BB      B
-B              B
-B      P       B
-B              B
+                
+       P        
+                
 BBBBBBBBBBBBBBBB

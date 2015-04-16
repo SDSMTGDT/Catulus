@@ -5,6 +5,7 @@ require "Enemy"
 require "LevelBuilder"
 
 player = Player()
+room = nil
 
 function love.load( )
   print(player.__index)
@@ -21,7 +22,7 @@ function love.load( )
   -- end
   -- Block(256, 256)
   
-  buildLevelFromFile("level1.txt")
+  room = buildLevelFromFile("level1.txt")
 end
 
 function love.draw( )
