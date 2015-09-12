@@ -46,7 +46,7 @@ function QuadTree:clear( )
     if self.nodes[i] ~= nil then
       self.nodes[i]:clear()
       self.nodes[i] = nil
-    end    
+    end
   end
 end
 
@@ -80,6 +80,24 @@ function QuadTree:split( )
 end
 
 --
+-- QuadTree::getSize
+--
+function QuadTree:getSize( )
+  
+  -- Add number of objects at current node
+  local count = table.getn(self.objects)
+  
+  -- Recursively count as well
+  for _,i in pairs(self.nodes) do
+    if i ~= nil then
+      count = count + i:getSize()
+    end
+  end
+  
+  return count
+end
+
+--
 -- QuadTree:getIndex
 --
 function QuadTree:getIndex( top, right, bottom, left )
@@ -90,7 +108,6 @@ function QuadTree:getIndex( top, right, bottom, left )
   
   -- Check upper half
   if top >= self.top and bottom < subHeight then
-    
     
     -- Check right side (Q I)
     if left >= subWidth and right < self.right then
@@ -181,7 +198,6 @@ function QuadTree:insert( object, top, right, bottom, left )
     table.insert(self.objects, object)
     return ""
   end
-
 end
 
 --

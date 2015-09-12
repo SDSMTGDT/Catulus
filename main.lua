@@ -59,6 +59,8 @@ function love.keypressed( key, isrepeat )
     else
       enemy:moveRight()
     end
+    
+    print("Objects: " .. Secretary.tree:getSize() .. "\n")
   end
 end
 
