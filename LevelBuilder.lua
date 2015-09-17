@@ -34,51 +34,48 @@ function buildLevelFromFile(filename)
         -- Do nothing, blank space
         
       elseif (map[i][j] == "B") then
-	  --[[
+        
         local k = i
 		local v = j
-		local firstPass = true
+		local validRow = true
 		local checkWidth = 0
 		local bWidth = 0
 		local bHeight = 0
-		-- Loop
-		while map[k][j] == "B" and k < height do
-		  if checkWidth == bWidth then
-		    bHeight = bHeight + 16
-			if firstPass == false then
-			  while map[k-1][v] == "B" do
-			    map[k-1][v] = "b"
-			    v = v + 1
-			  end
-			end
-			v = j
-		  else
-			bWidth = 0
-			bHeight = 0
-			firstPass = true
-			--k = height
-		  end
-		  
-		  checkWidth = 0
-		  
-		  while map[k][v] == "B" and k ~= height do 
-		    if firstPass == true then
-			  bWidth = bWidth + 16
-			  map[k][v] = "b"
-			end
-			
-			checkWidth = checkWidth + 16
-			v = v + 1
-		  end
-		  
-		  firstPass = false
-		  v = j
-		  k = k + 1
-		end
-	  ]]--
-	  
-        Block( (j-1) * 16, (i-1) * 16, 16, 16 )
 		
+        -- Expand block horizontally
+        while map[i][v] == "B" and v <= width do
+          bWidth = bWidth + 1
+          v = v + 1
+        end
+        
+        -- Expand block vertically
+        v = j
+        while validRow == true and k <= height do
+          bHeight = bHeight + 1
+          
+          for v = j, j+bWidth-1 do
+            map[k][v] = "b"
+          end
+          
+          -- Check next row
+          k = k + 1
+          if k <= height then
+            for v = j, j+bWidth-1 do
+              if map[k][v] ~= "B" then
+                validRow = false
+                break
+              end
+            end
+          end
+        end
+        
+        -- Create block with expanded dimensions
+        -- Note: j-1 and i-1 are positions (i & j are 1 indexed)
+        Block( (j-1) * 16, (i-1) * 16, bWidth * 16, bHeight * 16 )
+		
+        -- #DebugTime!!
+        print("Created block at ("..j..","..i.."), dimensions "..(bWidth).."x"..(bHeight))
+        
       elseif (map[i][j] == "P") then
         
         local player = Player()
