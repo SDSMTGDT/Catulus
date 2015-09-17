@@ -98,12 +98,23 @@ function PhysObject:getSize()
 end
 
 --
--- PhysObject
+-- PhysObject:getBoundingBox
 --
-function PhysObject:getBoundingBox()
-  return self.position.y, self.position.x + self.size.width,
-    self.position.y + self.size.height, self.position.x,
-    self.position.z, self.position.z + self.size.depth
+-- top, right, bottom, left, back, front
+--
+function PhysObject:getBoundingBox( x, y, z )
+  -- Assign default values
+  x = x or 0
+  y = y or 0
+  z = z or 0
+  
+  -- Return bounding box with offsets
+  return self.position.y + y,
+    self.position.x + x + self.size.width,
+    self.position.y + y + self.size.height,
+    self.position.x + x,
+    self.position.z + z,
+    self.position.z + z + self.size.depth
 end
 
 --
