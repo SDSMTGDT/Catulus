@@ -1,6 +1,7 @@
 require "Actor"
 require "Enemy"
 require "Block"
+require "Bullet"
 
 Player = {}
 Player.__index = Player
@@ -59,6 +60,11 @@ function Player:onKeyPress( key, isrepeat )
       self.velocity.y = self.velocity.y - 8
     end
   end
+  
+  -- Shoot
+  if key == "j" then
+    local bullet = Bullet( self.position.x, self.position.y, 0, 16 )
+  end
 end
 
 
@@ -99,5 +105,5 @@ function Player:onCollisionCheck( )
   end
   
   Actor.onPostPhysics( self )
-
+  
 end
