@@ -3,6 +3,7 @@ require "Player"
 require "Block"
 require "Enemy"
 require "QuadTree"
+require "Animation"
 
 player = Player()
 
