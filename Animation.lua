@@ -20,25 +20,39 @@ setmetatable(Animation, {
 function Animation:_init( )
 
   self.frames = {}	
-
+  self.framecount = 1
+  self.framequeue = 1
+  
 end
 
 function Animation:load( filename )
-  local i = 0
-  local line
-  
-  file = io.open("gfx/"..filename, "r")
-  while( line = file:read() )
-    self.frames[i] = love.graphics.newImage( "gfx/"..line )
-	i = i + 1
-  end
+  local i = 1
+  local line = {}
+
+  --Read animation file to find png's for a specific animation
+  file = io.open("EasyGame1/gfx/" .. filename, "r")
+
+  repeat
+    line = file:read("*l")
+	print( line )
+	if( line ~= nil ) then
+      self.frames[i] = love.graphics.newImage( "/gfx/"..line )
+	  i = i + 1
+	  self.framecount = self.framecount + 1
+	end
+  until( line == nil )
   
   file:close()
  
 end
 
-function Animation:update( )
+function Animation:update( x, y )
 
+  if (self.framequeue == self.framecount) then
+    self.framequeue = 1
+  end
 
-
+  love.graphics.draw( self.frames[self.framequeue], x, y)
+  self.framequeue =  self.framequeue + 1
+   
 end
