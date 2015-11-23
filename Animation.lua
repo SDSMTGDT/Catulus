@@ -22,7 +22,8 @@ function Animation:_init( )
   self.frames = {}	
   self.framecount = 1
   self.framequeue = 1
-  
+  self.counter = 1
+  self.rate = 10
 end
 
 function Animation:load( filename )
@@ -53,6 +54,12 @@ function Animation:update( x, y )
   end
 
   love.graphics.draw( self.frames[self.framequeue], x, y)
+  
+  if( self.counter >= self.rate ) then
   self.framequeue =  self.framequeue + 1
-   
+  self.counter = 0
+  end
+  
+  self.counter = self.counter + 1
+  
 end
