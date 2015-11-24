@@ -1,18 +1,26 @@
-16
-16
-BBBBBBBBBBBBBBBB
-B      BB      B
-B      BB      B
-B      BB      B
-B      BB      B
-B      BB      B
-B      BB      B
-B      BB      B
-B      BB      B
-B      BB      B
-B      BB      B
-B      BB      B
-                
-       P        
-                
-BBBBBBBBBBBBBBBB
+32
+24
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+                                
+                                
+                                
+ E                            E 
+BBBBBBBB                BBBBBBBB
+BBBBBBBB                BBBBBBBB
+                                
+                                
+                                
+                                
+      BBBBBBBBBBBBBBBBBBBB      
+      BBBBBBBBBBBBBBBBBBBB      
+                                
+                                
+                                
+                                
+BBBBBBBBBB            BBBBBBBBBB
+BBBBBBBBBB            BBBBBBBBBB
+                                
+                                
+               P                
+                                
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
