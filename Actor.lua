@@ -59,6 +59,15 @@ function Actor:onPostPhysics( )
   local t, r, b, l = self:getBoundingBox()
   local speed = self.horizontalStep
   
+  -- Adjust step for screen wrapping
+  if room ~= nil then
+    if speed > 0 and l + speed >= room.width then
+      speed = 0 - self.position.x - self.size.width + speed
+    elseif speed < 0 and r + speed <= 0 then
+      speed = room.width + self.size.width + (speed * 2)
+    end
+  end
+  
   -- Make sure future location is clear
   local jump = true
   list = Secretary.getCollisions( t, r+speed, b, l+speed )

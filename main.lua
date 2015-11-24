@@ -2,28 +2,38 @@ require "Secretary"
 require "Player"
 require "Block"
 require "Enemy"
-require "QuadTree"
+require "LevelBuilder"
 
 player = Player()
+room = nil
 
 function love.load( )
   print(player.__index)
   
   -- Starting position & gravity
-  player:setPosition( 100 , 100 )
+  -- player:setPosition( 100 , 100 )
   
   -- Build level
-  for i=0, (512-32-32), 32 do
-    Block(i, 0)
-    Block(512-32, i)
-    Block(512-32-i, 512-32)
-    Block(0, 512-32-i)
-  end
-  Block(256, 256)
+  -- for i=0, (512-32-32), 32 do
+  --   Block(i, 0)
+  --   Block(512-32, i)
+  --   Block(512-32-i, 512-32)
+  --   Block(0, 512-32-i)
+  -- end
+  -- Block(256, 256)
+  
+  room = buildLevelFromFile("level1.txt")
 end
 
 function love.draw( )
+  room:adjustCanvas()
   Secretary.onDraw()
+end
+
+function love.resize( w, h )
+  if room ~= nil then
+    room:onWindowResize(w, h)
+  end
 end
 
 function love.update( dt )
