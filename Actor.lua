@@ -17,6 +17,7 @@ setmetatable(Actor, {
 function Actor:_init( )
   PhysObject._init( self )
   self.horizontalStep = 0
+  self.dieSoon = false
   
   self:setAcceleration( 0, 0.25 )
   
@@ -32,7 +33,16 @@ function Actor:getHorizontalStep( )
   return self.horizontalStep  
 end
 
+function Actor:die( reason )
+  Secretary.remove( self )
+end
+
 function Actor:onPostPhysics( )
+  if self.dieSoon then
+    Secretary.remove( self )
+    return
+  end
+  
   local list = Secretary.getCollisions( self:getBoundingBox() )
   
   for i,o in pairs(list) do
