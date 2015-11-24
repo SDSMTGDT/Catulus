@@ -79,7 +79,7 @@ function buildLevelFromFile(filename)
         
       elseif (map[i][j] == "P") then
         
-        local player = Player()
+        -- Depends on a player actually existing
         player:setPosition( (j-1) * 16, (i-1) * 16 )
         
       elseif (map[i][j] == "E") then
