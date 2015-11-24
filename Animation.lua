@@ -47,19 +47,24 @@ function Animation:load( filename )
  
 end
 
-function Animation:update( x, y )
+function Animation:update(  )
 
-  if (self.framequeue == self.framecount) then
-    self.framequeue = 1
-  end
-
-  love.graphics.draw( self.frames[self.framequeue], x, y)
   
   if( self.counter >= self.rate ) then
-  self.framequeue =  self.framequeue + 1
-  self.counter = 0
+    self.framequeue =  self.framequeue + 1
+    self.counter = 0
+  end
+  
+  if (self.framequeue == self.framecount) then
+    self.framequeue = 1
   end
   
   self.counter = self.counter + 1
   
+end
+
+function Animation:draw( x, y )
+
+  love.graphics.draw( self.frames[self.framequeue], x, y)
+
 end

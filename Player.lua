@@ -40,6 +40,8 @@ function Player:onStep( )
     self:setHorizontalStep( 0 )
   end
   
+  self.animL:update( )
+  
 end
 
 function Player:onKeyPress( key, isrepeat )
@@ -55,7 +57,7 @@ function Player:draw( )
   
   -- animate 
   -- Currently using 1 animation and no method in place to change speed
-  self.animL:update( x, y )
+  self.animL:draw( x, y )
 
 end
 
