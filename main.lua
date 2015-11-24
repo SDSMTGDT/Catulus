@@ -26,7 +26,14 @@ function love.load( )
 end
 
 function love.draw( )
+  room:adjustCanvas()
   Secretary.onDraw()
+end
+
+function love.resize( w, h )
+  if room ~= nil then
+    room:onWindowResize(w, h)
+  end
 end
 
 function love.update( dt )

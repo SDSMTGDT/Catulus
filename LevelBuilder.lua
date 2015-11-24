@@ -1,3 +1,4 @@
+require "Room"
 
 function buildLevelFromFile(filename)
   assert(type(filename) == "string", "Unexpected argument type expected")
@@ -23,7 +24,7 @@ function buildLevelFromFile(filename)
   file:close(file)
   
   -- Build the level
-  love.window.setMode( width * 16, height * 16, {} )
+  love.window.setMode( width * 16, height * 16, {resizable=true} )
   
   for i = 1, height do
     for j = 1, width do
@@ -90,9 +91,8 @@ function buildLevelFromFile(filename)
     end
   end
   
-  local room = {}
-  room.width = width * 16
-  room.height = height * 16
+  local room = Room()
+  room:setDimensions(width * 16, height * 16)
   
   return room
 end
