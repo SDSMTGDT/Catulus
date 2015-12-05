@@ -1,26 +1,38 @@
-32
-24
-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-                                
-                                
-                                
- E                            E 
-BBBBBBBB                BBBBBBBB
-BBBBBBBB                BBBBBBBB
-                                
-                                
-                                
-                                
-      BBBBBBBBBBBBBBBBBBBB      
-      BBBBBBBBBBBBBBBBBBBB      
-                                
-                                
-                                
-                                
-BBBBBBBBBB            BBBBBBBBBB
-BBBBBBBBBB            BBBBBBBBBB
-                                
-                                
-               P                
-                                
-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+48
+36
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+  E                                         E   
+BBBBBBBBBBBB                        BBBBBBBBBBBB
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+              BBBBBBBBBBBBBBBBBBBB              
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+BBBBBBBBBBBBBBBBBB            BBBBBBBBBBBBBBBBBB
+                                                
+                                                
+                                                
+                                                
+                                                
+                      P                         
+                                                
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB

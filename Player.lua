@@ -57,7 +57,7 @@ function Player:onKeyPress( key, isrepeat )
     end
     
     if ground then
-      self.velocity.y = self.velocity.y - 8
+      self.velocity.y = self.velocity.y - 10
     end
   end
   
