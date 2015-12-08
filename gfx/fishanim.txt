@@ -1,2 +1,8 @@
-Fish.png
-Kitten.png
+Fish_l1.png
+Fish_l2.png
+Fish_l3.png
+Fish_l4.png
+Fish_l5.png
+Fish_l4.png
+Fish_l3.png
+Fish_l2.png

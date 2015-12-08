@@ -23,7 +23,7 @@ function Animation:_init( )
   self.framecount = 1
   self.framequeue = 1
   self.counter = 1
-  self.rate = 10
+  self.rate = 2
 end
 
 function Animation:load( filename )
