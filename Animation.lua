@@ -19,7 +19,9 @@ setmetatable(Animation, {
 
 function Animation:_init( )
 
-  self.frames = {}	
+  self.frames = {}
+  self.xScale = 1
+  self.yScale = 1  
   self.framecount = 1
   self.framequeue = 1
   self.counter = 1
@@ -63,8 +65,8 @@ function Animation:update(  )
   
 end
 
-function Animation:draw( x, y )
+function Animation:draw( x, y, origin )
 
-  love.graphics.draw( self.frames[self.framequeue], x, y)
+  love.graphics.draw( self.frames[self.framequeue], x, y, 0, self.xScale, self.yScale, origin )
 
 end

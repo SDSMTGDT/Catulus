@@ -20,10 +20,18 @@ function Player:_init( )
   
   self.velocity.max = {x = 4, y = -1}
   self:setSize(32, 48)
-  self.animL = Animation( )
+  self.animPointer = 1
   
-  self.animL:load( "fishanim.txt" )
-    
+  self.animations = {}
+  self.animations[1] = Animation( )
+  self.animations[2] = Animation( )
+  self.animations[3] = Animation( )
+  
+  self.animations[1]:load( "fishanim.txt" )
+  self.animations[2]:load( "fishanim.txt" )
+  
+  self.animations[1].xScale = -1
+  
   Secretary.registerEvent(self, EventType.POST_PHYSICS, self.onCollisionCheck)
   Secretary.registerEvent(self, EventType.STEP, self.onStep)
   Secretary.registerEvent(self, EventType.KEYBOARD_DOWN, self.onKeyPress)
@@ -40,7 +48,13 @@ function Player:onStep( )
     self:setHorizontalStep( 0 )
   end
   
-  self.animL:update( )
+  if self.horizontalStep > 0 then
+    self.animPointer = 1
+  elseif self.horizontalStep < 0 then
+    self.animPointer = 2
+  end
+  
+  self.animations[self.animPointer]:update( )
   
 end
 
@@ -56,9 +70,8 @@ function Player:draw( )
   local x, y = self:getPosition( )
   
   -- animate 
-  -- Currently using 1 animation and no method in place to change speed
-  self.animL:draw( x, y )
-
+  self.animations[self.animPointer]:draw( x+self.size.width/2, y, self.size.width/2 )
+  
 end
 
 function Player:onCollisionCheck( )
