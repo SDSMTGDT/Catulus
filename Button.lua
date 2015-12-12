@@ -27,6 +27,43 @@ function Button:_init( text, x, y, w, h )
   self.padding = 4
   self.border = 4
   
+  self.actions = {}
+  self.actions.click = nil
+  self.actions.hover = nil
+  self.actions.unhover = nil
+  
+end
+
+
+
+--
+-- Button:setOnClickAction
+--
+function Button:setOnClickAction(action)
+  
+  -- Verify parameters
+  assert(type(action) == "function" or action == nil, "Expected parameter of type 'function' or nil, '" .. type(action) .. "' received")
+  self.actions.click = action
+end
+
+--
+-- Button:setOnHoverAction
+--
+function Button:setOnHoverAction(action)
+  
+  -- Verify parameters
+  assert(type(action) == "function" or action == nil, "Expected parameter of type 'function' or nil, '" .. type(action) .. "' received")
+  self.actions.hover = action
+end
+
+--
+-- Button:setOnUnhoverAction
+--
+function Button:setOnUnhoverAction(action)
+  
+  -- Verify parameters
+  assert(type(action) == "function" or action == nil, "Expected parameter of type 'function' or nil, '" .. type(action) .. "' received")
+  self.actions.unhover = action
 end
 
 
@@ -55,14 +92,18 @@ end
 -- Button:onMouseOver
 --
 function Button:onMouseOver( )
-  print("mouse hover")
+  if self.actions.hover ~= nil then
+    self.actions.hover()
+  end
 end
 
 --
 -- Button:onMouseOff
 --
 function Button:onMouseOff( )
-  print("mouse unhover")
+  if self.actions.unhover ~= nil then
+    self.actions.unhover()
+  end
 end
 
 --
@@ -95,6 +136,9 @@ end
 -- Button:onClick
 --
 function Button:onClick( )
+  if self.actions.click ~= nil then
+    self.actions.click()
+  end
 end
 
 --

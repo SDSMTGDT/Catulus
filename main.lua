@@ -26,6 +26,9 @@ function love.load( )
   
   room = buildLevelFromFile("level1.txt")
   button = Button( "Test", 32, 32, 128, 32 )
+  button:setOnClickAction(function()
+    button = nil
+  end)
   
 end
 
