@@ -23,7 +23,6 @@ setmetatable(PhysObject, {
 --
 function PhysObject:_init( )
   -- Declare object properties
-  self.id = nil
   self.visible = true
   self.size = {}
   self.position = {}
@@ -51,16 +50,9 @@ function PhysObject:_init( )
   self.acceleration.z = 0
   
   -- Register with object manager
-  Secretary.registerObject(self)
-  Secretary.registerEvent(self, EventType.PHYSICS, self.update)
-  Secretary.registerEvent(self, EventType.DRAW, self.draw)
-end
-
---
--- PhysObject:getInstanceId
---
-function PhysObject:getInstanceId( )
-  return self.id
+  Secretary.registerPhysObject(self)
+  Secretary.registerEventListener(self, self.update, EventType.PHYSICS)
+  Secretary.registerEventListener(self, self.draw, EventType.DRAW)
 end
 
 --

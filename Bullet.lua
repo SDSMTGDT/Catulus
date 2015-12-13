@@ -23,7 +23,7 @@ function Bullet:_init( x, y, r, s )
   
   self.life = 30
   
-  Secretary.registerEvent(self, EventType.POST_PHYSICS, self.onPostPhysics)
+  Secretary.registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
 end
 
 function Bullet:actOn( other )

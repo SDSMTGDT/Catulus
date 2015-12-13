@@ -59,7 +59,6 @@ function Secretary.unregisterPhysObject( object )
   
   -- Validate arguments
   assert(instanceOf(object, PhysObject), "Argument must be an instance of PhysObject")
-  assert(Secretary.objectNodes[object] == nil, "PhysObject already registered with the secretary")
   
   -- Remove object from quadtree
   Secretary.tree:remove(object, Secretary.objectNodes[object])
@@ -122,6 +121,13 @@ function Secretary.getCollisions( top, right, bottom, left )
   return list
 end
 
+function Secretary.remove( object )
+  if instanceOf(object, PhysObject) then
+    Secretary.unregisterPhysObject(object)
+  end
+  Secretary.unregisterAllListeners(object)
+end
+
 
 
 
@@ -145,7 +151,7 @@ function Secretary.registerEventListener( object, listener, eventType )
   -- Verify arguments
   assert (object ~= nil, "Argument(s) cannot be nil")
   assert (eventType ~= nil, "Argument(s) cannot be nil")
-  assert (action ~= nil, "Argument(s) cannot be nil")
+  assert (listener ~= nil, "Argument(s) cannot be nil")
   eventType = EventType.fromId(eventType)
   assert (eventType ~= nil, "eventType must be a valid EventType")
   
@@ -158,9 +164,9 @@ function Secretary.registerEventListener( object, listener, eventType )
   }
   
   -- Insert callback into callback table indexed by event type
-  local n = table.getn(Secretary.callbacks[eventType]) + 1
+  local n = Secretary.callbacks[eventType].n + 1
   Secretary.callbacks[eventType][n] = callback
-  table.setn(Secretary.callbacks[eventType], n)
+  Secretary.callbacks[eventType].n = n
   callback.index = n
   
   -- Create table entry for object if none exists
@@ -169,9 +175,9 @@ function Secretary.registerEventListener( object, listener, eventType )
   end
   
   -- Insert callback into callback table indexed by calling object
-  n = table.getn(Secretary.callbacks[object]) + 1
+  n = Secretary.callbacks[object].n + 1
   Secretary.callbacks[object][n] = callback
-  table.setn(Secretary.callbacks[object], n)
+  Secretary.callbacks[object].n = n
   
 end
 
@@ -294,7 +300,7 @@ function Secretary.executeCallbacks( eventType, ... )
   -- Execute all registered callbacks registered with Secretary
   local callbacks = Secretary.callbacks[eventType]
   local lastIndex = 0
-  for i = 1,table.getn(callbacks) do
+  for i = 1,callbacks.n do
     local callback = callbacks[i]
     
     -- Ensure callback exists
@@ -304,6 +310,7 @@ function Secretary.executeCallbacks( eventType, ... )
       lastIndex = lastIndex + 1
       if lastIndex < i then
         callbacks[lastIndex] = callback
+        callback.index = lastIndex
         callbacks[i] = nil
       end
       
@@ -326,5 +333,5 @@ function Secretary.executeCallbacks( eventType, ... )
   end
   
   -- If gaps were detected and closed, decrease size of callback table
-  table.setn(callbacks, lastIndex)
+  callbacks.n = lastIndex
 end
