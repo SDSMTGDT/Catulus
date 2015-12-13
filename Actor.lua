@@ -21,7 +21,7 @@ function Actor:_init( )
   
   self:setAcceleration( 0, 0.25 )
   
-  Secretary.registerEvent(self, EventType.POST_PHYSICS, self.onPostPhysics)
+  Secretary.registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
 end
 
 function Actor:setHorizontalStep( s )
