@@ -1,3 +1,5 @@
+require "Secretary"
+
 -- Required fluff for classes
 Button = {}
 Button.__index = Button
@@ -32,6 +34,10 @@ function Button:_init( text, x, y, w, h )
   self.actions.hover = nil
   self.actions.unhover = nil
   
+  Secretary.registerEventListener(self, self.onMouseMove, EventType.MOUSE_MOVE)
+  Secretary.registerEventListener(self, self.onMouseDown, EventType.MOUSE_DOWN)
+  Secretary.registerEventListener(self, self.onMouseUp, EventType.MOUSE_UP)
+  Secretary.registerEventListener(self, self.draw, EventType.DRAW)
 end
 
 
@@ -118,9 +124,9 @@ function Button:onMouseDown( x, y, button )
 end
 
 --
--- Button:onMouseReleased
+-- Button:onMouseUp
 --
-function Button:onMouseReleased( x, y, button )
+function Button:onMouseUp( x, y, button )
   if button ~= "l" then return end
   
   -- Update flags

@@ -149,9 +149,9 @@ end
 function Secretary.registerEventListener( object, listener, eventType )
   
   -- Verify arguments
-  assert (object ~= nil, "Argument(s) cannot be nil")
-  assert (eventType ~= nil, "Argument(s) cannot be nil")
-  assert (listener ~= nil, "Argument(s) cannot be nil")
+  assert (object ~= nil, "Argument 'object' cannot be nil")
+  assert (listener ~= nil, "Argument 'listener' cannot be nil")
+  assert (eventType ~= nil, "Argument 'eventType' cannot be nil")
   eventType = EventType.fromId(eventType)
   assert (eventType ~= nil, "eventType must be a valid EventType")
   

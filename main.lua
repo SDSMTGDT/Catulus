@@ -7,7 +7,6 @@ require "Button"
 
 player = Player()
 room = nil
-button = nil
 
 function love.load( )
   print(player.__index)
@@ -25,9 +24,9 @@ function love.load( )
   -- Block(256, 256)
   
   room = buildLevelFromFile("level1.txt")
-  button = Button( "Test", 32, 32, 128, 32 )
+  local button = Button( "Test", 32, 32, 128, 32 )
   button:setOnClickAction(function()
-    button = nil
+    Secretary.remove(button)
   end)
   
 end
@@ -35,10 +34,6 @@ end
 function love.draw( )
   room:adjustCanvas()
   Secretary.onDraw()
-  
-  if button ~= nil then
-    button:draw() -- TODO: Remove
-  end
 end
 
 function love.resize( w, h )
@@ -88,26 +83,14 @@ end
 
 function love.mousepressed( x, y, mButton )
   Secretary.onMouseDown(x, y, mButton)
-  
-  if button ~= nil then
-    button:onMouseDown(x, y, mButton) -- TODO: Remove
-  end
 end
 
 function love.mousereleased( x, y, mButton )
   Secretary.onMouseUp(x, y, mButton)
-  
-  if button ~= nil then
-    button:onMouseReleased(x, y, mButton) -- TODO: Remove
-  end
 end
 
 function love.mousemoved( x, y, dx, dy )
   Secretary.onMouseMove(x, y, dx, dy)
-  
-  if button ~= nil then
-    button:onMouseMove(x, y) -- TODO: Remove
-  end
 end
 
 function love.joystickpressed( joystick, button )
