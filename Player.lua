@@ -24,9 +24,9 @@ function Player:_init( )
   self.image = love.graphics.newImage("gfx/character.png")
   self:setSize(32, 48)
   
-  Secretary.registerEvent(self, EventType.POST_PHYSICS, self.onCollisionCheck)
-  Secretary.registerEvent(self, EventType.STEP, self.onStep)
-  Secretary.registerEvent(self, EventType.KEYBOARD_DOWN, self.onKeyPress)
+  Secretary.registerEventListener(self, self.onCollisionCheck, EventType.POST_PHYSICS)
+  Secretary.registerEventListener(self, self.onStep, EventType.STEP)
+  Secretary.registerEventListener(self, self.onKeyPress, EventType.KEYBOARD_DOWN)
   
 end
 

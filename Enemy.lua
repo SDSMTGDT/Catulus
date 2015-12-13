@@ -19,7 +19,7 @@ function Enemy:_init( )
   self.velocity.max = {x = 2}
   
   self:setSize(32, 32)
-  Secretary.registerEvent(self, EventType.STEP, self.onStep)
+  Secretary.registerEventListener(self, self.onStep, EventType.STEP)
 end
 
 function Enemy:moveLeft()
