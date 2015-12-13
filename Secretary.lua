@@ -16,69 +16,70 @@ setmetatable(Secretary, {
   }
 )
 
+Secretary.tree = QuadTree( 1, -1000, 1000, -1000, 1000 ) -- Collision detection data structure
 
-Secretary.objects = {}
-Secretary.nextId = 1
-Secretary.tree = QuadTree( 1, -1000, 1000, -1000, 1000 )
-Secretary.objectNodes = {}
+Secretary.objectNodes = {}  -- table containing direct references to object quadtree nodes
+Secretary.callbacks = {}    -- table containing all callbacks
 
--- Set up callback tables for fast event lookups
-Secretary.callbacks = {}
-for t in EventType.values() do Secretary.callbacks[t] = {} end
+-- Prepare variables
+for t in EventType.values() do
+  Secretary.callbacks[t] = {n = 0}
+end
 
 
-function Secretary.registerObject(object)
+
+
+
+--------------------------------------------------------------------------------
+--                            COLLISION SYSTEM                                --
+--------------------------------------------------------------------------------
+
+--
+-- Registers a new PhysObject with the Secretary.
+--
+-- object: The new object to track collisions with.
+--
+function Secretary.registerPhysObject( object )
   
   -- Validate arguments
-  assert (instanceOf(object, PhysObject), "Argument must be an instance of PhysObject")
-  
-  -- Make sure object ID is unset
-  assert (object.id == nil, "Object already assigned an ID")
-  
-  -- Assign object an ID, add to data structures
-  object.id = Secretary.nextId
-  Secretary.objects[Secretary.nextId] = object
+  assert(instanceOf(object, PhysObject), "Argument must be an instance of PhysObject")
+  assert(Secretary.objectNodes[object] == nil, "PhysObject already registered with the secretary")
   
   -- Store full node path
-  Secretary.objectNodes[Secretary.nextId] = Secretary.tree:insert(object)
-  
-  -- Increment ID for next object
-  Secretary.nextId = Secretary.nextId + 1
-  
-  return true
+  Secretary.objectNodes[object] = Secretary.tree:insert(object)
 end
 
-
-function Secretary.registerEvent(object, eventType, callback)
-  assert (object ~= nil, "Argument(s) cannot be nil")
-  assert (eventType ~= nil, "Argument(s) cannot be nil")
-  assert (callback ~= nil, "Argument(s) cannot be nil")
+--
+-- Unregisters a PhysObject with the Secretary, removing them from collision
+-- checks and data structures.
+--
+-- object: The object to unregister.
+--
+function Secretary.unregisterPhysObject( object )
   
-  local etype = EventType.fromId(eventType)
-  assert (etype ~= nil, "eventType must be a valid EventType")
+  -- Validate arguments
+  assert(instanceOf(object, PhysObject), "Argument must be an instance of PhysObject")
+  assert(Secretary.objectNodes[object] == nil, "PhysObject already registered with the secretary")
   
-  assert (type(object.getInstanceId) == "function", "Object missing getInstanceId() method")
-  
-  local id = object:getInstanceId()
-  assert (type(id) == "number", "Object ID must be of type number")
-  assert (Secretary.objects[id] == object, "Object not registered with Secretary")
-  
-  assert (type(callback) == "function", "Callback must be a function")
-  
-  Secretary.callbacks[etype][id] = callback
+  -- Remove object from quadtree
+  Secretary.tree:remove(object, Secretary.objectNodes[object])
 end
 
-
+--
+-- Updates an object's status in the quadtree and other lists, updating caches
+-- and indexes for fast access.
+--
+-- object: The object to update information for.
+--
 function Secretary.updateObject(object)
   local path = Secretary.tree:getFullIndex(object:getBoundingBox())
   
-  if path ~= Secretary.objectNodes[object.id] then
-    Secretary.tree:remove(object, Secretary.objectNodes[object.id])
+  if path ~= Secretary.objectNodes[object] then
+    Secretary.tree:remove(object, Secretary.objectNodes[object])
     path = Secretary.tree:insert(object)
-    Secretary.objectNodes[object.id] = path
+    Secretary.objectNodes[object] = path
   end
 end
-
 
 --
 -- Gets a list of all registered objets whose bouding boxes intersect with the
@@ -122,62 +123,88 @@ function Secretary.getCollisions( top, right, bottom, left )
 end
 
 
+
+
+
+--------------------------------------------------------------------------------
+--                              EVENT SYSTEM                                  --
+--------------------------------------------------------------------------------
+
 --
--- Gets a reference to the object registered under the given instance id.
+-- Adds a function to the callback table, indexing by event type and by owning
+-- object.
 --
--- Parameters
---   id - required - number
---     The instance id of the object to retrieve.
+-- object: Table that "owns" the listener function
+-- listener: Function to be called on event trigger. The "object" parameter will
+--           be passed as the first argument, followed by any other parameters
+--           that are required for the given event type.
+-- eventType: type of event the listener is listening for.
 --
--- Return
---   Reference to the object with instance id equal to id, or nil if no objects
---     match the given id.
---
-function Secretary.getObject( id )
+function Secretary.registerEventListener( object, listener, eventType )
   
-  -- Validate arguments
-  assert(id, "id cannot be nil")
-  assert(type(id) == "number", "id must be a number")
+  -- Verify arguments
+  assert (object ~= nil, "Argument(s) cannot be nil")
+  assert (eventType ~= nil, "Argument(s) cannot be nil")
+  assert (action ~= nil, "Argument(s) cannot be nil")
+  eventType = EventType.fromId(eventType)
+  assert (eventType ~= nil, "eventType must be a valid EventType")
   
-  -- Look up entry in table (returns null if no entry exists)
-  return Secretary.objects[id]
+  -- Create callback object
+  local callback = {
+    object = object,
+    listener = listener,
+    eventType = eventType,
+    index = 0
+  }
+  
+  -- Insert callback into callback table indexed by event type
+  local n = table.getn(Secretary.callbacks[eventType]) + 1
+  Secretary.callbacks[eventType][n] = callback
+  table.setn(Secretary.callbacks[eventType], n)
+  callback.index = n
+  
+  -- Create table entry for object if none exists
+  if Secretary.callbacks[object] == nil then
+    Secretary.callbacks[object] = {n = 0}
+  end
+  
+  -- Insert callback into callback table indexed by calling object
+  n = table.getn(Secretary.callbacks[object]) + 1
+  Secretary.callbacks[object][n] = callback
+  table.setn(Secretary.callbacks[object], n)
+  
+end
+
+--
+-- Deletes all callbacks associated with the given object.
+--
+-- object: The object to delete all registered callbacks for.
+--
+function Secretary.unregisterAllListeners( object )
+  
+  -- Verfy arguments
+  assert(object ~= nil, "Argument cannot be nil")
+  
+  -- Make sure callbacks exist for the given object
+  local callbacks = Secretary.callbacks[object]
+  if callbacks == nil then
+    return
+  end
+  
+  -- Remove each callback from it's eventType table
+  for i,callback in ipairs(callbacks) do
+    if callback then
+      Secretary.callbacks[callback.eventType][callback.index] = nil
+    end
+  end
+  
+  -- Remove this object from the callback table, finallizing the process
+  Secretary.callbacks[object] = nil
 end
 
 
---
--- Removes an object from the Secretary. Removes any callbacks associated with
--- the object and removes object from collision checks.
--- 
--- Parameters
---   object - required - number or PhysObject
---     The object or the instace id of the object to delete from the secretary.
--- 
--- Return
---   nil
---
-function Secretary.remove( object )
-  -- Validate arguments
-  assert( type(object) == "number" or instanceOf( object, PhysObject ), "Invalid parameter type" )
-  local id = object
-  
-  -- Get ID if given object or object if given ID
-  if type(id) == "number" then
-    object = Secretary.objects[id]
-    assert( object , "Invalid object ID "..id ) 
-  else
-    id = object:getInstanceId()
-  end
-  
-  -- Remove object from tree and object lists
-  Secretary.tree:remove(object, Secretary.objectNodes[id])
-  Secretary.objects[id] = nil
-  Secretary.objectNodes[id] = nil
-  
-  -- Remove object's registered event callback functions
-  for t in EventType.values() do
-    Secretary.callbacks[t][id] = nil
-  end
-end
+
+
 
 
 --------------------------------------------------------------------------------
@@ -256,6 +283,7 @@ function Secretary.onJoystickRemove(joystick)
 end
 
 
+
 -- Generic function that executes callbacks for a given event type
 -- Handles errors and takes any variable number of arguments and passes
 -- them along to the callbacks.
@@ -264,14 +292,28 @@ function Secretary.executeCallbacks( eventType, ... )
   local arg = {...}
   
   -- Execute all registered callbacks registered with Secretary
-  for i,callback in pairs(Secretary.callbacks[eventType]) do
+  local callbacks = Secretary.callbacks[eventType]
+  local lastIndex = 0
+  for i = 1,table.getn(callbacks) do
+    local callback = callbacks[i]
     
-    -- Double-check that callback is real
+    -- Ensure callback exists
     if callback then
+      
+      -- Attempt to fill any gaps in table (in event of deleted objects)
+      lastIndex = lastIndex + 1
+      if lastIndex < i then
+        callbacks[lastIndex] = callback
+        callbacks[i] = nil
+      end
+      
+      -- Convenience variables
+      local listener = callback.listener
+      local object = callback.object
       
       -- Use xpcall to prevent errors from destroying everything
       local success, errmessage = xpcall(
-        function() return callback(Secretary.objects[i], unpack(arg)) end,
+        function() return listener(object, unpack(arg)) end,
         catchError    -- function to handle errors
       )
       
@@ -282,4 +324,7 @@ function Secretary.executeCallbacks( eventType, ... )
       end
     end
   end
+  
+  -- If gaps were detected and closed, decrease size of callback table
+  table.setn(callbacks, lastIndex)
 end
