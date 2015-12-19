@@ -15,17 +15,19 @@ EventType = {
   JOYSTICK_UP = 12,
   JOYSTICK_ADD = 13,
   JOYSTICK_REMOVE = 14,
+  WINDOW_RESIZE = 15,
+  PRE_DRAW = 16,
   
   values = function( )
     local i = 0
     return function()
       i = i + 1
-      if i <= 14 then return i end
+      if i <= 16 then return i end
     end
   end,
   
   fromId = function( id )
-    if id > 14 or id < 1 then
+    if id > 16 or id < 1 then
       return nil
     else
       return id
