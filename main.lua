@@ -1,4 +1,5 @@
 require "Secretary"
+require "LoveEvents"
 require "Player"
 require "Block"
 require "Enemy"
@@ -7,104 +8,56 @@ require "Button"
 
 player = Player()
 room = nil
+enemies = {}
 
 function love.load( )
-  print(player.__index)
-  
-  -- Starting position & gravity
-  -- player:setPosition( 100 , 100 )
-  
-  -- Build level
-  -- for i=0, (512-32-32), 32 do
-  --   Block(i, 0)
-  --   Block(512-32, i)
-  --   Block(512-32-i, 512-32)
-  --   Block(0, 512-32-i)
-  -- end
-  -- Block(256, 256)
-  
   room = buildLevelFromFile("level1.txt")
-  local button = Button( "Test", 32, 32, 128, 32 )
-  button:setOnClickAction(function()
-    Secretary.remove(button)
+  
+  local button1 = Button( "Level1", 32, 32, 128, 32 )
+  button1:setOnClickAction(function()
+    clearEnemies()
+    for _,obj in pairs(room.objects) do
+      Secretary.remove(obj)
+    end
+    Secretary.remove(room)
+    room = buildLevelFromFile("level1.txt")
   end)
   
-end
-
-function love.draw( )
-  room:adjustCanvas()
-  Secretary.onDraw()
-end
-
-function love.resize( w, h )
-  if room ~= nil then
-    room:onWindowResize(w, h)
-  end
-end
-
-function love.update( dt )
-  
-  -- Regulate the framerate
-  if dt < 1/60 then
-    love.timer.sleep( 1/60 - dt )
-  end
-  
-  -- Call step-based events
-  Secretary.onPrePhysics()
-  Secretary.onPhysics()
-  Secretary.onPostPhysics()
-  Secretary.onStep()
-  
-  love.graphics.print(love.timer.getFPS(), 0, 0)
-end
-
-function love.keypressed( key, isrepeat )
-  Secretary.onKeyboardDown(key, isrepeat)
-  
-  --Escape
-  if key == "escape" then
-    love.event.quit()
-  elseif key == "return" then
-    local enemy = Enemy()
-    enemy:setPosition(64, 64)
-    if math.random(2) == 1 then
-      enemy:moveLeft()
-    else
-      enemy:moveRight()
+  local button2 = Button( "Level2", 32, 80, 128, 32 )
+  button2:setOnClickAction(function()
+    clearEnemies()
+    for _,obj in pairs(room.objects) do
+      Secretary.remove(obj)
     end
-    
-    print("Objects: " .. Secretary.tree:getSize() .. "\n")
+    Secretary.remove(room)
+    room = buildLevelFromFile("level2.txt")
+  end)
+
+
+  Secretary.registerEventListener({}, function(_, key, isrepeat)
+    --Escape
+    if key == "escape" then
+      love.event.quit()
+    elseif key == "return" then
+      local enemy = Enemy()
+      table.insert(enemies, enemy)
+      enemy:setPosition(64, 64)
+      if math.random(2) == 1 then
+        enemy:moveLeft()
+      else
+        enemy:moveRight()
+      end
+
+      print("Objects: " .. Secretary.tree:getSize() .. "\n")
+    elseif key == "backspace" then
+      clearEnemies()
+    end
+  end, EventType.KEYBOARD_DOWN)
+end
+
+function clearEnemies()
+  for k,enemy in pairs(enemies) do
+    Secretary.remove(enemy)
+    enemies[k] = nil
   end
-end
-
-function love.keyreleased( key )
-  Secretary.onKeyboardUp(key)
-end
-
-function love.mousepressed( x, y, mButton )
-  Secretary.onMouseDown(x, y, mButton)
-end
-
-function love.mousereleased( x, y, mButton )
-  Secretary.onMouseUp(x, y, mButton)
-end
-
-function love.mousemoved( x, y, dx, dy )
-  Secretary.onMouseMove(x, y, dx, dy)
-end
-
-function love.joystickpressed( joystick, button )
-  Secretary.onJoystickDown(joystick, button)
-end
-
-function love.joystickreleased( joystick, button )
-  Secretary.onJoystickUp(joystick, button)
-end
-
-function love.joystickadded( joystick )
-  Secretary.onJoystickAdded(joystick)
-end
-
-function love.joystickremoved( joystick )
-  Secretary.onJoystickRemoved(joystick)
 end

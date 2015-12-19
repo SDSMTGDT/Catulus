@@ -288,6 +288,16 @@ function Secretary.onJoystickRemove(joystick)
   Secretary.executeCallbacks(EventType.JOYSTICK_REMOVE, joystick)
 end
 
+-- Called when the game window is resized
+function Secretary.onWindowResize(w, h)
+  Secretary.executeCallbacks(EventType.WINDOW_RESIZE, w, h)
+end
+
+-- Called before draw events are executed
+function Secretary.onPreDraw()
+  Secretary.executeCallbacks(EventType.PRE_DRAW)
+end
+
 
 
 -- Generic function that executes callbacks for a given event type

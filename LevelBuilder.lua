@@ -3,13 +3,15 @@ require "Room"
 function buildLevelFromFile(filename)
   assert(type(filename) == "string", "Unexpected argument type expected")
   
-  local file = io.open(love.filesystem.getSourceBaseDirectory().."/"..love.filesystem.getIdentity().."/levels/"..filename, "r")
+  --local file = io.open(love.filesystem.getSourceBaseDirectory().."/"..love.filesystem.getIdentity().."/levels/"..filename, "r")
+  local file = io.open("levels/" .. filename, "r")
   
   local width = 0
   local height = 0
   
   local map = {}
-  
+  local room = Room()
+
   width = tonumber(file:read())
   height = tonumber(file:read())
   
@@ -25,6 +27,7 @@ function buildLevelFromFile(filename)
   
   -- Build the level
   love.window.setMode( width * 16, height * 16, {resizable=true} )
+  room:setDimensions(width * 16, height * 16)
   
   for i = 1, height do
     for j = 1, width do
@@ -72,7 +75,7 @@ function buildLevelFromFile(filename)
         
         -- Create block with expanded dimensions
         -- Note: j-1 and i-1 are positions (i & j are 1 indexed)
-        Block( (j-1) * 16, (i-1) * 16, bWidth * 16, bHeight * 16 )
+        table.insert(room.objects, Block( (j-1) * 16, (i-1) * 16, bWidth * 16, bHeight * 16 ))
 		
         -- #DebugTime!!
         print("Created block at ("..j..","..i.."), dimensions "..(bWidth).."x"..(bHeight))
@@ -81,6 +84,7 @@ function buildLevelFromFile(filename)
         
         -- Depends on a player actually existing
         player:setPosition( (j-1) * 16, (i-1) * 16 )
+        player:setVelocity( 0, 0 )
         
       elseif (map[i][j] == "E") then
         
@@ -90,9 +94,6 @@ function buildLevelFromFile(filename)
       
     end
   end
-  
-  local room = Room()
-  room:setDimensions(width * 16, height * 16)
   
   return room
 end

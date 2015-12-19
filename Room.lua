@@ -28,6 +28,12 @@ function Room:_init( )
   self.offset = {}
   self.offset.x = 0
   self.offset.y = 0
+  
+  -- internal list of owned objects
+  self.objects = {}
+  
+  Secretary.registerEventListener(self, self.adjustCanvas, EventType.PRE_DRAW)
+  Secretary.registerEventListener(self, self.onWindowResize, EventType.WINDOW_RESIZE)
 end
 
 --
@@ -63,7 +69,7 @@ end
 function Room:drawingPoint(x, y)
   x = x or 0
   y = y or 0
-  return self.offset.x + (x * self.scale), self.offset.y + (y * self.scale)
+  return (x - self.offset.x) / self.scale, (y - self.offset.y) / self.scale
 end
 
 function Room:drawingScale(w, h)

@@ -79,6 +79,8 @@ end
 --
 function Button:onMouseMove( x, y )
   
+  x, y = room:drawingPoint(x, y)
+  
   -- Trigger mouse hover events
   if x >= self.x and x < self.x + self.width and y >= self.y and y < self.y + self.height then
     if self.hover == false then
@@ -116,6 +118,8 @@ end
 -- Button:onMousePressed
 --
 function Button:onMouseDown( x, y, button )
+  x, y = room:drawingPoint(x, y)
+  
   if button ~= "l" then return end
   
   if x >= self.x and x < self.x + self.width and y >= self.y and y < self.y + self.height then
@@ -127,6 +131,8 @@ end
 -- Button:onMouseUp
 --
 function Button:onMouseUp( x, y, button )
+  x, y = room:drawingPoint(x, y)
+  
   if button ~= "l" then return end
   
   -- Update flags
