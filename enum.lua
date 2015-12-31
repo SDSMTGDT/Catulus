@@ -1,3 +1,5 @@
+require "functions"
+
 function buildEnum(enum)
   local n = 1
   while enum[n] ~= nil do
@@ -15,6 +17,7 @@ function buildEnum(enum)
   end
   
   enum.fromId = function(id)
+    assertType(id, "id", "number")
     if id > enum.n or id < 1 then
       return nil
     else

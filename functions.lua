@@ -21,3 +21,8 @@ function catchError( err )
     return err..debug.traceback().."\n"
   end
 end
+
+-- Convenience function for type assertions
+function assertType( value, name, t )
+  assert(type(value) == t, "Unexpected type for "..name..": "..t.." expected, "..type(object).." received")
+end
