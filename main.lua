@@ -32,8 +32,11 @@ function love.load( )
     Secretary.remove(room)
     room = buildLevelFromFile("level2.txt")
   end)
-
-
+  
+  
+  Secretary.registerEventListener(room, room.adjustCanvas, EventType.PRE_DRAW)
+  Secretary.registerEventListener(room, room.onWindowResize, EventType.WINDOW_RESIZE)
+  
   Secretary.registerEventListener({}, function(_, key, isrepeat)
     --Escape
     if key == "escape" then

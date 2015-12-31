@@ -1,10 +1,10 @@
 require "Secretary"
 
 function love.update( dt )
+  
   -- Regulate the framerate to 60 fps
-  if dt < 1/60 then
-    love.timer.sleep( 1/60 - dt )
-  end
+  local targetTime = love.timer.getTime() + (1/60 - dt)
+  while love.timer.getTime() < targetTime do end
   
   -- Call step-based events
   Secretary.onPrePhysics()
