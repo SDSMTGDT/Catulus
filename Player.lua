@@ -28,10 +28,8 @@ function Player:_init( )
   self.animations[3] = Animation( )
   
   self.animations[1]:load( "fishanim.txt" )
-  self.animations[2]:load( "fishanim.txt" )
-  
-  self.animations[1].xScale = -1
-  
+  self.animations[2]:load( "fishidle.txt" )
+  self.animations[3]:load( "fishjump.txt" )
   Secretary.registerEvent(self, EventType.POST_PHYSICS, self.onCollisionCheck)
   Secretary.registerEvent(self, EventType.STEP, self.onStep)
   Secretary.registerEvent(self, EventType.KEYBOARD_DOWN, self.onKeyPress)
@@ -50,8 +48,18 @@ function Player:onStep( )
   
   if self.horizontalStep > 0 then
     self.animPointer = 1
+	self.animations[1].xScale = -1
+	self.animations[2].xScale = -1
+	self.animations[3].xScale = -1
   elseif self.horizontalStep < 0 then
-    self.animPointer = 2
+    self.animPointer = 1
+	self.animations[1].xScale = 1
+	self.animations[2].xScale = 1
+	self.animations[3].xScale = 1
+  elseif self.velocity.y ~= 0 
+	self.animPointer = 3
+  else
+	self.animPointer = 2
   end
   
   self.animations[self.animPointer]:update( )
