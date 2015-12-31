@@ -27,6 +27,7 @@ function Player:_init( )
   Secretary.registerEventListener(self, self.onCollisionCheck, EventType.POST_PHYSICS)
   Secretary.registerEventListener(self, self.onStep, EventType.STEP)
   Secretary.registerEventListener(self, self.onKeyPress, EventType.KEYBOARD_DOWN)
+  Secretary.setDrawLayer(self, DrawLayer.SPOTLIGHT)
   
 end
 
