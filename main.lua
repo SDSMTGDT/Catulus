@@ -23,6 +23,12 @@ function love.load( )
     if key == "escape" then
       if pauseMenu == nil then
         pauseMenu = Menu.createPauseMenu()
+        
+        local destroy = pauseMenu.destroy
+        pauseMenu.destroy = function(self)
+          pauseMenu = nil
+          destroy(self)
+        end
       else
         pauseMenu:destroy()
         pauseMenu = nil
@@ -37,7 +43,7 @@ function love.load( )
         enemy:moveRight()
       end
 
-      print("Objects: " .. Secretary.tree:getSize() .. "\n")
+      print("Objects: "..Secretary.tree:getSize())
     elseif key == "backspace" then
       clearEnemies()
     end

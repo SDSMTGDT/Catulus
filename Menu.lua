@@ -93,35 +93,36 @@ end
 --
 
 function Menu.createPauseMenu( )
-  local menu = Menu("Pause Menu", 0, 0, 100, 200)
+  local menu = Menu("Pause Menu", 20, 20, 100, 200)
   
-  menu:addItem(Button("Continue", 8, 8, 84, 32, function()
+  menu:addItem(Button("Continue", menu.x+menu.border*2, menu.y+menu.border*2, menu.width-menu.border*4, 32, function()
     menu:destroy()
   end))
   
-  menu:addItem(Button("Quit", 8, 48, 84, 32, function()
+  menu:addItem(Button("Quit", menu.x+menu.border*2, menu.y+menu.height-32-menu.border*2, menu.width-menu.border*4, 32, function()
     love.event.quit()
   end))
   
---    local button1 = Button( "Level1", 32, 32, 128, 32 )
---  button1:setOnClickAction(function()
---    clearEnemies()
---    for _,obj in pairs(room.objects) do
---      Secretary.remove(obj)
---    end
---    Secretary.remove(room)
---    room = buildLevelFromFile("level1.txt")
---  end)
---  
---  local button2 = Button( "Level2", 32, 80, 128, 32 )
---  button2:setOnClickAction(function()
---    clearEnemies()
---    for _,obj in pairs(room.objects) do
---      Secretary.remove(obj)
---    end
---    Secretary.remove(room)
---    room = buildLevelFromFile("level2.txt")
---  end)
+  menu:addItem(Button("Level 1", menu.x+menu.border*2, menu.y+menu.border*3+32, menu.width-menu.border*4, 32, function()
+    clearEnemies()
+    for _,obj in pairs(room.objects) do
+      Secretary.remove(obj)
+    end
+    Secretary.remove(room)
+    room = buildLevelFromFile("level1.txt")
+    menu:destroy()
+  end))
+  
+  
+  menu:addItem(Button("Level 2", menu.x+menu.border*2, menu.y+menu.border*4+32*2, menu.width-menu.border*4, 32, function()
+    clearEnemies()
+    for _,obj in pairs(room.objects) do
+      Secretary.remove(obj)
+    end
+    Secretary.remove(room)
+    room = buildLevelFromFile("level2.txt")
+    menu:destroy()
+  end))
   
   return menu
 end
