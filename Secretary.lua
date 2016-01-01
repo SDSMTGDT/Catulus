@@ -409,7 +409,6 @@ function Secretary.executeCallbacks( callbacks, ... )
       
       -- If error occured, display traceback and continue
       if success == false then
-        print("Error occured while handling event (type: "..eventType..")")
         print("Caused by:", errmessage)
       end
     end

@@ -5,34 +5,15 @@ require "Block"
 require "Enemy"
 require "LevelBuilder"
 require "Button"
+require "Menu"
 
 player = Player()
 room = nil
 enemies = {}
+pauseMenu = nil
 
 function love.load( )
   room = buildLevelFromFile("level1.txt")
-  
-  local button1 = Button( "Level1", 32, 32, 128, 32 )
-  button1:setOnClickAction(function()
-    clearEnemies()
-    for _,obj in pairs(room.objects) do
-      Secretary.remove(obj)
-    end
-    Secretary.remove(room)
-    room = buildLevelFromFile("level1.txt")
-  end)
-  
-  local button2 = Button( "Level2", 32, 80, 128, 32 )
-  button2:setOnClickAction(function()
-    clearEnemies()
-    for _,obj in pairs(room.objects) do
-      Secretary.remove(obj)
-    end
-    Secretary.remove(room)
-    room = buildLevelFromFile("level2.txt")
-  end)
-  
   
   Secretary.registerEventListener(room, room.adjustCanvas, EventType.PRE_DRAW)
   Secretary.registerEventListener(room, room.onWindowResize, EventType.WINDOW_RESIZE)
@@ -40,7 +21,12 @@ function love.load( )
   Secretary.registerEventListener({}, function(_, key, isrepeat)
     --Escape
     if key == "escape" then
-      love.event.quit()
+      if pauseMenu == nil then
+        pauseMenu = Menu.createPauseMenu()
+      else
+        pauseMenu:destroy()
+        pauseMenu = nil
+      end
     elseif key == "return" then
       local enemy = Enemy()
       table.insert(enemies, enemy)

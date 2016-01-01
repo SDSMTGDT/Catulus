@@ -16,7 +16,7 @@ setmetatable(Button, {
 -- 
 -- Button constructor
 --
-function Button:_init( text, x, y, w, h )
+function Button:_init( text, x, y, w, h, action )
 
   self.text = text or ""
   self.x = x or 0
@@ -30,7 +30,7 @@ function Button:_init( text, x, y, w, h )
   self.border = 4
   
   self.actions = {}
-  self.actions.click = nil
+  self.actions.click = action
   self.actions.hover = nil
   self.actions.unhover = nil
   
