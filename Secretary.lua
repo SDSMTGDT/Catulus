@@ -17,22 +17,34 @@ setmetatable(Secretary, {
   }
 )
 
-Secretary.tree = QuadTree( 1, -1000, 1000, -1000, 1000 ) -- Collision detection data structure
 
-Secretary.objectNodes = {}  -- table containing direct references to object quadtree nodes
-Secretary.callbacks = {}    -- table containing all callbacks
 
--- Prepare callback lists
-for t in EventType.values() do
-  Secretary.callbacks[t] = {n = 0}
-end
+--
+-- CONSTRUCTOR
+--
+function Secretary:_init( )
+  
+  -- Collision detection data structure
+  self.tree = QuadTree( 1, -1000, 1000, -1000, 1000 )
+  
+  self.paused = false
+  self.objectNodes = {}  -- table containing direct references to object quadtree nodes
+  self.callbacks = {}    -- table containing all callbacks
 
-for l in DrawLayer.values() do
-  Secretary.callbacks[EventType.DRAW][l] = {n = 0}
-  if Secretary.callbacks[EventType.DRAW][l].n < l then
-    Secretary.callbacks[EventType.DRAW][l].n = l
+  -- Prepare callback lists
+  for t in EventType.values() do
+    self.callbacks[t] = {n = 0}
   end
+
+  for l in DrawLayer.values() do
+    self.callbacks[EventType.DRAW][l] = {n = 0}
+    if self.callbacks[EventType.DRAW][l].n < l then
+      self.callbacks[EventType.DRAW][l].n = l
+    end
+  end
+
 end
+
 
 
 
@@ -47,14 +59,14 @@ end
 --
 -- object: The new object to track collisions with.
 --
-function Secretary.registerPhysObject( object )
+function Secretary:registerPhysObject( object )
   
   -- Validate arguments
   assert(instanceOf(object, PhysObject), "Argument must be an instance of PhysObject")
-  assert(Secretary.objectNodes[object] == nil, "PhysObject already registered with the secretary")
+  assert(self.objectNodes[object] == nil, "PhysObject already registered with the secretary")
   
   -- Store full node path
-  Secretary.objectNodes[object] = Secretary.tree:insert(object)
+  self.objectNodes[object] = self.tree:insert(object)
 end
 
 --
@@ -63,13 +75,13 @@ end
 --
 -- object: The object to unregister.
 --
-function Secretary.unregisterPhysObject( object )
+function Secretary:unregisterPhysObject( object )
   
   -- Validate arguments
   assert(instanceOf(object, PhysObject), "Argument must be an instance of PhysObject")
   
   -- Remove object from quadtree
-  Secretary.tree:remove(object, Secretary.objectNodes[object])
+  self.tree:remove(object, self.objectNodes[object])
 end
 
 --
@@ -78,13 +90,13 @@ end
 --
 -- object: The object to update information for.
 --
-function Secretary.updateObject(object)
-  local path = Secretary.tree:getFullIndex(object:getBoundingBox())
+function Secretary:updateObject(object)
+  local path = self.tree:getFullIndex(object:getBoundingBox())
   
-  if path ~= Secretary.objectNodes[object] then
-    Secretary.tree:remove(object, Secretary.objectNodes[object])
-    path = Secretary.tree:insert(object)
-    Secretary.objectNodes[object] = path
+  if path ~= self.objectNodes[object] then
+    self.tree:remove(object, self.objectNodes[object])
+    path = self.tree:insert(object)
+    self.objectNodes[object] = path
   end
 end
 
@@ -106,7 +118,7 @@ end
 --   Table containing indexed array of objects whose bounding boxes intersect
 --     with the supplied coordinates.
 --
-function Secretary.getCollisions( top, right, bottom, left )
+function Secretary:getCollisions( top, right, bottom, left )
   assert(top and right and bottom and left, "parameter(s) cannot be nil")
   
   -- Initialize variables
@@ -114,7 +126,7 @@ function Secretary.getCollisions( top, right, bottom, left )
   local i = 1
   
   -- Retrieve list of all possible collisions from tree
-  Secretary.tree:retrieve( list, top, right, bottom, left )
+  self.tree:retrieve( list, top, right, bottom, left )
   
   -- Remove objects from list that we do not collide with
   while i <= #list do
@@ -129,14 +141,39 @@ function Secretary.getCollisions( top, right, bottom, left )
   return list
 end
 
-function Secretary.remove( object )
+function Secretary:remove( object )
   if instanceOf(object, PhysObject) then
-    Secretary.unregisterPhysObject(object)
+    self:unregisterPhysObject(object)
   end
-  Secretary.unregisterAllListeners(object)
+  self:unregisterAllListeners(object)
 end
 
 
+
+function Secretary:registerChildSecretary( child )
+  
+  -- Validate parameters
+  assertType(child, Secretary)
+  assert(child ~= self, "A Secretary cannot register itself as a child, unless you're a sadist and WANT infinite loops")
+  
+  -- Register event methods of child with self
+  self:registerEventListener(child, child.onDraw, EventType.DRAW)
+  self:registerEventListener(child, child.onStep, EventType.STEP)
+  self:registerEventListener(child, child.onPrePhysics, EventType.PRE_PHYSICS)
+  self:registerEventListener(child, child.onPhysics, EventType.PHYSICS)
+  self:registerEventListener(child, child.onPostPhysics, EventType.POST_PHYSICS)
+  self:registerEventListener(child, child.onKeyboardDown, EventType.KEYBOARD_DOWN)
+  self:registerEventListener(child, child.onKeyboardUp, EventType.KEYBOARD_UP)
+  self:registerEventListener(child, child.onMouseDown, EventType.MOUSE_DOWN)
+  self:registerEventListener(child, child.onMouseUp, EventType.MOUSE_UP)
+  self:registerEventListener(child, child.onMouseMove, EventType.MOUSE_MOVE)
+  self:registerEventListener(child, child.onJoystickDown, EventType.JOYSTICK_DOWN)
+  self:registerEventListener(child, child.onJoystickUp, EventType.JOYSTICK_UP)
+  self:registerEventListener(child, child.onJoystickAdd, EventType.JOYSTICK_ADD)
+  self:registerEventListener(child, child.onJoystickRemove, EventType.JOYSTICK_REMOVE)
+  self:registerEventListener(child, child.onWindowResize, EventType.WINDOW_RESIZE)
+  self:registerEventListener(child, child.onPreDraw, EventType.PRE_DRAW)
+end
 
 
 
@@ -154,7 +191,7 @@ end
 --           that are required for the given event type.
 -- eventType: type of event the listener is listening for.
 --
-function Secretary.registerEventListener( object, listener, eventType )
+function Secretary:registerEventListener( object, listener, eventType )
   
   -- Verify arguments
   assertType(object, "object", "table")
@@ -177,7 +214,7 @@ function Secretary.registerEventListener( object, listener, eventType )
   end
   
   -- Insert callback into callback table indexed by event type
-  local callbacks = Secretary.callbacks[eventType]
+  local callbacks = self.callbacks[eventType]
   if eventType == EventType.DRAW then
     callbacks = callbacks[callback.drawLayer]
   end
@@ -187,14 +224,14 @@ function Secretary.registerEventListener( object, listener, eventType )
   callback.index = n
   
   -- Create table entry for object if none exists
-  if Secretary.callbacks[object] == nil then
-    Secretary.callbacks[object] = {n = 0}
+  if self.callbacks[object] == nil then
+    self.callbacks[object] = {n = 0}
   end
   
   -- Insert callback into callback table indexed by calling object
-  n = Secretary.callbacks[object].n + 1
-  Secretary.callbacks[object][n] = callback
-  Secretary.callbacks[object].n = n
+  n = self.callbacks[object].n + 1
+  self.callbacks[object][n] = callback
+  self.callbacks[object].n = n
   
 end
 
@@ -206,14 +243,14 @@ end
 -- listener (optional): specific draw function to move to drawLayer
 --     in case object has multiple draw callbacks registered
 --
-function Secretary.setDrawLayer( object, drawLayer, listener )
+function Secretary:setDrawLayer( object, drawLayer, listener )
   
   -- Validate arguments
   assertType(object, "object", "table")
   assert(DrawLayer.fromId(drawLayer) ~= nil, "drawLayer must be a valid DrawLayer value")
   
   -- Make sure callbacks exist for the given object
-  local callbacks = Secretary.callbacks[object]
+  local callbacks = self.callbacks[object]
   if callbacks == nil then
     return
   end
@@ -226,10 +263,10 @@ function Secretary.setDrawLayer( object, drawLayer, listener )
        callback.drawLayer ~= drawLayer then
       
       -- Remove from old drawing layer
-      Secretary.callbacks[callback.eventType][callback.drawLayer][callback.index] = nil
+      self.callbacks[callback.eventType][callback.drawLayer][callback.index] = nil
       
       -- Insert into new layer at end of list
-      local newCallbacks = Secretary.callbacks[callback.eventType][drawLayer]
+      local newCallbacks = self.callbacks[callback.eventType][drawLayer]
       newCallbacks.n = newCallbacks.n + 1
       newCallbacks[newCallbacks.n] = callback
       
@@ -245,13 +282,13 @@ end
 --
 -- object: The object to delete all registered callbacks for.
 --
-function Secretary.unregisterAllListeners( object )
+function Secretary:unregisterAllListeners( object )
   
   -- Validate arguments
   assertType(object, "object", "table")
   
   -- Make sure callbacks exist for the given object
-  local callbacks = Secretary.callbacks[object]
+  local callbacks = self.callbacks[object]
   if callbacks == nil then
     return
   end
@@ -260,15 +297,15 @@ function Secretary.unregisterAllListeners( object )
   for i,callback in ipairs(callbacks) do
     if callback then
       if callback.eventType == EventType.DRAW then
-        Secretary.callbacks[callback.eventType][callback.drawLayer][callback.index] = nil
+        self.callbacks[callback.eventType][callback.drawLayer][callback.index] = nil
       else
-        Secretary.callbacks[callback.eventType][callback.index] = nil
+        self.callbacks[callback.eventType][callback.index] = nil
       end
     end
   end
   
   -- Remove this object from the callback table, finallizing the process
-  Secretary.callbacks[object] = nil
+  self.callbacks[object] = nil
 end
 
 
@@ -282,95 +319,98 @@ end
 
 
 -- Called every draw step
-function Secretary.onDraw()
+function Secretary:onDraw()
   for l in DrawLayer.values() do
-    Secretary.executeCallbacks(Secretary.callbacks[EventType.DRAW][l])
+    self:executeCallbacks(self.callbacks[EventType.DRAW][l])
   end
 end
 
 -- Called every game step
-function Secretary.onStep()
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.STEP])
+function Secretary:onStep()
+  if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.STEP])
 end
 
 -- Called before every physics event
-function Secretary.onPrePhysics()
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.PRE_PHYSICS])
+function Secretary:onPrePhysics()
+  if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.PRE_PHYSICS])
 end
 
 -- CAlled every step to execute physics
-function Secretary.onPhysics()
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.PHYSICS])
+function Secretary:onPhysics()
+  if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.PHYSICS])
 end
 
 -- Called after physics event
-function Secretary.onPostPhysics()
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.POST_PHYSICS])
+function Secretary:onPostPhysics()
+  if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.POST_PHYSICS])
 end
 
 -- Called when a keyboard button is pressed
-function Secretary.onKeyboardDown( key, isrepeat )
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.KEYBOARD_DOWN], key, isrepeat)
+function Secretary:onKeyboardDown( key, isrepeat )
+  if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.KEYBOARD_DOWN], key, isrepeat)
 end
 
 -- Called when a keyboard button is released
-function Secretary.onKeyboardUp( key )
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.KEYBOARD_UP], key )
+function Secretary:onKeyboardUp( key )
+  if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.KEYBOARD_UP], key )
 end
 
 -- Called when a mouse button is pressed
-function Secretary.onMouseDown(x, y, button)
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.MOUSE_DOWN], x, y, button)
+function Secretary:onMouseDown(x, y, button)
+  if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.MOUSE_DOWN], x, y, button)
 end
 
 -- Called when a mouse button is released
-function Secretary.onMouseUp(x, y, button)
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.MOUSE_UP], x, y, button)
+function Secretary:onMouseUp(x, y, button)
+  if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.MOUSE_UP], x, y, button)
 end
 
 -- Called when the mouse is moved
-function Secretary.onMouseMove(x, y, dx, dy)
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.MOUSE_MOVE], x, y, dx, dy)
+function Secretary:onMouseMove(x, y, dx, dy)
+  if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.MOUSE_MOVE], x, y, dx, dy)
 end
 
 -- Called when a joystick button is pressed
-function Secretary.onJoystickDown(joystick, button)
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.JOYSTICK_DOWN], joystick, button)
+function Secretary:onJoystickDown(joystick, button)
+  if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.JOYSTICK_DOWN], joystick, button)
 end
 
 -- Called when a joystick button is released
-function Secretary.onJoystickUp(joystick, button)
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.JOYSTICK_UP], joystick, button)
+function Secretary:onJoystickUp(joystick, button)
+  if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.JOYSTICK_UP], joystick, button)
 end
 
 -- Called when a joystick is connected
-function Secretary.onJoystickAdd(joystick)
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.JOYSTICK_ADD], joystick)
+function Secretary:onJoystickAdd(joystick)
+  if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.JOYSTICK_ADD], joystick)
 end
 
 -- Called when a joystick is released
-function Secretary.onJoystickRemove(joystick)
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.JOYSTICK_REMOVE], joystick)
+function Secretary:onJoystickRemove(joystick)
+  if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.JOYSTICK_REMOVE], joystick)
 end
 
 -- Called when the game window is resized
-function Secretary.onWindowResize(w, h)
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.WINDOW_RESIZE], w, h)
+function Secretary:onWindowResize(w, h)
+  self:executeCallbacks(self.callbacks[EventType.WINDOW_RESIZE], w, h)
 end
 
 -- Called before draw events are executed
-function Secretary.onPreDraw()
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.PRE_DRAW])
-end
-
--- Called when the game window is resized
-function Secretary.onWindowResize(w, h)
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.WINDOW_RESIZE], w, h)
-end
-
--- Called before draw events are executed
-function Secretary.onPreDraw()
-  Secretary.executeCallbacks(Secretary.callbacks[EventType.PRE_DRAW])
+function Secretary:onPreDraw()
+  self:executeCallbacks(self.callbacks[EventType.PRE_DRAW])
 end
 
 
@@ -378,7 +418,7 @@ end
 -- Generic function that executes callbacks for a given event type
 -- Handles errors and takes any variable number of arguments and passes
 -- them along to the callbacks.
-function Secretary.executeCallbacks( callbacks, ... )
+function Secretary:executeCallbacks( callbacks, ... )
   local arg = {...}
   
   -- Execute all registered callbacks registered with Secretary

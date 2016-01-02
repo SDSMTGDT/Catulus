@@ -35,12 +35,12 @@ function Button:_init( text, x, y, w, h, action )
   self.actions.hover = nil
   self.actions.unhover = nil
   
-  Secretary.registerEventListener(self, self.onKeyboardDown, EventType.KEYBOARD_DOWN)
-  Secretary.registerEventListener(self, self.onKeyboardUp, EventType.KEYBOARD_UP)
-  Secretary.registerEventListener(self, self.onMouseMove, EventType.MOUSE_MOVE)
-  Secretary.registerEventListener(self, self.onMouseDown, EventType.MOUSE_DOWN)
-  Secretary.registerEventListener(self, self.onMouseUp, EventType.MOUSE_UP)
-  Secretary.registerEventListener(self, self.draw, EventType.DRAW)
+  rootSecretary:registerEventListener(self, self.onKeyboardDown, EventType.KEYBOARD_DOWN)
+  rootSecretary:registerEventListener(self, self.onKeyboardUp, EventType.KEYBOARD_UP)
+  rootSecretary:registerEventListener(self, self.onMouseMove, EventType.MOUSE_MOVE)
+  rootSecretary:registerEventListener(self, self.onMouseDown, EventType.MOUSE_DOWN)
+  rootSecretary:registerEventListener(self, self.onMouseUp, EventType.MOUSE_UP)
+  rootSecretary:registerEventListener(self, self.draw, EventType.DRAW)
 end
 
 

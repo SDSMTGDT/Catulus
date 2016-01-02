@@ -34,9 +34,9 @@ function Menu:_init( title, x, y, w, h )
   self.items = {n = 0, selected = 0}
   
   -- Register events
-  Secretary.registerEventListener(self, self.onKeyboardDown, EventType.KEYBOARD_DOWN)
-  Secretary.registerEventListener(self, self.draw, EventType.DRAW)
-  Secretary.setDrawLayer(self, DrawLayer.UI)
+  rootSecretary:registerEventListener(self, self.onKeyboardDown, EventType.KEYBOARD_DOWN)
+  rootSecretary:registerEventListener(self, self.draw, EventType.DRAW)
+  rootSecretary:setDrawLayer(self, DrawLayer.UI)
   
 end
 
@@ -46,11 +46,12 @@ function Menu:destroy( )
   
   -- Destroy menu items
   for i,item in ipairs(self.items) do
-    Secretary.remove(item)
+    rootSecretary:remove(item)
   end
   
   -- Destroy self
-  Secretary.remove(self)
+  rootSecretary:remove(self)
+  gameSecretary.paused = false
   
 end
 
@@ -64,7 +65,7 @@ function Menu:addItem( item )
   -- Add item to menu
   table.insert(self.items, item)
   self.items.n = self.items.n + 1
-  Secretary.setDrawLayer(item, DrawLayer.UI)
+  rootSecretary:setDrawLayer(item, DrawLayer.UI)
   
 end
 
@@ -125,6 +126,8 @@ end
 
 function Menu.createPauseMenu( )
   
+  gameSecretary.paused = true
+  
   -- Create new instance of menu
   local menu = Menu("Pause Menu", 20, 20, 200, 200)
   menu.padding = 8
@@ -151,9 +154,9 @@ function Menu.createPauseMenu( )
       function()
         clearEnemies()
         for _,obj in pairs(room.objects) do
-          Secretary.remove(obj)
+          gameSecretary:remove(obj)
         end
-        Secretary.remove(room)
+        gameSecretary:remove(room)
         room = buildLevelFromFile("level1.txt")
         menu:destroy()
       end))
@@ -167,9 +170,9 @@ function Menu.createPauseMenu( )
       function()
         clearEnemies()
         for _,obj in pairs(room.objects) do
-          Secretary.remove(obj)
+          gameSecretary:remove(obj)
         end
-        Secretary.remove(room)
+        gameSecretary:remove(room)
         room = buildLevelFromFile("level2.txt")
         menu:destroy()
       end))
