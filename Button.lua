@@ -23,17 +23,20 @@ function Button:_init( text, x, y, w, h, action )
   self.y = y or 0
   self.width = w or 32
   self.height = h or 32
+  self.padding = 4
+  self.border = 4
   
   self.hover = false
   self.down = false
-  self.padding = 4
-  self.border = 4
+  self.selected = false
   
   self.actions = {}
   self.actions.click = action
   self.actions.hover = nil
   self.actions.unhover = nil
   
+  Secretary.registerEventListener(self, self.onKeyboardDown, EventType.KEYBOARD_DOWN)
+  Secretary.registerEventListener(self, self.onKeyboardUp, EventType.KEYBOARD_UP)
   Secretary.registerEventListener(self, self.onMouseMove, EventType.MOUSE_MOVE)
   Secretary.registerEventListener(self, self.onMouseDown, EventType.MOUSE_DOWN)
   Secretary.registerEventListener(self, self.onMouseUp, EventType.MOUSE_UP)
@@ -70,6 +73,28 @@ function Button:setOnUnhoverAction(action)
   -- Verify parameters
   assert(type(action) == "function" or action == nil, "Expected parameter of type 'function' or nil, '" .. type(action) .. "' received")
   self.actions.unhover = action
+end
+
+
+
+--
+-- Button:onKeyboardDown
+--
+function Button:onKeyboardDown( key, isRepeat )
+  if self.selected and key == "return" then
+    self.down = true  
+  end
+end
+
+--
+-- Button:onKeyboardUp
+function Button:onKeyboardUp( key )
+  if self.selected and key == "return" then
+    if self.down then
+      self.down = false
+      onClick()
+    end
+  end
 end
 
 
@@ -170,13 +195,13 @@ function Button:draw()
   end
   
   -- Black background
-  if self.hover == false then
+  if self.hover == false and self.selected == false then
     love.graphics.setColor( 0, 0, 0 )
     love.graphics.rectangle( "fill", self.x + self.border, self.y + self.border, self.width - self.border * 2, self.height - self.border * 2 )
   end
   
   -- Text
-  if self.hover == false then
+  if self.hover == false and self.selected == false then
     love.graphics.setColor( 255, 255, 255 )
   else
     love.graphics.setColor( 0, 0, 0 )

@@ -29,8 +29,9 @@ function Menu:_init( title, x, y, w, h )
   self.y = y
   self.width = w
   self.height = h
-  self.border = 4
-  self.items = {}
+  self.border = 0
+  self.padding = 0
+  self.items = {n = 0, selected = 0}
   
   -- Register events
   Secretary.registerEventListener(self, self.onKeyboardDown, EventType.KEYBOARD_DOWN)
@@ -62,6 +63,7 @@ function Menu:addItem( item )
   
   -- Add item to menu
   table.insert(self.items, item)
+  self.items.n = self.items.n + 1
   Secretary.setDrawLayer(item, DrawLayer.UI)
   
 end
@@ -69,7 +71,36 @@ end
 
 
 function Menu:onKeyboardDown( key, isRepeat )
-  -- TODO: menu selection
+  
+  -- Short circuit
+  if self.items.n == 0 then return end
+  
+  -- De-select previous button
+  if self.items.selected ~= 0 and self.items[self.items.selected] ~= nil then
+    self.items[self.items.selected].selected = false
+  end
+  
+  -- Select next button up
+  if key == "up" then
+    if self.items.selected <= 1 then
+      self.items.selected = self.items.n
+    else
+      self.items.selected = self.items.selected - 1
+    end
+    
+  -- Select next button down
+  elseif key == "down" then
+    if self.items.selected == 0 or self.items.selected == self.items.n then
+      self.items.selected = 1
+    else
+      self.items.selected = self.items.selected + 1
+    end
+  end
+  
+  -- Select new button
+  if self.items[self.items.selected] ~= nil then
+    self.items[self.items.selected].selected = true
+  end
 end
 
 
@@ -93,36 +124,64 @@ end
 --
 
 function Menu.createPauseMenu( )
-  local menu = Menu("Pause Menu", 20, 20, 100, 200)
   
-  menu:addItem(Button("Continue", menu.x+menu.border*2, menu.y+menu.border*2, menu.width-menu.border*4, 32, function()
-    menu:destroy()
-  end))
+  -- Create new instance of menu
+  local menu = Menu("Pause Menu", 20, 20, 200, 200)
+  menu.padding = 8
+  menu.border = 4
   
-  menu:addItem(Button("Quit", menu.x+menu.border*2, menu.y+menu.height-32-menu.border*2, menu.width-menu.border*4, 32, function()
-    love.event.quit()
-  end))
+  -- Center menu
+  menu.x = (room.width - menu.width) / 2
+  menu.y = (room.height - menu.height) / 2
   
-  menu:addItem(Button("Level 1", menu.x+menu.border*2, menu.y+menu.border*3+32, menu.width-menu.border*4, 32, function()
-    clearEnemies()
-    for _,obj in pairs(room.objects) do
-      Secretary.remove(obj)
-    end
-    Secretary.remove(room)
-    room = buildLevelFromFile("level1.txt")
-    menu:destroy()
-  end))
+  menu:addItem(Button("Continue",
+      menu.x + menu.border + menu.padding,
+      menu.y + menu.border + menu.padding,
+      menu.width - menu.border*2 - menu.padding*2,
+      32,
+      function()
+        menu:destroy()
+      end))
+  
+  menu:addItem(Button("Level 1",
+      menu.x + menu.border + menu.padding,
+      menu.y + menu.border + menu.padding*2 + 32*1,
+      menu.width - menu.border*2 - menu.padding*2,
+      32,
+      function()
+        clearEnemies()
+        for _,obj in pairs(room.objects) do
+          Secretary.remove(obj)
+        end
+        Secretary.remove(room)
+        room = buildLevelFromFile("level1.txt")
+        menu:destroy()
+      end))
   
   
-  menu:addItem(Button("Level 2", menu.x+menu.border*2, menu.y+menu.border*4+32*2, menu.width-menu.border*4, 32, function()
-    clearEnemies()
-    for _,obj in pairs(room.objects) do
-      Secretary.remove(obj)
-    end
-    Secretary.remove(room)
-    room = buildLevelFromFile("level2.txt")
-    menu:destroy()
-  end))
+  menu:addItem(Button("Level 2",
+      menu.x + menu.border + menu.padding,
+      menu.y + menu.border + menu.padding*3 + 32*2,
+      menu.width - menu.border*2 - menu.padding*2,
+      32,
+      function()
+        clearEnemies()
+        for _,obj in pairs(room.objects) do
+          Secretary.remove(obj)
+        end
+        Secretary.remove(room)
+        room = buildLevelFromFile("level2.txt")
+        menu:destroy()
+      end))
+  
+  menu:addItem(Button("Quit",
+      menu.x + menu.border + menu.padding,
+      menu.y + menu.height - menu.border - menu.padding - 32,
+      menu.width - menu.border*2 - menu.padding*2,
+      32,
+      function()
+        love.event.quit()
+      end))
   
   return menu
 end
