@@ -23,7 +23,7 @@ function Enemy:_init( )
   self.anim:load( "catanim.txt" )  
   
   self:setSize(32, 32)
-  Secretary.registerEvent(self, EventType.STEP, self.onStep)
+  Secretary.registerEventListener(self, self.onStep, EventType.STEP)
 end
 
 function Enemy:moveLeft()

@@ -1,6 +1,7 @@
 require "functions"
 require "QuadTree"
 require "EventType"
+require "DrawLayer"
 
 -- Required fluff for classes
 Secretary = {}
@@ -16,69 +17,76 @@ setmetatable(Secretary, {
   }
 )
 
+Secretary.tree = QuadTree( 1, -1000, 1000, -1000, 1000 ) -- Collision detection data structure
 
-Secretary.objects = {}
-Secretary.nextId = 1
-Secretary.tree = QuadTree( 1, -1000, 1000, -1000, 1000 )
-Secretary.objectNodes = {}
+Secretary.objectNodes = {}  -- table containing direct references to object quadtree nodes
+Secretary.callbacks = {}    -- table containing all callbacks
 
--- Set up callback tables for fast event lookups
-Secretary.callbacks = {}
-for t in EventType.values() do Secretary.callbacks[t] = {} end
-
-
-function Secretary.registerObject(object)
-  
-  -- Validate arguments
-  assert (instanceOf(object, PhysObject), "Argument must be an instance of PhysObject")
-  
-  -- Make sure object ID is unset
-  assert (object.id == nil, "Object already assigned an ID")
-  
-  -- Assign object an ID, add to data structures
-  object.id = Secretary.nextId
-  Secretary.objects[Secretary.nextId] = object
-  
-  -- Store full node path
-  Secretary.objectNodes[Secretary.nextId] = Secretary.tree:insert(object)
-  
-  -- Increment ID for next object
-  Secretary.nextId = Secretary.nextId + 1
-  
-  return true
+-- Prepare callback lists
+for t in EventType.values() do
+  Secretary.callbacks[t] = {n = 0}
 end
 
-
-function Secretary.registerEvent(object, eventType, callback)
-  assert (object ~= nil, "Argument(s) cannot be nil")
-  assert (eventType ~= nil, "Argument(s) cannot be nil")
-  assert (callback ~= nil, "Argument(s) cannot be nil")
-  
-  local etype = EventType.fromId(eventType)
-  assert (etype ~= nil, "eventType must be a valid EventType")
-  
-  assert (type(object.getInstanceId) == "function", "Object missing getInstanceId() method")
-  
-  local id = object:getInstanceId()
-  assert (type(id) == "number", "Object ID must be of type number")
-  assert (Secretary.objects[id] == object, "Object not registered with Secretary")
-  
-  assert (type(callback) == "function", "Callback must be a function")
-  
-  Secretary.callbacks[etype][id] = callback
-end
-
-
-function Secretary.updateObject(object)
-  local path = Secretary.tree:getFullIndex(object:getBoundingBox())
-  
-  if path ~= Secretary.objectNodes[object.id] then
-    Secretary.tree:remove(object, Secretary.objectNodes[object.id])
-    path = Secretary.tree:insert(object)
-    Secretary.objectNodes[object.id] = path
+for l in DrawLayer.values() do
+  Secretary.callbacks[EventType.DRAW][l] = {n = 0}
+  if Secretary.callbacks[EventType.DRAW][l].n < l then
+    Secretary.callbacks[EventType.DRAW][l].n = l
   end
 end
 
+
+
+
+
+--------------------------------------------------------------------------------
+--                            COLLISION SYSTEM                                --
+--------------------------------------------------------------------------------
+
+--
+-- Registers a new PhysObject with the Secretary.
+--
+-- object: The new object to track collisions with.
+--
+function Secretary.registerPhysObject( object )
+  
+  -- Validate arguments
+  assert(instanceOf(object, PhysObject), "Argument must be an instance of PhysObject")
+  assert(Secretary.objectNodes[object] == nil, "PhysObject already registered with the secretary")
+  
+  -- Store full node path
+  Secretary.objectNodes[object] = Secretary.tree:insert(object)
+end
+
+--
+-- Unregisters a PhysObject with the Secretary, removing them from collision
+-- checks and data structures.
+--
+-- object: The object to unregister.
+--
+function Secretary.unregisterPhysObject( object )
+  
+  -- Validate arguments
+  assert(instanceOf(object, PhysObject), "Argument must be an instance of PhysObject")
+  
+  -- Remove object from quadtree
+  Secretary.tree:remove(object, Secretary.objectNodes[object])
+end
+
+--
+-- Updates an object's status in the quadtree and other lists, updating caches
+-- and indexes for fast access.
+--
+-- object: The object to update information for.
+--
+function Secretary.updateObject(object)
+  local path = Secretary.tree:getFullIndex(object:getBoundingBox())
+  
+  if path ~= Secretary.objectNodes[object] then
+    Secretary.tree:remove(object, Secretary.objectNodes[object])
+    path = Secretary.tree:insert(object)
+    Secretary.objectNodes[object] = path
+  end
+end
 
 --
 -- Gets a list of all registered objets whose bouding boxes intersect with the
@@ -121,63 +129,151 @@ function Secretary.getCollisions( top, right, bottom, left )
   return list
 end
 
-
---
--- Gets a reference to the object registered under the given instance id.
---
--- Parameters
---   id - required - number
---     The instance id of the object to retrieve.
---
--- Return
---   Reference to the object with instance id equal to id, or nil if no objects
---     match the given id.
---
-function Secretary.getObject( id )
-  
-  -- Validate arguments
-  assert(id, "id cannot be nil")
-  assert(type(id) == "number", "id must be a number")
-  
-  -- Look up entry in table (returns null if no entry exists)
-  return Secretary.objects[id]
-end
-
-
---
--- Removes an object from the Secretary. Removes any callbacks associated with
--- the object and removes object from collision checks.
--- 
--- Parameters
---   object - required - number or PhysObject
---     The object or the instace id of the object to delete from the secretary.
--- 
--- Return
---   nil
---
 function Secretary.remove( object )
-  -- Validate arguments
-  assert( type(object) == "number" or instanceOf( object, PhysObject ), "Invalid parameter type" )
-  local id = object
+  if instanceOf(object, PhysObject) then
+    Secretary.unregisterPhysObject(object)
+  end
+  Secretary.unregisterAllListeners(object)
+end
+
+
+
+
+
+--------------------------------------------------------------------------------
+--                              EVENT SYSTEM                                  --
+--------------------------------------------------------------------------------
+
+--
+-- Adds a function to the callback table, indexing by event type and by owning
+-- object.
+--
+-- object: Table that "owns" the listener function
+-- listener: Function to be called on event trigger. The "object" parameter will
+--           be passed as the first argument, followed by any other parameters
+--           that are required for the given event type.
+-- eventType: type of event the listener is listening for.
+--
+function Secretary.registerEventListener( object, listener, eventType )
   
-  -- Get ID if given object or object if given ID
-  if type(id) == "number" then
-    object = Secretary.objects[id]
-    assert( object , "Invalid object ID "..id ) 
-  else
-    id = object:getInstanceId()
+  -- Verify arguments
+  assertType(object, "object", "table")
+  assert (listener ~= nil, "Argument 'listener' cannot be nil")
+  assert (eventType ~= nil, "Argument 'eventType' cannot be nil")
+  eventType = EventType.fromId(eventType)
+  assert (eventType ~= nil, "eventType must be a valid EventType")
+  
+  -- Create callback object
+  local callback = {
+    object = object,
+    listener = listener,
+    eventType = eventType,
+    index = 0
+  }
+  
+  -- Customize callback object based on callback type
+  if eventType == EventType.DRAW then
+    callback.drawLayer = DrawLayer.MAIN
   end
   
-  -- Remove object from tree and object lists
-  Secretary.tree:remove(object, Secretary.objectNodes[id])
-  Secretary.objects[id] = nil
-  Secretary.objectNodes[id] = nil
+  -- Insert callback into callback table indexed by event type
+  local callbacks = Secretary.callbacks[eventType]
+  if eventType == EventType.DRAW then
+    callbacks = callbacks[callback.drawLayer]
+  end
+  local n = callbacks.n + 1
+  callbacks[n] = callback
+  callbacks.n = n
+  callback.index = n
   
-  -- Remove object's registered event callback functions
-  for t in EventType.values() do
-    Secretary.callbacks[t][id] = nil
+  -- Create table entry for object if none exists
+  if Secretary.callbacks[object] == nil then
+    Secretary.callbacks[object] = {n = 0}
+  end
+  
+  -- Insert callback into callback table indexed by calling object
+  n = Secretary.callbacks[object].n + 1
+  Secretary.callbacks[object][n] = callback
+  Secretary.callbacks[object].n = n
+  
+end
+
+--
+-- Moves an object's draw callback(s) to a new draw layer.
+--
+-- object: Object whose draw function to move to drawLayer
+-- drawLayer: New layer to move draw callback to
+-- listener (optional): specific draw function to move to drawLayer
+--     in case object has multiple draw callbacks registered
+--
+function Secretary.setDrawLayer( object, drawLayer, listener )
+  
+  -- Validate arguments
+  assertType(object, "object", "table")
+  assert(DrawLayer.fromId(drawLayer) ~= nil, "drawLayer must be a valid DrawLayer value")
+  
+  -- Make sure callbacks exist for the given object
+  local callbacks = Secretary.callbacks[object]
+  if callbacks == nil then
+    return
+  end
+  
+  -- Search through object's calbacks for a match with parameters
+  for i, callback in ipairs(callbacks) do
+    if callback and
+       callback.eventType == EventType.DRAW and
+       (listener == nil or callback.listener == nil) and
+       callback.drawLayer ~= drawLayer then
+      
+      -- Remove from old drawing layer
+      Secretary.callbacks[callback.eventType][callback.drawLayer][callback.index] = nil
+      
+      -- Insert into new layer at end of list
+      local newCallbacks = Secretary.callbacks[callback.eventType][drawLayer]
+      newCallbacks.n = newCallbacks.n + 1
+      newCallbacks[newCallbacks.n] = callback
+      
+      -- Update values in callback
+      callback.index = newCallbacks.n
+      callback.drawLayer = drawLayer
+    end
   end
 end
+
+--
+-- Deletes all callbacks associated with the given object.
+--
+-- object: The object to delete all registered callbacks for.
+--
+function Secretary.unregisterAllListeners( object )
+  
+  -- Validate arguments
+  assertType(object, "object", "table")
+  
+  -- Make sure callbacks exist for the given object
+  local callbacks = Secretary.callbacks[object]
+  if callbacks == nil then
+    return
+  end
+  
+  -- Remove each callback from it's eventType table
+  for i,callback in ipairs(callbacks) do
+    if callback then
+      if callback.eventType == EventType.DRAW then
+        Secretary.callbacks[callback.eventType][callback.drawLayer][callback.index] = nil
+      else
+        Secretary.callbacks[callback.eventType][callback.index] = nil
+      end
+    end
+  end
+  
+  -- Remove this object from the callback table, finallizing the process
+  Secretary.callbacks[object] = nil
+end
+
+
+
+
 
 
 --------------------------------------------------------------------------------
@@ -187,99 +283,137 @@ end
 
 -- Called every draw step
 function Secretary.onDraw()
-  Secretary.executeCallbacks(EventType.DRAW)
+  for l in DrawLayer.values() do
+    Secretary.executeCallbacks(Secretary.callbacks[EventType.DRAW][l])
+  end
 end
 
 -- Called every game step
 function Secretary.onStep()
-  Secretary.executeCallbacks(EventType.STEP)
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.STEP])
 end
 
 -- Called before every physics event
 function Secretary.onPrePhysics()
-  Secretary.executeCallbacks(EventType.PRE_PHYSICS)
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.PRE_PHYSICS])
 end
 
 -- CAlled every step to execute physics
 function Secretary.onPhysics()
-  Secretary.executeCallbacks(EventType.PHYSICS)
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.PHYSICS])
 end
 
 -- Called after physics event
 function Secretary.onPostPhysics()
-  Secretary.executeCallbacks(EventType.POST_PHYSICS)
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.POST_PHYSICS])
 end
 
 -- Called when a keyboard button is pressed
 function Secretary.onKeyboardDown( key, isrepeat )
-  Secretary.executeCallbacks(EventType.KEYBOARD_DOWN, key, isrepeat)
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.KEYBOARD_DOWN], key, isrepeat)
 end
 
 -- Called when a keyboard button is released
 function Secretary.onKeyboardUp( key )
-  Secretary.executeCallbacks(EventType.KEYBOARD_UP, key )
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.KEYBOARD_UP], key )
 end
 
 -- Called when a mouse button is pressed
 function Secretary.onMouseDown(x, y, button)
-  Secretary.executeCallbacks(EventType.MOUSE_DOWN, x, y, button)
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.MOUSE_DOWN], x, y, button)
 end
 
 -- Called when a mouse button is released
 function Secretary.onMouseUp(x, y, button)
-  Secretary.executeCallbacks(EventType.MOUSE_UP, x, y, button)
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.MOUSE_UP], x, y, button)
 end
 
 -- Called when the mouse is moved
 function Secretary.onMouseMove(x, y, dx, dy)
-  Secretary.executeCallbacks(EventType.MOUSE_MOVE, x, y, dx, dy)
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.MOUSE_MOVE], x, y, dx, dy)
 end
 
 -- Called when a joystick button is pressed
 function Secretary.onJoystickDown(joystick, button)
-  Secretary.executeCallbacks(EventType.JOYSTICK_DOWN, joystick, button)
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.JOYSTICK_DOWN], joystick, button)
 end
 
 -- Called when a joystick button is released
 function Secretary.onJoystickUp(joystick, button)
-  Secretary.executeCallbacks(EventType.JOYSTICK_UP, joystick, button)
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.JOYSTICK_UP], joystick, button)
 end
 
 -- Called when a joystick is connected
 function Secretary.onJoystickAdd(joystick)
-  Secretary.executeCallbacks(EventType.JOYSTICK_ADD, joystick)
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.JOYSTICK_ADD], joystick)
 end
 
 -- Called when a joystick is released
 function Secretary.onJoystickRemove(joystick)
-  Secretary.executeCallbacks(EventType.JOYSTICK_REMOVE, joystick)
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.JOYSTICK_REMOVE], joystick)
 end
+
+-- Called when the game window is resized
+function Secretary.onWindowResize(w, h)
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.WINDOW_RESIZE], w, h)
+end
+
+-- Called before draw events are executed
+function Secretary.onPreDraw()
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.PRE_DRAW])
+end
+
+-- Called when the game window is resized
+function Secretary.onWindowResize(w, h)
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.WINDOW_RESIZE], w, h)
+end
+
+-- Called before draw events are executed
+function Secretary.onPreDraw()
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.PRE_DRAW])
+end
+
 
 
 -- Generic function that executes callbacks for a given event type
 -- Handles errors and takes any variable number of arguments and passes
 -- them along to the callbacks.
-function Secretary.executeCallbacks( eventType, ... )
-  assert(EventType.fromId(eventType), "Invalid event type: "..eventType)
+function Secretary.executeCallbacks( callbacks, ... )
   local arg = {...}
   
   -- Execute all registered callbacks registered with Secretary
-  for i,callback in pairs(Secretary.callbacks[eventType]) do
+  local lastIndex = 0
+  for i = 1,callbacks.n do
+    local callback = callbacks[i]
     
-    -- Double-check that callback is real
+    -- Ensure callback exists
     if callback then
+      
+      -- Attempt to fill any gaps in table (in event of deleted objects)
+      lastIndex = lastIndex + 1
+      if lastIndex < i then
+        callbacks[lastIndex] = callback
+        callback.index = lastIndex
+        callbacks[i] = nil
+      end
+      
+      -- Convenience variables
+      local listener = callback.listener
+      local object = callback.object
       
       -- Use xpcall to prevent errors from destroying everything
       local success, errmessage = xpcall(
-        function() return callback(Secretary.objects[i], unpack(arg)) end,
+        function() return listener(object, unpack(arg)) end,
         catchError    -- function to handle errors
       )
       
       -- If error occured, display traceback and continue
       if success == false then
-        print("Error occured while handling event (type: "..eventType..")")
         print("Caused by:", errmessage)
       end
     end
   end
+  
+  -- If gaps were detected and closed, decrease size of callback table
+  callbacks.n = lastIndex
 end

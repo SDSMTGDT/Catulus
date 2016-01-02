@@ -17,10 +17,11 @@ setmetatable(Actor, {
 function Actor:_init( )
   PhysObject._init( self )
   self.horizontalStep = 0
+  self.dieSoon = false
   
   self:setAcceleration( 0, 0.25 )
   
-  Secretary.registerEvent(self, EventType.POST_PHYSICS, self.onPostPhysics)
+  Secretary.registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
 end
 
 function Actor:setHorizontalStep( s )
@@ -32,7 +33,16 @@ function Actor:getHorizontalStep( )
   return self.horizontalStep  
 end
 
+function Actor:die( reason )
+  Secretary.remove( self )
+end
+
 function Actor:onPostPhysics( )
+  if self.dieSoon then
+    Secretary.remove( self )
+    return
+  end
+  
   local list = Secretary.getCollisions( self:getBoundingBox() )
   
   for i,o in pairs(list) do
@@ -58,6 +68,15 @@ function Actor:onPostPhysics( )
   -- Get our bounding box
   local t, r, b, l = self:getBoundingBox()
   local speed = self.horizontalStep
+  
+  -- Adjust step for screen wrapping
+  if room ~= nil then
+    if speed > 0 and l + speed >= room.width then
+      speed = 0 - self.position.x - self.size.width + speed
+    elseif speed < 0 and r + speed <= 0 then
+      speed = room.width + self.size.width + (speed * 2)
+    end
+  end
   
   -- Make sure future location is clear
   local jump = true

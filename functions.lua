@@ -18,6 +18,16 @@ end
 -- Function for catching errors and returning the traceback (AKA stack trace)
 function catchError( err )
   if debug then
-    return err.."\n"..debug.traceback() 
+    return err..debug.traceback().."\n"
+  end
+end
+
+-- Convenience function for type assertions
+function assertType( value, name, t )
+  if (type(t) == "table") then
+    assertType(value, name, "table")
+    assert(instanceOf(value, t), "Unexpected type for "..name..": Object not instance of expected type")
+  elseif (type(t) == "string") then
+    assert(type(value) == t, "Unexpected type for "..name..": "..t.." expected, "..type(object).." received")
   end
 end
