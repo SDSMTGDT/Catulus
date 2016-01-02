@@ -15,33 +15,49 @@ setmetatable(Animation, {
 )
 
 
+-- Cached images
+Animation.cache = {}
+
+
 --Constructor--
 
-function Animation:_init( )
+function Animation:_init( filename )
 
   self.frames = {}
   self.xScale = 1
   self.yScale = 1  
-  self.framecount = 1
+  self.framecount = 0
   self.framequeue = 1
   self.counter = 1
   self.rate = 2
+  
+  if Animation.cache[filename] == nil then
+    Animation.load(filename)
+  end
+  
+  for i,frame in pairs(Animation.cache[filename]) do
+    self.frames[i] = frame
+    self.framecount = self.framecount + 1
+  end
+  
 end
 
-function Animation:load( filename )
+function Animation.load( filename )
+  
+  Animation.cache[filename] = {}
+  local frames = Animation.cache[filename]
   local i = 1
   local line = {}
 
   --Read animation file to find png's for a specific animation
-  file = love.filesystem.newFile("gfx/"..filename)
+  file = love.filesystem.newFile("gfx/"..filename..".txt")
   file:open("r")
 
   for line in file:lines() do
     print( line )
 	if( line ~= nil ) then
-      self.frames[i] = love.graphics.newImage( "gfx/"..line )
+      frames[i] = love.graphics.newImage( "gfx/"..line )
 	  i = i + 1
-	  self.framecount = self.framecount + 1
 	end
   end
   
@@ -57,7 +73,7 @@ function Animation:update(  )
     self.counter = 0
   end
   
-  if (self.framequeue == self.framecount) then
+  if (self.framequeue > self.framecount) then
     self.framequeue = 1
   end
   

@@ -26,13 +26,9 @@ function Player:_init( )
   self.animPointer = 1
   
   self.animations = {}
-  self.animations[1] = Animation( )
-  self.animations[2] = Animation( )
-  self.animations[3] = Animation( )
-  
-  self.animations[1]:load( "fishanim.txt" )
-  self.animations[2]:load( "fishidle.txt" )
-  self.animations[3]:load( "fishjump.txt" )
+  self.animations[1] = Animation( "fishanim" )
+  self.animations[2] = Animation( "fishidle" )
+  self.animations[3] = Animation( "fishjump" )
   
   Secretary.registerEventListener(self, self.onCollisionCheck, EventType.POST_PHYSICS)
   Secretary.registerEventListener(self, self.onStep, EventType.STEP)

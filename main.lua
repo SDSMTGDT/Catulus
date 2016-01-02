@@ -14,6 +14,14 @@ enemies = {}
 pauseMenu = nil
 
 function love.load( )
+  
+  -- Preload sprites
+  local file = love.filesystem.newFile("preload_anim.txt", "r")
+  for line in file:lines() do
+    Animation.load(line)
+  end
+  file:close()
+  
   player = Player()
   room = buildLevelFromFile("level1.txt")
   

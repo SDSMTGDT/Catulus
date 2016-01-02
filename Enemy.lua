@@ -19,8 +19,7 @@ function Enemy:_init( )
   Actor._init( self )
   self.velocity.max = {x = 2}
   
-  self.anim = Animation( )
-  self.anim:load( "catanim.txt" )  
+  self.anim = Animation( "catanim" )
   
   self:setSize(32, 32)
   Secretary.registerEventListener(self, self.onStep, EventType.STEP)
