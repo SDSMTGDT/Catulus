@@ -32,10 +32,10 @@ function Room:_init( )
   -- internal list of owned objects
   self.objects = {}
   
-  Secretary.registerEventListener(self, self.adjustCanvas, EventType.PRE_DRAW)
-  Secretary.registerEventListener(self, self.onWindowResize, EventType.WINDOW_RESIZE)
-  Secretary.registerEventListener(self, self.drawBars, EventType.DRAW)
-  Secretary.setDrawLayer(self, DrawLayer.OVERLAY)
+  rootSecretary:registerEventListener(self, self.adjustCanvas, EventType.PRE_DRAW)
+  rootSecretary:registerEventListener(self, self.onWindowResize, EventType.WINDOW_RESIZE)
+  rootSecretary:registerEventListener(self, self.drawBars, EventType.DRAW)
+  rootSecretary:setDrawLayer(self, DrawLayer.OVERLAY)
 end
 
 --

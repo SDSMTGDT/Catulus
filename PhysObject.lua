@@ -50,9 +50,9 @@ function PhysObject:_init( )
   self.acceleration.z = 0
   
   -- Register with object manager
-  Secretary.registerPhysObject(self)
-  Secretary.registerEventListener(self, self.update, EventType.PHYSICS)
-  Secretary.registerEventListener(self, self.draw, EventType.DRAW)
+  gameSecretary:registerPhysObject(self)
+  gameSecretary:registerEventListener(self, self.update, EventType.PHYSICS)
+  gameSecretary:registerEventListener(self, self.draw, EventType.DRAW)
 end
 
 --

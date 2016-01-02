@@ -22,7 +22,7 @@ function Enemy:_init( )
   self.anim = Animation( "catanim" )
   
   self:setSize(32, 32)
-  Secretary.registerEventListener(self, self.onStep, EventType.STEP)
+  gameSecretary:registerEventListener(self, self.onStep, EventType.STEP)
 end
 
 function Enemy:moveLeft()
@@ -40,7 +40,7 @@ end
 function Enemy:onStep()
   local speed = self:getHorizontalStep()
   local t, r, b, l = self:getBoundingBox()
-  local list = Secretary.getCollisions( t, r+speed, b, l+speed )
+  local list = gameSecretary:getCollisions( t, r+speed, b, l+speed )
   
   for i,o in pairs(list) do
     if o ~= self and instanceOf(o, Block) and o:collidesWith(t, r+speed, b, l+speed) then

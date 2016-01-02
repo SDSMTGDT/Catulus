@@ -21,7 +21,7 @@ function Actor:_init( )
   
   self:setAcceleration( 0, 0.25 )
   
-  Secretary.registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
+  gameSecretary:registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
 end
 
 function Actor:setHorizontalStep( s )
@@ -34,16 +34,16 @@ function Actor:getHorizontalStep( )
 end
 
 function Actor:die( reason )
-  Secretary.remove( self )
+  gameSecretary:remove( self )
 end
 
 function Actor:onPostPhysics( )
   if self.dieSoon then
-    Secretary.remove( self )
+    gameSecretary:remove( self )
     return
   end
   
-  local list = Secretary.getCollisions( self:getBoundingBox() )
+  local list = gameSecretary:getCollisions( self:getBoundingBox() )
   
   for i,o in pairs(list) do
     if self ~= o and instanceOf(o, Block) and self:collidesWith(o:getBoundingBox()) then
@@ -80,7 +80,7 @@ function Actor:onPostPhysics( )
   
   -- Make sure future location is clear
   local jump = true
-  list = Secretary.getCollisions( t, r+speed, b, l+speed )
+  list = gameSecretary:getCollisions( t, r+speed, b, l+speed )
   
   for i,o in pairs(list) do
     if self ~= o and instanceOf(o, Block) and o:collidesWith(t, r+speed, b, l+speed) then
