@@ -59,6 +59,8 @@ function Enemy:draw()
   local x, y = self:getPosition()
 --  local w, h = self:getSize()
 --  love.graphics.rectangle( "fill", x, y, w, h )
+  
+  love.graphics.setColor(255, 255, 255)
   self.anim:draw( x , y )
   
 end

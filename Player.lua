@@ -92,7 +92,11 @@ function Player:onKeyPress( key, isrepeat )
   
   -- Shoot
   if key == "j" then
-    local bullet = Bullet( self.position.x, self.position.y, 0, 16 )
+    if self.animations[self.animPointer].xScale > 0 then
+      Bullet( self.position.x, self.position.y + self.size.height/2, 0, -16 )
+    elseif self.animations[self.animPointer].xScale < 0 then
+      Bullet( self.position.x + self.size.width, self.position.y + self.size.height/2, 0, 16 )
+    end
   end
 end
 
@@ -100,7 +104,8 @@ end
 function Player:draw( )
   local x, y = self:getPosition( )
   
-  -- animate 
+  -- Draw selected animation
+  love.graphics.setColor(255, 255, 255)
   self.animations[self.animPointer]:draw( x+self.size.width/2, y, self.size.width/2 )
 end
 
