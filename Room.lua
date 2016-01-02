@@ -28,6 +28,14 @@ function Room:_init( )
   self.offset = {}
   self.offset.x = 0
   self.offset.y = 0
+  
+  -- internal list of owned objects
+  self.objects = {}
+  
+  Secretary.registerEventListener(self, self.adjustCanvas, EventType.PRE_DRAW)
+  Secretary.registerEventListener(self, self.onWindowResize, EventType.WINDOW_RESIZE)
+  Secretary.registerEventListener(self, self.drawBars, EventType.DRAW)
+  Secretary.setDrawLayer(self, DrawLayer.OVERLAY)
 end
 
 --
@@ -63,7 +71,7 @@ end
 function Room:drawingPoint(x, y)
   x = x or 0
   y = y or 0
-  return self.offset.x + (x * self.scale), self.offset.y + (y * self.scale)
+  return (x - self.offset.x) / self.scale, (y - self.offset.y) / self.scale
 end
 
 function Room:drawingScale(w, h)
@@ -81,5 +89,17 @@ end
 
 -- Draw black bars surrounding the room
 function Room:drawBars( )
+  if self.offset.x == 0 and self.offset.y == 0 then return end
   
+  love.graphics.setColor(200, 200, 255)
+  
+  if self.offset.x > 0 then
+    local w = self.offset.x / self.scale
+    love.graphics.rectangle("fill", -w, 0, w, self.height)
+    love.graphics.rectangle("fill", self.width, 0, w, self.height)
+  elseif self.offset.y > 0 then
+    local h = self.offset.y / self.scale
+    love.graphics.rectangle("fill", 0, -h, self.width, h)
+    love.graphics.rectangle("fill", 0, self.height, self.width, h)
+  end
 end

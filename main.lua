@@ -4,10 +4,13 @@ require "Player"
 require "Block"
 require "Enemy"
 require "LevelBuilder"
+require "Button"
+require "Menu"
 
 player = Player()
 room = nil
 enemies = {}
+pauseMenu = nil
 
 function love.load( )
   room = buildLevelFromFile("level1.txt")
@@ -18,7 +21,18 @@ function love.load( )
   Secretary.registerEventListener({}, function(_, key, isrepeat)
     --Escape
     if key == "escape" then
-      love.event.quit()
+      if pauseMenu == nil then
+        pauseMenu = Menu.createPauseMenu()
+        
+        local destroy = pauseMenu.destroy
+        pauseMenu.destroy = function(self)
+          pauseMenu = nil
+          destroy(self)
+        end
+      else
+        pauseMenu:destroy()
+        pauseMenu = nil
+      end
     elseif key == "return" then
       local enemy = Enemy()
       table.insert(enemies, enemy)
@@ -29,7 +43,7 @@ function love.load( )
         enemy:moveRight()
       end
 
-      print("Objects: " .. Secretary.tree:getSize() .. "\n")
+      print("Objects: "..Secretary.tree:getSize())
     elseif key == "backspace" then
       clearEnemies()
     end

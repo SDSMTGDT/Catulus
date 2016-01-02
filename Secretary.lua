@@ -158,8 +158,8 @@ function Secretary.registerEventListener( object, listener, eventType )
   
   -- Verify arguments
   assertType(object, "object", "table")
-  assert (eventType ~= nil, "Argument(s) cannot be nil")
-  assert (listener ~= nil, "Argument(s) cannot be nil")
+  assert (listener ~= nil, "Argument 'listener' cannot be nil")
+  assert (eventType ~= nil, "Argument 'eventType' cannot be nil")
   eventType = EventType.fromId(eventType)
   assert (eventType ~= nil, "eventType must be a valid EventType")
   
@@ -363,6 +363,16 @@ function Secretary.onPreDraw()
   Secretary.executeCallbacks(Secretary.callbacks[EventType.PRE_DRAW])
 end
 
+-- Called when the game window is resized
+function Secretary.onWindowResize(w, h)
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.WINDOW_RESIZE], w, h)
+end
+
+-- Called before draw events are executed
+function Secretary.onPreDraw()
+  Secretary.executeCallbacks(Secretary.callbacks[EventType.PRE_DRAW])
+end
+
 
 
 -- Generic function that executes callbacks for a given event type
@@ -399,7 +409,6 @@ function Secretary.executeCallbacks( callbacks, ... )
       
       -- If error occured, display traceback and continue
       if success == false then
-        print("Error occured while handling event (type: "..eventType..")")
         print("Caused by:", errmessage)
       end
     end
