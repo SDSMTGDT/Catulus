@@ -5,9 +5,10 @@ require "Enemy"
 require "QuadTree"
 require "Animation"
 
-player = Player()
+player = nil
 
 function love.load( )
+  player = Player()
   print(player.__index)
   
   -- Starting position & gravity

@@ -56,7 +56,7 @@ function Player:onStep( )
 	self.animations[1].xScale = 1
 	self.animations[2].xScale = 1
 	self.animations[3].xScale = 1
-  elseif self.velocity.y ~= 0 
+  elseif self.velocity.y ~= 0 then
 	self.animPointer = 3
   else
 	self.animPointer = 2

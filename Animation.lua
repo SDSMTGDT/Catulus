@@ -33,17 +33,17 @@ function Animation:load( filename )
   local line = {}
 
   --Read animation file to find png's for a specific animation
-  file = io.open("EasyGame1/gfx/" .. filename, "r")
+  file = love.filesystem.newFile("gfx/"..filename)
+  file:open("r")
 
-  repeat
-    line = file:read("*l")
-	print( line )
+  for line in file:lines() do
+    print( line )
 	if( line ~= nil ) then
-      self.frames[i] = love.graphics.newImage( "/gfx/"..line )
+      self.frames[i] = love.graphics.newImage( "gfx/"..line )
 	  i = i + 1
 	  self.framecount = self.framecount + 1
 	end
-  until( line == nil )
+  end
   
   file:close()
  
