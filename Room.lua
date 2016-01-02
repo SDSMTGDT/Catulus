@@ -91,7 +91,7 @@ end
 function Room:drawBars( )
   if self.offset.x == 0 and self.offset.y == 0 then return end
   
-  love.graphics.setColor(200, 200, 255)
+  love.graphics.setColor(0, 0, 0)
   
   if self.offset.x > 0 then
     local w = self.offset.x / self.scale

@@ -1,4 +1,5 @@
 require "Actor"
+require "Animation"
 
 Enemy = {}
 Enemy.__index = Enemy
@@ -17,6 +18,8 @@ setmetatable(Enemy, {
 function Enemy:_init( )
   Actor._init( self )
   self.velocity.max = {x = 2}
+  
+  self.anim = Animation( "catanim" )
   
   self:setSize(32, 32)
   gameSecretary:registerEventListener(self, self.onStep, EventType.STEP)
@@ -45,11 +48,18 @@ function Enemy:onStep()
       break
     end
   end
+  
+  self.anim:update( )
+  
 end
 
 function Enemy:draw()
-  love.graphics.setColor( 255, 0, 0 )
+--  love.graphics.setColor( 255, 0, 0 )
   local x, y = self:getPosition()
-  local w, h = self:getSize()
-  love.graphics.rectangle( "fill", x, y, w, h )
+--  local w, h = self:getSize()
+--  love.graphics.rectangle( "fill", x, y, w, h )
+  
+  love.graphics.setColor(255, 255, 255)
+  self.anim:draw( x , y )
+  
 end
