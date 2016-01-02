@@ -24,10 +24,10 @@ function Player:_init( )
   self.image = love.graphics.newImage("gfx/character.png")
   self:setSize(32, 48)
   
-  Secretary.registerEventListener(self, self.onCollisionCheck, EventType.POST_PHYSICS)
-  Secretary.registerEventListener(self, self.onStep, EventType.STEP)
-  Secretary.registerEventListener(self, self.onKeyPress, EventType.KEYBOARD_DOWN)
-  Secretary.setDrawLayer(self, DrawLayer.SPOTLIGHT)
+  gameSecretary:registerEventListener(self, self.onCollisionCheck, EventType.POST_PHYSICS)
+  gameSecretary:registerEventListener(self, self.onStep, EventType.STEP)
+  gameSecretary:registerEventListener(self, self.onKeyPress, EventType.KEYBOARD_DOWN)
+  gameSecretary:setDrawLayer(self, DrawLayer.SPOTLIGHT)
   
 end
 
@@ -48,7 +48,7 @@ function Player:onKeyPress( key, isrepeat )
   if key == " " then
     
     local ground = false
-    local others = Secretary.getCollisions( self:getBoundingBox( 0, 1, 0 ) )
+    local others = gameSecretary:getCollisions( self:getBoundingBox( 0, 1, 0 ) )
     
     for _, other in pairs(others) do
       if instanceOf(other, Block) then
@@ -82,7 +82,7 @@ end
 function Player:onCollisionCheck( )
   
   local t, r, b, l = self:getBoundingBox( )
-  local others = Secretary.getCollisions( t, r, b, l )
+  local others = gameSecretary:getCollisions( t, r, b, l )
   for _, other in pairs(others) do
     
     -- Check for collision with enemy
@@ -100,7 +100,7 @@ function Player:onCollisionCheck( )
         end
         
         -- Destroy the enemy
-        Secretary.remove( other )
+        gameSecretary:remove( other )
       end
     end
   end

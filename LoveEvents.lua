@@ -7,53 +7,53 @@ function love.update( dt )
   while love.timer.getTime() < targetTime do end
   
   -- Call step-based events
-  Secretary.onPrePhysics()
-  Secretary.onPhysics()
-  Secretary.onPostPhysics()
-  Secretary.onStep()
+  rootSecretary:onPrePhysics()
+  rootSecretary:onPhysics()
+  rootSecretary:onPostPhysics()
+  rootSecretary:onStep()
 end
 
 function love.resize( w, h )
-  Secretary.onWindowResize(w, h)
+  rootSecretary:onWindowResize(w, h)
 end
 
 function love.draw( )
-  Secretary.onPreDraw()
-  Secretary.onDraw()
+  rootSecretary:onPreDraw()
+  rootSecretary:onDraw()
 end
 
 function love.keypressed( key, isrepeat )
-  Secretary.onKeyboardDown(key, isrepeat)
+  rootSecretary:onKeyboardDown(key, isrepeat)
 end
 
 function love.keyreleased( key )
-  Secretary.onKeyboardUp(key)
+  rootSecretary:onKeyboardUp(key)
 end
 
 function love.mousepressed( x, y, button )
-  Secretary.onMouseDown(x, y, button)
+  rootSecretary:onMouseDown(x, y, button)
 end
 
 function love.mousereleased( x, y, button )
-  Secretary.onMouseUp(x, y, button)
+  rootSecretary:onMouseUp(x, y, button)
 end
 
 function love.mousemoved( x, y, dx, dy )
-  Secretary.onMouseMove(x, y, dx, dy)
+  rootSecretary:onMouseMove(x, y, dx, dy)
 end
 
 function love.joystickpressed( joystick, button )
-  Secretary.onJoystickDown(joystick, button)
+  rootSecretary:onJoystickDown(joystick, button)
 end
 
 function love.joystickreleased( joystick, button )
-  Secretary.onJoystickUp(joystick, button)
+  rootSecretary:onJoystickUp(joystick, button)
 end
 
 function love.joystickadded( joystick )
-  Secretary.onJoystickAdded(joystick)
+  rootSecretary:onJoystickAdded(joystick)
 end
 
 function love.joystickremoved( joystick )
-  Secretary.onJoystickRemoved(joystick)
+  rootSecretary:onJoystickRemoved(joystick)
 end
