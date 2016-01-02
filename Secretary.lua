@@ -154,6 +154,7 @@ function Secretary:registerChildSecretary( child )
   
   -- Validate parameters
   assertType(child, Secretary)
+  assert(child ~= self, "A Secretary cannot register itself as a child, unless you're a sadist and WANT infinite loops")
   
   -- Register event methods of child with self
   self:registerEventListener(child, child.onDraw, EventType.DRAW)
