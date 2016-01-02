@@ -1,4 +1,5 @@
 require "Actor"
+require "Animation"
 require "Enemy"
 require "Block"
 require "Bullet"
@@ -21,8 +22,13 @@ function Player:_init( )
   Actor._init( self )
   
   self.velocity.max = {x = 4, y = -1}
-  self.image = love.graphics.newImage("gfx/character.png")
   self:setSize(32, 48)
+  self.animPointer = 1
+  
+  self.animations = {}
+  self.animations[1] = Animation( "fishanim" )
+  self.animations[2] = Animation( "fishidle" )
+  self.animations[3] = Animation( "fishjump" )
   
   gameSecretary:registerEventListener(self, self.onCollisionCheck, EventType.POST_PHYSICS)
   gameSecretary:registerEventListener(self, self.onStep, EventType.STEP)
@@ -40,6 +46,24 @@ function Player:onStep( )
   else
     self:setHorizontalStep( 0 )
   end
+  
+  if self.horizontalStep > 0 then
+    self.animPointer = 1
+	self.animations[1].xScale = -1
+	self.animations[2].xScale = -1
+	self.animations[3].xScale = -1
+  elseif self.horizontalStep < 0 then
+    self.animPointer = 1
+	self.animations[1].xScale = 1
+	self.animations[2].xScale = 1
+	self.animations[3].xScale = 1
+  elseif self.velocity.y ~= 0 then
+	self.animPointer = 3
+  else
+	self.animPointer = 2
+  end
+  
+  self.animations[self.animPointer]:update( )
   
 end
 
@@ -64,19 +88,21 @@ function Player:onKeyPress( key, isrepeat )
   
   -- Shoot
   if key == "j" then
-    local bullet = Bullet( self.position.x, self.position.y, 0, 16 )
+    if self.animations[self.animPointer].xScale > 0 then
+      Bullet( self.position.x, self.position.y + self.size.height/2, 0, -16 )
+    elseif self.animations[self.animPointer].xScale < 0 then
+      Bullet( self.position.x + self.size.width, self.position.y + self.size.height/2, 0, 16 )
+    end
   end
 end
 
 
 function Player:draw( )
   local x, y = self:getPosition( )
-  love.graphics.setColor( 255, 255, 255 )
   
-  -- animate
-  love.graphics.draw(self.image, (x+32), y, rotation, -1, 1)
-
-  love.graphics.rectangle( "fill", x, y+32, 32, 16 )
+  -- Draw selected animation
+  love.graphics.setColor(255, 255, 255)
+  self.animations[self.animPointer]:draw( x+self.size.width/2, y, self.size.width/2 )
 end
 
 function Player:onCollisionCheck( )
@@ -106,5 +132,4 @@ function Player:onCollisionCheck( )
   end
   
   Actor.onPostPhysics( self )
-  
 end

@@ -3,6 +3,7 @@ require "LoveEvents"
 require "Player"
 require "Block"
 require "Enemy"
+require "Animation"
 require "LevelBuilder"
 require "Button"
 require "Menu"
@@ -16,6 +17,14 @@ gameSecretary = Secretary()
 rootSecretary:registerChildSecretary(gameSecretary)
 
 function love.load( )
+  
+  -- Preload sprites
+  local file = love.filesystem.newFile("preload_anim.txt", "r")
+  for line in file:lines() do
+    Animation.load(line)
+  end
+  file:close()
+  
   player = Player()
   room = buildLevelFromFile("level1.txt")
   

@@ -1,0 +1,4 @@
+catanim
+fishanim
+fishidle
+fishjump
