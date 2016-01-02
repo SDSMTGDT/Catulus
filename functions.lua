@@ -24,5 +24,10 @@ end
 
 -- Convenience function for type assertions
 function assertType( value, name, t )
-  assert(type(value) == t, "Unexpected type for "..name..": "..t.." expected, "..type(object).." received")
+  if (type(t) == "table") then
+    assertType(value, name, "table")
+    assert(instanceOf(value, t), "Unexpected type for "..name..": Object not instance of expected type")
+  elseif (type(t) == "string") then
+    assert(type(value) == t, "Unexpected type for "..name..": "..t.." expected, "..type(object).." received")
+  end
 end

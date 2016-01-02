@@ -1,6 +1,7 @@
 require "Secretary"
 
 function love.update( dt )
+  
   -- Regulate the framerate to 60 fps
   local targetTime = love.timer.getTime() + (1/60 - dt)
   while love.timer.getTime() < targetTime do end
