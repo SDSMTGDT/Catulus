@@ -4,29 +4,36 @@ function buildLevelFromFile(filename)
   assert(type(filename) == "string", "Unexpected argument type expected")
   
   --local file = io.open(love.filesystem.getSourceBaseDirectory().."/"..love.filesystem.getIdentity().."/levels/"..filename, "r")
-  local file = io.open("levels/" .. filename, "r")
+  local file = love.filesystem.newFile("levels/" .. filename)
+  file:open("r")
   
   local width = 0
   local height = 0
   
   local map = {}
   local room = Room()
-
-  width = tonumber(file:read())
-  height = tonumber(file:read())
   
-  for i = 1, height do
-    map[i] = {}
-    for j = 1, width do
-      map[i][j] = file:read(1)
+  local linenum = 0
+  for line in file:lines() do
+    linenum = linenum + 1
+    
+    if linenum == 1 then
+      width = tonumber(line)
+    elseif linenum == 2 then
+      height = tonumber(line)
+    else
+      local i = linenum - 2
+      map[i] = {}
+      for j = 1,width do
+        map[i][j] = line:sub(j, j)
+      end
     end
-    file:read()
   end
   
-  file:close(file)
+  file:close()
   
   -- Build the level
-  love.window.setMode( width * 16, height * 16, {resizable=true} )
+  love.window.setMode(width * 16, height * 16, {resizable=true})
   room:setDimensions(width * 16, height * 16)
   
   for i = 1, height do
