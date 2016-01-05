@@ -2,28 +2,59 @@ require "Room"
 
 function buildLevelFromFile(filename)
   assert(type(filename) == "string", "Unexpected argument type expected")
+   
+  --local file = love.filesystem.newFile(love.filesystem.getSourceBaseDirectory().."/"..love.filesystem.getIdentity().."/levels/"..filename )
   
-  --local file = io.open(love.filesystem.getSourceBaseDirectory().."/"..love.filesystem.getIdentity().."/levels/"..filename, "r")
-  local file = io.open("levels/" .. filename, "r")
+  local file = love.filesystem.newFile( "levels/" .. filename )
   
   local width = 0
   local height = 0
-  
   local map = {}
+  local line = {}
   local room = Room()
-
-  width = tonumber(file:read())
-  height = tonumber(file:read())
+  local character
   
-  for i = 1, height do
-    map[i] = {}
-    for j = 1, width do
-      map[i][j] = file:read(1)
+  
+  
+  file:open( "r" )
+
+  for line in file:lines( ) do
+    if i == 1 then
+	  width = tonumber( line )
+	  i = i + 1
+	elseif i == 2 then
+	  height = tonumber( line )
+	  i = i + 1
+	else
+      break
     end
-    file:read()
+  end	
+  
+  i = 1
+  
+  for line in file:lines( ) do
+    if( i <= 2 ) then
+	  i = i + 1
+	elseif( i <= height + 2 ) then
+	  map[i-2] = {}
+	  for j = 1, width do
+	    character = string.sub( line, j, j )
+	    map[i-2][j] = character
+	  end
+	  i = i + 1
+	end
   end
   
-  file:close(file)
+  
+--  for i = 1, height do
+--    map[i] = {}
+--    for j = 1, width do
+--      map[i][j] = tonumber( file:read(1) )
+--    end
+--    file:read()
+--  end
+  
+  file:close( )
   
   -- Build the level
   love.window.setMode( width * 16, height * 16, {resizable=true} )
