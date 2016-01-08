@@ -13,9 +13,8 @@ function buildLevelFromFile(filename)
   local line = {}
   local room = Room()
   local character
-  
-  
-  
+  local i = 1
+    
   file:open( "r" )
 
   for line in file:lines( ) do
