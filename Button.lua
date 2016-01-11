@@ -92,7 +92,7 @@ function Button:onKeyboardUp( key )
   if self.selected and key == "return" then
     if self.down then
       self.down = false
-      onClick()
+      self:onClick()
     end
   end
 end
