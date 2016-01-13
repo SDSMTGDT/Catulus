@@ -28,7 +28,8 @@ function Player:_init( )
   self.animations = {}
   self.animations[1] = Animation( "fishanim" )
   self.animations[2] = Animation( "fishidle" )
-  self.animations[3] = Animation( "fishjump" )
+  self.animations[3] = Animation( "fishfall" )
+  self.animations[4] = Animation( "fishrise" )
   
   gameSecretary:registerEventListener(self, self.onCollisionCheck, EventType.POST_PHYSICS)
   gameSecretary:registerEventListener(self, self.onStep, EventType.STEP)
@@ -48,17 +49,29 @@ function Player:onStep( )
   end
   
   if self.horizontalStep > 0 then
-    self.animPointer = 1
+    if self.velocity.y > 0 then
+	  self.animPointer = 3
+	else
+	  self.animPointer = 1
+	end
 	self.animations[1].xScale = -1
 	self.animations[2].xScale = -1
 	self.animations[3].xScale = -1
+	self.animations[4].xScale = -1
   elseif self.horizontalStep < 0 then
-    self.animPointer = 1
+    if self.velocity.y < 0 then
+	  self.animPointer = 4
+	else
+	  self.animPointer = 1
+	end
 	self.animations[1].xScale = 1
 	self.animations[2].xScale = 1
 	self.animations[3].xScale = 1
-  elseif self.velocity.y ~= 0 then
+	self.animations[4].xScale = 1
+  elseif self.velocity.y > 0 then
 	self.animPointer = 3
+  elseif self.velocity.y < 0 then
+    self.animPointer = 4
   else
 	self.animPointer = 2
   end
