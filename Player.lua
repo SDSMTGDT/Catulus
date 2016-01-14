@@ -48,32 +48,42 @@ function Player:onStep( )
     self:setHorizontalStep( 0 )
   end
   
+  -- Make sprite face correct direction
   if self.horizontalStep > 0 then
-    if self.velocity.y > 0 then
-	  self.animPointer = 3
-	else
-	  self.animPointer = 1
-	end
 	self.animations[1].xScale = -1
 	self.animations[2].xScale = -1
 	self.animations[3].xScale = -1
 	self.animations[4].xScale = -1
   elseif self.horizontalStep < 0 then
-    if self.velocity.y < 0 then
-	  self.animPointer = 4
-	else
-	  self.animPointer = 1
-	end
 	self.animations[1].xScale = 1
 	self.animations[2].xScale = 1
 	self.animations[3].xScale = 1
 	self.animations[4].xScale = 1
-  elseif self.velocity.y > 0 then
-	self.animPointer = 3
-  elseif self.velocity.y < 0 then
-    self.animPointer = 4
+  end
+  
+  local list = gameSecretary:getCollisions(self:getBoundingBox(0, 1))
+  
+  local midair = true
+  for _,other in pairs(list) do
+    if instanceOf(other, Block) then
+      midair = false
+      break
+    end
+  end
+  
+  -- Switch animation
+  if midair  == true then
+    if self.velocity.y < 0 then
+      self.animPointer = 4
+    else
+      self.animPointer = 3
+    end
   else
-	self.animPointer = 2
+    if self.horizontalStep == 0 then
+      self.animPointer = 2
+    else
+      self.animPointer = 1
+    end
   end
   
   self.animations[self.animPointer]:update( )
