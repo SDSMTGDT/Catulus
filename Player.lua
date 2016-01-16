@@ -129,7 +129,6 @@ function Player:draw( )
 end
 
 function Player:onCollisionCheck( )
-  
   local t, r, b, l = self:getBoundingBox( )
   local others = gameSecretary:getCollisions( t, r, b, l )
   for _, other in pairs(others) do
@@ -154,5 +153,4 @@ function Player:onCollisionCheck( )
     end
   end
   
-  Actor.onPostPhysics( self )
 end

@@ -43,7 +43,7 @@ function Enemy:onStep()
   local list = gameSecretary:getCollisions( t, r+speed, b, l+speed )
   
   for i,o in pairs(list) do
-    if o ~= self and instanceOf(o, Block) and o:collidesWith(t, r+speed, b, l+speed) then
+    if o ~= self and instanceOf(o, Block) then
       self:setHorizontalStep(-speed)
       break
     end

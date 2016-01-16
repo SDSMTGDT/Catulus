@@ -46,7 +46,7 @@ function Actor:onPostPhysics( )
   local list = gameSecretary:getCollisions( self:getBoundingBox() )
   
   for i,o in pairs(list) do
-    if self ~= o and instanceOf(o, Block) and self:collidesWith(o:getBoundingBox()) then
+    if self ~= o and instanceOf(o, Block) then
       
       -- Store other's bounding box
       local t, r, b, l = o:getBoundingBox()
@@ -84,7 +84,7 @@ function Actor:onPostPhysics( )
   list = gameSecretary:getCollisions( t, r+speed, b, l+speed )
   
   for i,o in pairs(list) do
-    if self ~= o and instanceOf(o, Block) and o:collidesWith(t, r+speed, b, l+speed) then
+    if self ~= o and instanceOf(o, Block) then
         
         -- We're going to collide with the environment; cancel movement
       jump = false
