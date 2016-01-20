@@ -31,6 +31,8 @@ function Player:_init( )
   self.animations[3] = Animation( "fishfall" )
   self.animations[4] = Animation( "fishrise" )
   
+  self.animations[2].rate = 6
+  
   gameSecretary:registerEventListener(self, self.onCollisionCheck, EventType.POST_PHYSICS)
   gameSecretary:registerEventListener(self, self.onStep, EventType.STEP)
   gameSecretary:registerEventListener(self, self.onKeyPress, EventType.KEYBOARD_DOWN)
