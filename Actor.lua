@@ -70,8 +70,8 @@ function Actor:onPostPhysics( )
   -- ****************************************************************************
   
   -- Get our bounding box again
-  t, r, b, l = self:getBoundingBox(speed, 0, 0)
   local speed = self.horizontalStep
+  t, r, b, l = self:getBoundingBox(speed, 0, 0)
   
   -- Adjust step for screen wrapping
   if room ~= nil then
