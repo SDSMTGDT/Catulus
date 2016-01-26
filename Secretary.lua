@@ -144,19 +144,26 @@ function Secretary:getCollisions( top, right, bottom, left )
   assert(top and right and bottom and left, "parameter(s) cannot be nil")
   
   -- Initialize variables
-  local list = {}
+  local list = {n = 0}
   local i = 1
   
   -- Retrieve list of all possible collisions from tree
   self.tree:retrieve( list, top, right, bottom, left )
   
   -- Remove objects from list that we do not collide with
-  while i <= #list do
+  local lastIndex = 1
+  while list[i] ~= nil do
     if list[i]:collidesWith(top, right, bottom, left) == true then
-      i = i + 1
+      if i ~= lastIndex then
+        list[lastIndex] = list[i]
+        list[i] = nil
+      end
+      list.n = list.n + 1
+      lastIndex = lastIndex + 1
     else
-      table.remove(list, i)
+      list[i] = nil
     end
+    i = i + 1
   end
   
   -- Return our compiled list
