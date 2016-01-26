@@ -80,13 +80,11 @@ function Player:onKeyPress( key, isrepeat )
   if key == " " then
     
     local ground = false
-    local others = gameSecretary:getCollisions( self:getBoundingBox( 0, 1, 0 ) )
+    local t, r, b, l = self:getBoundingBox(0, 1, 0)
+    local others = gameSecretary:getCollisions( t, r, b, l, Block )
     
-    for _, other in pairs(others) do
-      if instanceOf(other, Block) then
-        ground = true
-        break
-      end
+    if table.getn(others) > 0 then
+      ground = true
     end
     
     if ground then
@@ -119,26 +117,22 @@ end
 function Player:onCollisionCheck( )
   
   local t, r, b, l = self:getBoundingBox( )
-  local others = gameSecretary:getCollisions( t, r, b, l )
-  for _, other in pairs(others) do
+  local others = gameSecretary:getCollisions( t, r, b, l, Enemy )
+  for _, other in ipairs(others) do
     
-    -- Check for collision with enemy
-    if instanceOf(other, Enemy) then
-      
-      -- Test for goomba stomp
-      if self.velocity.y > other.velocity.y and b < other.position.y + other.size.height then
-        
-        -- Bounce off enemy's head, jump higher if user is holding down jump button
-        self:setPosition( self.position.x, other.position.y - self.size.height, self.position.z )
-        if love.keyboard.isDown( " " ) then
-          self:setVelocity( self.velocity.x, other.velocity.y - 8, self.velocity.z )
-        else
-          self:setVelocity( self.velocity.x, other.velocity.y - 4, self.velocity.z )
-        end
-        
-        -- Destroy the enemy
-        gameSecretary:remove( other )
+    -- Test for goomba stomp
+    if self.velocity.y > other.velocity.y and b < other.position.y + other.size.height then
+
+      -- Bounce off enemy's head, jump higher if user is holding down jump button
+      self:setPosition( self.position.x, other.position.y - self.size.height, self.position.z )
+      if love.keyboard.isDown( " " ) then
+        self:setVelocity( self.velocity.x, other.velocity.y - 8, self.velocity.z )
+      else
+        self:setVelocity( self.velocity.x, other.velocity.y - 4, self.velocity.z )
       end
+
+      -- Destroy the enemy
+      gameSecretary:remove( other )
     end
   end
   
