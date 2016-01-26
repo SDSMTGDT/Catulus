@@ -39,14 +39,11 @@ end
 
 function Enemy:onStep()
   local speed = self:getHorizontalStep()
-  local t, r, b, l = self:getBoundingBox()
-  local list = gameSecretary:getCollisions( t, r+speed, b, l+speed )
+  local t, r, b, l = self:getBoundingBox(speed, 0, 0)
+  local list = gameSecretary:getCollisions( t, r, b, l, Block )
   
-  for i,o in pairs(list) do
-    if o ~= self and instanceOf(o, Block) then
-      self:setHorizontalStep(-speed)
-      break
-    end
+  if table.getn(list) > 0 then
+    self:setHorizontalStep(-speed)
   end
   
   self.anim:update( )

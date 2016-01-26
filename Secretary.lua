@@ -30,6 +30,8 @@ function Secretary:_init( )
   self.paused = false
   self.objectNodes = {}  -- table containing direct references to object quadtree nodes
   self.callbacks = {}    -- table containing all callbacks
+  self.queue = {n = 0}
+  self.postpone = false
 
   -- Prepare callback lists
   for t in EventType.values() do
@@ -65,6 +67,16 @@ function Secretary:registerPhysObject( object )
   assert(instanceOf(object, PhysObject), "Argument must be an instance of PhysObject")
   assert(self.objectNodes[object] == nil, "PhysObject already registered with the secretary")
   
+  -- Postpone if processing events
+  if self.postpone then
+    self.queue.n = self.queue.n + 1
+    self.queue[self.queue.n] = {
+      func = self.registerPhysObject,
+      args = {self, object}
+    }
+    return
+  end
+  
   -- Store full node path
   self.objectNodes[object] = self.tree:insert(object)
 end
@@ -79,6 +91,16 @@ function Secretary:unregisterPhysObject( object )
   
   -- Validate arguments
   assert(instanceOf(object, PhysObject), "Argument must be an instance of PhysObject")
+  
+  -- Postpone if processing events
+  if self.postpone then
+    self.queue.n = self.queue.n + 1
+    self.queue[self.queue.n] = {
+      func = self.unregisterPhysObject,
+      args = {self, object}
+    }
+    return
+  end
   
   -- Remove object from quadtree
   self.tree:remove(object, self.objectNodes[object])
@@ -118,23 +140,33 @@ end
 --   Table containing indexed array of objects whose bounding boxes intersect
 --     with the supplied coordinates.
 --
-function Secretary:getCollisions( top, right, bottom, left )
+function Secretary:getCollisions( top, right, bottom, left, front, back, ... )
+  local arg = {...}
   assert(top and right and bottom and left, "parameter(s) cannot be nil")
+  
+  if type(front) == "table" then table.insert(arg, front) end
+  if type(back) == "table" then table.insert(arg, back) end
   
   -- Initialize variables
   local list = {}
   local i = 1
   
   -- Retrieve list of all possible collisions from tree
-  self.tree:retrieve( list, top, right, bottom, left )
+  self.tree:retrieve( list, top, right, bottom, left, unpack(arg) )
   
   -- Remove objects from list that we do not collide with
-  while i <= #list do
+  local lastIndex = 1
+  while list[i] ~= nil do
     if list[i]:collidesWith(top, right, bottom, left) == true then
-      i = i + 1
+      if i ~= lastIndex then
+        list[lastIndex] = list[i]
+        list[i] = nil
+      end
+      lastIndex = lastIndex + 1
     else
-      table.remove(list, i)
+      list[i] = nil
     end
+    i = i + 1
   end
   
   -- Return our compiled list
@@ -200,6 +232,16 @@ function Secretary:registerEventListener( object, listener, eventType )
   eventType = EventType.fromId(eventType)
   assert (eventType ~= nil, "eventType must be a valid EventType")
   
+  -- Postpone if processing events
+  if self.postpone then
+    self.queue.n = self.queue.n + 1
+    self.queue[self.queue.n] = {
+      func = self.registerEventListener,
+      args = {self, object, listener, eventType}
+    }
+    return
+  end
+  
   -- Create callback object
   local callback = {
     object = object,
@@ -249,6 +291,16 @@ function Secretary:setDrawLayer( object, drawLayer, listener )
   assertType(object, "object", "table")
   assert(DrawLayer.fromId(drawLayer) ~= nil, "drawLayer must be a valid DrawLayer value")
   
+  -- Postpone if processing events
+  if self.postpone then
+    self.queue.n = self.queue.n + 1
+    self.queue[self.queue.n] = {
+      func = self.setDrawLayer,
+      args = {self, object, drawLayer, listener}
+    }
+    return
+  end
+  
   -- Make sure callbacks exist for the given object
   local callbacks = self.callbacks[object]
   if callbacks == nil then
@@ -286,6 +338,16 @@ function Secretary:unregisterAllListeners( object )
   
   -- Validate arguments
   assertType(object, "object", "table")
+  
+  -- Postpone if processing events
+  if self.postpone then
+    self.queue.n = self.queue.n + 1
+    self.queue[self.queue.n] = {
+      func = self.unregisterAllListeners,
+      args = {self, object}
+    }
+    return
+  end
   
   -- Make sure callbacks exist for the given object
   local callbacks = self.callbacks[object]
@@ -421,6 +483,9 @@ end
 function Secretary:executeCallbacks( callbacks, ... )
   local arg = {...}
   
+  -- Prevent concurrent modification
+  self.postpone = true
+  
   -- Execute all registered callbacks registered with Secretary
   local lastIndex = 0
   for i = 1,callbacks.n do
@@ -454,6 +519,16 @@ function Secretary:executeCallbacks( callbacks, ... )
     end
   end
   
+  -- Enable direct modification of callback lists
+  self.postpone = false
+  
   -- If gaps were detected and closed, decrease size of callback table
   callbacks.n = lastIndex
+  
+  -- Empty any event queue we got
+  for i = 1,self.queue.n do
+    self.queue[i].func(unpack(self.queue[i].args))
+    self.queue[i] = nil
+  end
+  self.queue.n = 0
 end

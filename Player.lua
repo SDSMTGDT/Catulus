@@ -18,20 +18,22 @@ setmetatable(Player, {
   }
 )
 
+
+
 function Player:_init( )
   Actor._init( self )
   
   self.velocity.max = {x = 4, y = -1}
   self:setSize(32, 48)
-  self.animPointer = 1
+  self.facing = "left"
   
   self.animations = {}
-  self.animations[1] = Animation( "fishanim" )
-  self.animations[2] = Animation( "fishidle" )
-  self.animations[3] = Animation( "fishfall" )
-  self.animations[4] = Animation( "fishrise" )
-  
-  self.animations[2].rate = 6
+  self.animations.walk = Animation( "fishanim" )
+  self.animations.idle = Animation( "fishidle" )
+  self.animations.idle.rate = 6
+  self.animations.fall = Animation( "fishfall" )
+  self.animations.rise = Animation( "fishrise" )
+  self.animations.current = self.animations.idle
   
   gameSecretary:registerEventListener(self, self.onCollisionCheck, EventType.POST_PHYSICS)
   gameSecretary:registerEventListener(self, self.onStep, EventType.STEP)
@@ -40,70 +42,57 @@ function Player:_init( )
   
 end
 
+
+
 function Player:onStep( )
   
   if love.keyboard.isDown( "a" ) and love.keyboard.isDown( "d" ) == false then
     self:setHorizontalStep( -self.velocity.max.x )
+    self.facing = "left"
   elseif love.keyboard.isDown( "d" ) and love.keyboard.isDown( "a" ) == false then
     self:setHorizontalStep( self.velocity.max.x )
+    self.facing = "right"
   else
     self:setHorizontalStep( 0 )
   end
   
-  -- Make sprite face correct direction
-  if self.horizontalStep > 0 then
-	self.animations[1].xScale = -1
-	self.animations[2].xScale = -1
-	self.animations[3].xScale = -1
-	self.animations[4].xScale = -1
-  elseif self.horizontalStep < 0 then
-	self.animations[1].xScale = 1
-	self.animations[2].xScale = 1
-	self.animations[3].xScale = 1
-	self.animations[4].xScale = 1
-  end
+  local t, r, b, l = self:getBoundingBox(0, 1)
+  local list = gameSecretary:getCollisions(t, r, b, l, Block)
+  local midair = (table.getn(list) == 0)
   
-  local list = gameSecretary:getCollisions(self:getBoundingBox(0, 1))
-  
-  local midair = true
-  for _,other in pairs(list) do
-    if instanceOf(other, Block) then
-      midair = false
-      break
-    end
-  end
-  
-  -- Switch animation
-  if midair  == true then
-    if self.velocity.y < 0 then
-      self.animPointer = 4
-    else
-      self.animPointer = 3
-    end
+  -- Set sprite state
+  if midair and self.velocity.y <= 0 then
+    self.animations.current = self.animations.rise
+  elseif midair then
+    self.animations.current = self.animations.fall
+  elseif self.horizontalStep ~= 0 then
+    self.animations.current = self.animations.walk
   else
-    if self.horizontalStep == 0 then
-      self.animPointer = 2
-    else
-      self.animPointer = 1
-    end
+	self.animations.current = self.animations.idle
   end
   
-  self.animations[self.animPointer]:update( )
+  -- Set sprite direction
+  if self.facing == "right" then
+    self.animations.current.xScale = -1
+  elseif self.facing == "left" then
+    self.animations.current.xScale = 1
+  end
   
+  self.animations.current:update()
 end
+
+
 
 function Player:onKeyPress( key, isrepeat )
   --Jump
   if key == " " then
     
     local ground = false
-    local others = gameSecretary:getCollisions( self:getBoundingBox( 0, 1, 0 ) )
+    local t, r, b, l = self:getBoundingBox(0, 1, 0)
+    local others = gameSecretary:getCollisions( t, r, b, l, Block )
     
-    for _, other in pairs(others) do
-      if instanceOf(other, Block) then
-        ground = true
-        break
-      end
+    if table.getn(others) > 0 then
+      ground = true
     end
     
     if ground then
@@ -113,13 +102,14 @@ function Player:onKeyPress( key, isrepeat )
   
   -- Shoot
   if key == "j" then
-    if self.animations[self.animPointer].xScale > 0 then
-      Bullet( self.position.x, self.position.y + self.size.height/2, 0, -16 )
-    elseif self.animations[self.animPointer].xScale < 0 then
-      Bullet( self.position.x + self.size.width, self.position.y + self.size.height/2, 0, 16 )
+    if self.facing == "left" then
+      Bullet( self.position.x, self.position.y + self.size.height/2, 0, -32 )
+    elseif self.facing == "right" then
+      Bullet( self.position.x + self.size.width, self.position.y + self.size.height/2, 0, 32 )
     end
   end
 end
+
 
 
 function Player:draw( )
@@ -127,31 +117,29 @@ function Player:draw( )
   
   -- Draw selected animation
   love.graphics.setColor(255, 255, 255)
-  self.animations[self.animPointer]:draw( x+self.size.width/2, y, self.size.width/2 )
+  self.animations.current:draw( x+self.size.width/2, y, self.size.width/2 )
 end
+
+
 
 function Player:onCollisionCheck( )
   local t, r, b, l = self:getBoundingBox( )
-  local others = gameSecretary:getCollisions( t, r, b, l )
-  for _, other in pairs(others) do
+  local others = gameSecretary:getCollisions( t, r, b, l, Enemy )
+  for _, other in ipairs(others) do
     
-    -- Check for collision with enemy
-    if instanceOf(other, Enemy) then
-      
-      -- Test for goomba stomp
-      if self.velocity.y > other.velocity.y and b < other.position.y + other.size.height then
-        
-        -- Bounce off enemy's head, jump higher if user is holding down jump button
-        self:setPosition( self.position.x, other.position.y - self.size.height, self.position.z )
-        if love.keyboard.isDown( " " ) then
-          self:setVelocity( self.velocity.x, other.velocity.y - 8, self.velocity.z )
-        else
-          self:setVelocity( self.velocity.x, other.velocity.y - 4, self.velocity.z )
-        end
-        
-        -- Destroy the enemy
-        gameSecretary:remove( other )
+    -- Test for goomba stomp
+    if self.velocity.y > other.velocity.y and b < other.position.y + other.size.height then
+
+      -- Bounce off enemy's head, jump higher if user is holding down jump button
+      self:setPosition( self.position.x, other.position.y - self.size.height, self.position.z )
+      if love.keyboard.isDown( " " ) then
+        self:setVelocity( self.velocity.x, other.velocity.y - 8, self.velocity.z )
+      else
+        self:setVelocity( self.velocity.x, other.velocity.y - 4, self.velocity.z )
       end
+
+      -- Destroy the enemy
+      gameSecretary:remove( other )
     end
   end
   

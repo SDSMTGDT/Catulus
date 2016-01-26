@@ -43,32 +43,34 @@ function Actor:onPostPhysics( )
     return
   end
   
-  local list = gameSecretary:getCollisions( self:getBoundingBox() )
+  -- Get own bounding box
+  local t, r, b, l = self:getBoundingBox()
   
-  for i,o in pairs(list) do
-    if self ~= o and instanceOf(o, Block) then
-      
-      -- Store other's bounding box
-      local t, r, b, l = o:getBoundingBox()
-      
-      -- Collision! Are we dropping down?
-      if self.velocity.y > 0 then
-        self.position.y = t - self.size.height
-        self.velocity.y = 0
-        
-      -- Collision! Are we flying up?
-      elseif self.velocity.y < 0 then
-        self.position.y = b
-        self.velocity.y = 0
-      end
+  -- Get block collisions
+  local list = gameSecretary:getCollisions( t, r, b, l, Block )
+  
+  for i,o in ipairs(list) do
+
+    -- Store other's bounding box
+    local t, r, b, l = o:getBoundingBox()
+
+    -- Collision! Are we dropping down?
+    if self.velocity.y > 0 then
+      self.position.y = t - self.size.height
+      self.velocity.y = 0
+
+    -- Collision! Are we flying up?
+    elseif self.velocity.y < 0 then
+      self.position.y = b
+      self.velocity.y = 0
     end
   end
   
   -- ****************************************************************************
   
-  -- Get our bounding box
-  local t, r, b, l = self:getBoundingBox()
+  -- Get our bounding box again
   local speed = self.horizontalStep
+  t, r, b, l = self:getBoundingBox(speed, 0, 0)
   
   -- Adjust step for screen wrapping
   if room ~= nil then
@@ -81,15 +83,11 @@ function Actor:onPostPhysics( )
   
   -- Make sure future location is clear
   local jump = true
-  list = gameSecretary:getCollisions( t, r+speed, b, l+speed )
+  list = gameSecretary:getCollisions( t, r, b, l, Block )
   
-  for i,o in pairs(list) do
-    if self ~= o and instanceOf(o, Block) then
-        
-        -- We're going to collide with the environment; cancel movement
-      jump = false
-      break
-    end
+  if table.getn(list) > 0 then
+    -- We're going to collide with the environment; cancel movement
+    jump = false
   end
     -- If future position is clear, make our move
   if jump == true then
