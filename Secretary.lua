@@ -140,15 +140,19 @@ end
 --   Table containing indexed array of objects whose bounding boxes intersect
 --     with the supplied coordinates.
 --
-function Secretary:getCollisions( top, right, bottom, left )
+function Secretary:getCollisions( top, right, bottom, left, front, back, ... )
+  local arg = {...}
   assert(top and right and bottom and left, "parameter(s) cannot be nil")
   
+  if type(front) == "table" then table.insert(arg, front) end
+  if type(back) == "table" then table.insert(arg, back) end
+  
   -- Initialize variables
-  local list = {n = 0}
+  local list = {}
   local i = 1
   
   -- Retrieve list of all possible collisions from tree
-  self.tree:retrieve( list, top, right, bottom, left )
+  self.tree:retrieve( list, top, right, bottom, left, unpack(arg) )
   
   -- Remove objects from list that we do not collide with
   local lastIndex = 1
@@ -158,7 +162,6 @@ function Secretary:getCollisions( top, right, bottom, left )
         list[lastIndex] = list[i]
         list[i] = nil
       end
-      list.n = list.n + 1
       lastIndex = lastIndex + 1
     else
       list[i] = nil

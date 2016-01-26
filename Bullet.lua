@@ -61,8 +61,9 @@ function Bullet:onPostPhysics( )
   end
   
   -- self-destruct if collides with wall or enemy
-  local others = gameSecretary:getCollisions( self:getBoundingBox() )
-  for _,other in pairs(others) do
+  local t, r, b, l = self:getBoundingBox()
+  local others = gameSecretary:getCollisions( t, r, b, l, Enemy, Block )
+  for _,other in ipairs(others) do
     if instanceOf(other, Block) then
       self:die()
       return

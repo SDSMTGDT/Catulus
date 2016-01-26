@@ -37,16 +37,11 @@ end
 function QuadTree:clear( )
   
   -- Clear objects list
-  for i in pairs(self.objects) do
-    self.objects[i] = nil
-  end
+  self.objects = {}
   
   -- Recursively clear nodes
   for i = 1, 4 do
-    if self.nodes[i] ~= nil then
-      self.nodes[i]:clear()
-      self.nodes[i] = nil
-    end
+    self.nodes[i] = nil
   end
 end
 
@@ -54,21 +49,13 @@ end
 -- QuadTree:isLeaf
 --
 function QuadTree:isLeaf( )
-
-  for i = 1, 4 do
-    if self.nodes[i] ~= nil then
-      return false
-    end
-  end
-  return true
-
+  return self.nodes[1] == nil and self.nodes[2] == nil and self.nodes[3] == nil and self.nodes[4] == nil
 end
 
 --
 -- QuadTree:split
 --
 function QuadTree:split( )
-
   local subWidth = (self.right + self.left) / 2
   local subHeight = (self.top + self.bottom) / 2
   
@@ -76,7 +63,6 @@ function QuadTree:split( )
   self.nodes[2] = QuadTree( self.level+1, self.top, subWidth, subHeight, self.left )
   self.nodes[3] = QuadTree( self.level+1, subHeight, subWidth, self.bottom, self.left )
   self.nodes[4] = QuadTree( self.level+1, subHeight, self.right, self.bottom, subWidth )
-
 end
 
 --
@@ -85,12 +71,19 @@ end
 function QuadTree:getSize( )
   
   -- Add number of objects at current node
-  local count = table.getn(self.objects)
+  local count = 0
+  for key in pairs(self.objects) do
+    if type(key) == "table" then
+      count = count + table.getn(self.objects[key])
+    else
+      count = count + 1
+    end
+  end
   
   -- Recursively count as well
-  for _,i in pairs(self.nodes) do
-    if i ~= nil then
-      count = count + i:getSize()
+  for _,subnode in ipairs(self.nodes) do
+    if subnode ~= nil then
+      count = count + subnode:getSize()
     end
   end
   
@@ -183,6 +176,34 @@ function QuadTree:insert( object, top, right, bottom, left )
         i = i + 1
       end
     end
+    
+    -- Do the same for objects stored in buckets
+    for class,objects in pairs(self.objects) do
+      if type(class) == "table" then
+
+        local i = 1
+        while i <= table.getn(objects) do
+
+          -- Figure out what child object belongs in
+          top, right, bottom, left = objects[i]:getBoundingBox()
+          local index = self:getIndex(top, right, bottom, left)
+
+          if index ~= 0 then
+            -- Insert object into child, delete from self
+            self.nodes[index]:insert(objects[i])
+            table.remove(objects, i)
+          else
+            -- Object remains in current
+            i = i + 1
+          end
+        end
+
+        -- Delete bucket if no objects remain
+        if i == 1 then
+          self.objects[class] = nil
+        end
+      end
+    end
   end
   
 
@@ -192,10 +213,17 @@ function QuadTree:insert( object, top, right, bottom, left )
   -- Insert into subnode, return
   if index ~= 0 and self.nodes[index] ~= nil then
     return index .. self.nodes[index]:insert(object, top, right, bottom, left)
-
+  
   -- If not fitting in subnode, insert into current node, return
+  -- Insert into appropriate bucket
   else
-    table.insert(self.objects, object)
+    local class = getmetatable(object)
+    if class ~= nil then
+      if self.objects[class] == nil then self.objects[class] = {} end
+      table.insert(self.objects[class], object)
+    else
+      table.insert(self.objects, object)
+    end
     return ""
   end
 end
@@ -205,19 +233,44 @@ end
 --
 function QuadTree:remove( object, path )
   if path == nil or path:len()==0 then
-    for k,v in pairs(self.objects) do
-      if v == object then
-        table.remove(self.objects, k)
-        return true
+    
+    -- Determine object's class
+    local class = getmetatable(object)
+    
+    if class == nil then
+      
+      -- Remove from generic bucket
+      for i,o in ipairs(self.objects) do
+        if o == object then
+          table.remove(self.objects, i)
+          return true
+        end
+      end
+    else
+      
+      -- Search for and remove from in class specific bucket
+      if self.objects[class] ~= nil then
+        for i,o in ipairs(self.objects[class]) do
+          if o == object then
+            table.remove(self.objects[class], i)
+            return true
+          end
+        end
       end
     end
+    
+    -- If not found, remove from subnodes
     for k in pairs(self.nodes) do
       if self.nodes[k]:remove(object) == true then
         return true
       end
     end
+    
+    -- Not found, return false
     return false
   else
+    
+    -- Path supplied, just blindly follow path
     local t = tonumber(path:sub(1,1))
     if self.nodes[t] ~= nil then
       return self.nodes[t]:remove(object, path:sub(2))
@@ -230,22 +283,54 @@ end
 --
 -- QuadTree:retrieve
 --
-function QuadTree:retrieve( list, top, right, bottom, left )
+function QuadTree:retrieve( list, top, right, bottom, left, ... )
+  local arg = {...}
   
   local index = self:getIndex(top, right, bottom, left)
   
+  -- Recurse into subnodes
   if index ~= 0 and self:isLeaf() == false then
     self.nodes[index]:retrieve(list, top, right, bottom, left)
   end
   
-  for i,o in pairs(self.objects) do
-    table.insert(list, o)
+  -- Add all objects at current node that match type parameters
+  for key,val in pairs(self.objects) do
+    
+    -- Add objects in generic bucket if no class types are supplied
+    if type(key) == "number" then
+      if table.getn(arg) == 0 then
+        table.insert(list, val)
+      end
+    
+    -- Add objects from matching buckets, note we must scan buckets themselves
+    elseif type(key) == "table" then
+      
+      -- Insert all objects from all buckets if no class filters are specified
+      if table.getn(arg) == 0 then
+        for _,obj in ipairs(val) do
+          table.insert(list, obj)
+        end
+      else
+        
+        -- Scan buckets for matching buckets
+        for _,a in ipairs(arg) do
+          if instanceOf(key, a) then
+            for _,obj in ipairs(val) do
+              table.insert(list, obj)
+            end
+            break
+          end
+        end
+      end
+    end
   end
   
   return list
-  
 end
 
+--
+-- QuadTree:draw
+--
 function QuadTree:draw( )
   love.graphics.rectangle("line", self.left, self.top, self.right - self.left, self.bottom - self.top)
   for i in pairs(self.nodes) do
