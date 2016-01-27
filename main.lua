@@ -7,6 +7,7 @@ require "Animation"
 require "LevelBuilder"
 require "Button"
 require "Menu"
+require "Debugger"
 
 player = nil
 room = nil
@@ -15,6 +16,7 @@ pauseMenu = nil
 rootSecretary = Secretary()
 gameSecretary = Secretary()
 rootSecretary:registerChildSecretary(gameSecretary)
+debugger = Debugger()
 
 function love.load( )
   
@@ -59,8 +61,6 @@ function love.load( )
         else
           enemy:moveRight()
         end
-
-        print("Objects: " .. gameSecretary.tree:getSize())
       
       -- Clear enemies
       elseif key == "backspace" then

@@ -14,7 +14,7 @@ Secretary = buildClass()
 function Secretary:_init( )
   
   -- Collision detection data structure
-  self.tree = QuadTree( 1, -1000, 1000, -1000, 1000 )
+  self.tree = QuadTree( 1, -1000, 1000, 1000, -1000 )
   
   self.paused = false
   self.objectNodes = {}  -- table containing direct references to object quadtree nodes
@@ -33,7 +33,6 @@ function Secretary:_init( )
       self.callbacks[EventType.DRAW][l].n = l
     end
   end
-
 end
 
 
