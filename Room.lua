@@ -1,4 +1,4 @@
-require "class"
+require "common/class"
 
 Room = buildClass()
 

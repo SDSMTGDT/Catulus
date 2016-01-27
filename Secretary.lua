@@ -1,5 +1,5 @@
-require "class"
-require "functions"
+require "common/class"
+require "common/functions"
 require "QuadTree"
 require "EventType"
 require "DrawLayer"
@@ -53,8 +53,8 @@ end
 function Secretary:registerPhysObject( object )
   
   -- Validate arguments
-  assert(instanceOf(object, PhysObject), "Argument must be an instance of PhysObject")
-  assert(self.objectNodes[object] == nil, "PhysObject already registered with the secretary")
+  assertType(object, "object", PhysObject)
+  assert(self.objectNodes[object] == nil, "Object already registered with the secretary")
   
   -- Postpone if processing events
   if self.postpone then
@@ -79,7 +79,7 @@ end
 function Secretary:unregisterPhysObject( object )
   
   -- Validate arguments
-  assert(instanceOf(object, PhysObject), "Argument must be an instance of PhysObject")
+  assertType(object, "object", PhysObject)
   
   -- Postpone if processing events
   if self.postpone then
@@ -163,7 +163,7 @@ function Secretary:getCollisions( top, right, bottom, left, front, back, ... )
 end
 
 function Secretary:remove( object )
-  if instanceOf(object, PhysObject) then
+  if object:instanceOf(PhysObject) then
     self:unregisterPhysObject(object)
   end
   self:unregisterAllListeners(object)
@@ -174,7 +174,7 @@ end
 function Secretary:registerChildSecretary( child )
   
   -- Validate parameters
-  assertType(child, Secretary)
+  assertType(child, "child", Secretary)
   assert(child ~= self, "A Secretary cannot register itself as a child, unless you're a sadist and WANT infinite loops")
   
   -- Register event methods of child with self

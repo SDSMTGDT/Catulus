@@ -1,4 +1,5 @@
-require "functions"
+require "common/Object"
+require "common/functions"
 
 --
 -- Builds a new class using the supplied table as a superclass..
@@ -13,7 +14,7 @@ function buildClass(superclass)
   local newClass = {}
   newClass.__index = newClass
   
-  if superclass == nil then
+  if Object == nil then
     
     -- Define class as a new class with no superclass
     setmetatable(newClass, {
@@ -24,6 +25,11 @@ function buildClass(superclass)
         end,
       })
   else
+    
+    -- Force all classes to inherit from Object if possible
+    if superclass == nil then
+      superclass = Object
+    end
     
     -- Define class as a subclass of another class
     setmetatable(newClass, {

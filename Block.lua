@@ -1,4 +1,4 @@
-require "class"
+require "common/class"
 require "PhysObject"
 
 Block = buildClass(PhysObject)
