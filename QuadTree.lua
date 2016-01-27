@@ -54,8 +54,6 @@ function QuadTree:split( )
   self.nodes[2] = QuadTree( self.level+1, self.top, subWidth, subHeight, self.left )
   self.nodes[3] = QuadTree( self.level+1, subHeight, subWidth, self.bottom, self.left )
   self.nodes[4] = QuadTree( self.level+1, subHeight, self.right, self.bottom, subWidth )
-  
-  print ("split!")
 end
 
 --

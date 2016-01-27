@@ -373,8 +373,6 @@ function Secretary:onDraw()
   for l in DrawLayer.values() do
     self:executeCallbacks(self.callbacks[EventType.DRAW][l])
   end
-  
-  self.tree:draw()
 end
 
 -- Called every game step
