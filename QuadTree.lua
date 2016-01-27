@@ -1,15 +1,7 @@
--- Required fluff for classes
-QuadTree = {}
-QuadTree.__index = QuadTree
+require "common/class"
+require "common/functions"
 
-setmetatable(QuadTree, {
-    __call = function(cls, ...)
-      local self = setmetatable({}, cls)
-      self:_init(...)
-      return self
-    end,
-  }
-)
+QuadTree = buildClass()
 
 -- 
 -- QuadTree constructor
@@ -148,6 +140,9 @@ end
 --
 function QuadTree:insert( object, top, right, bottom, left )
   
+  -- Verify parameters
+  assertType(object, "object", PhysObject)
+  
   -- Optional arguments
   if left == nil then
     top, right, bottom, left = object:getBoundingBox()
@@ -217,7 +212,7 @@ function QuadTree:insert( object, top, right, bottom, left )
   -- If not fitting in subnode, insert into current node, return
   -- Insert into appropriate bucket
   else
-    local class = getmetatable(object)
+    local class = object:getClass()
     if class ~= nil then
       if self.objects[class] == nil then self.objects[class] = {} end
       table.insert(self.objects[class], object)
@@ -235,7 +230,7 @@ function QuadTree:remove( object, path )
   if path == nil or path:len()==0 then
     
     -- Determine object's class
-    local class = getmetatable(object)
+    local class = object:getClass()
     
     if class == nil then
       

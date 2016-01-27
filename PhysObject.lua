@@ -1,18 +1,7 @@
+require "common/class"
 require "Secretary"
 
--- Required fluff for classes
-PhysObject = {}
-PhysObject.__index = PhysObject
-
--- Syntax is very weird in this section, but it's necessary for classes
-setmetatable(PhysObject, {
-    __call = function(cls, ...)
-      local self = setmetatable({}, cls)
-      self:_init(...)
-      return self
-    end,
-  }
-)
+PhysObject = buildClass()
 
 ---------------------------------------
 -- BEGIN PhysObject CLASS DEFINITION --

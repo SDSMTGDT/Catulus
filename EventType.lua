@@ -1,4 +1,4 @@
-require "enum"
+require "common/enum"
 
 -- Enum
 -- Event types; used for event registration

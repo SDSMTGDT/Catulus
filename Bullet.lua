@@ -1,18 +1,7 @@
+require "common/class"
 require "PhysObject"
 
-Bullet = {}
-Bullet.__index = Bullet
-
-setmetatable(Bullet, {
-    __index = PhysObject,
-    __metatable = PhysObject,
-    __call = function(cls, ...)
-      local self = setmetatable({}, cls)
-      self:_init(...)
-      return self
-    end,
-  }
-)
+Bullet = buildClass(PhysObject)
 
 function Bullet:_init( x, y, r, s )
   PhysObject._init( self )
