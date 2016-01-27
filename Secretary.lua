@@ -1,21 +1,10 @@
-require "functions"
+require "common/class"
+require "common/functions"
 require "QuadTree"
 require "EventType"
 require "DrawLayer"
 
--- Required fluff for classes
-Secretary = {}
-Secretary.__index = Secretary
-
--- Syntax is very weird in this section, but it's necessary for classes
-setmetatable(Secretary, {
-    __call = function(cls, ...)
-      local self = setmetatable({}, cls)
-      self:_init(...)
-      return self
-    end,
-  }
-)
+Secretary = buildClass()
 
 
 
@@ -25,7 +14,7 @@ setmetatable(Secretary, {
 function Secretary:_init( )
   
   -- Collision detection data structure
-  self.tree = QuadTree( 1, -1000, 1000, -1000, 1000 )
+  self.tree = QuadTree( 1, -1000, 1000, 1000, -1000 )
   
   self.paused = false
   self.objectNodes = {}  -- table containing direct references to object quadtree nodes
@@ -44,7 +33,6 @@ function Secretary:_init( )
       self.callbacks[EventType.DRAW][l].n = l
     end
   end
-
 end
 
 
@@ -64,8 +52,8 @@ end
 function Secretary:registerPhysObject( object )
   
   -- Validate arguments
-  assert(instanceOf(object, PhysObject), "Argument must be an instance of PhysObject")
-  assert(self.objectNodes[object] == nil, "PhysObject already registered with the secretary")
+  assertType(object, "object", PhysObject)
+  assert(self.objectNodes[object] == nil, "Object already registered with the secretary")
   
   -- Postpone if processing events
   if self.postpone then
@@ -90,7 +78,7 @@ end
 function Secretary:unregisterPhysObject( object )
   
   -- Validate arguments
-  assert(instanceOf(object, PhysObject), "Argument must be an instance of PhysObject")
+  assertType(object, "object", PhysObject)
   
   -- Postpone if processing events
   if self.postpone then
@@ -174,7 +162,7 @@ function Secretary:getCollisions( top, right, bottom, left, front, back, ... )
 end
 
 function Secretary:remove( object )
-  if instanceOf(object, PhysObject) then
+  if object:instanceOf(PhysObject) then
     self:unregisterPhysObject(object)
   end
   self:unregisterAllListeners(object)
@@ -185,7 +173,7 @@ end
 function Secretary:registerChildSecretary( child )
   
   -- Validate parameters
-  assertType(child, Secretary)
+  assertType(child, "child", Secretary)
   assert(child ~= self, "A Secretary cannot register itself as a child, unless you're a sadist and WANT infinite loops")
   
   -- Register event methods of child with self

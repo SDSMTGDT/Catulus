@@ -1,18 +1,6 @@
+require "common/class"
 
-
-Animation = {}
-Animation.__index = Animation
-
-
---FLUFF--
-setmetatable(Animation, {
-      __call = function(cls, ...)
-      local self = setmetatable({}, cls)
-      self:_init(...)
-      return self
-    end,
-  }
-)
+Animation = buildClass()
 
 
 -- Cached images

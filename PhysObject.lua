@@ -1,18 +1,7 @@
+require "common/class"
 require "Secretary"
 
--- Required fluff for classes
-PhysObject = {}
-PhysObject.__index = PhysObject
-
--- Syntax is very weird in this section, but it's necessary for classes
-setmetatable(PhysObject, {
-    __call = function(cls, ...)
-      local self = setmetatable({}, cls)
-      self:_init(...)
-      return self
-    end,
-  }
-)
+PhysObject = buildClass()
 
 ---------------------------------------
 -- BEGIN PhysObject CLASS DEFINITION --
@@ -182,6 +171,8 @@ function PhysObject:update( )
   self.position.x = self.position.x + self.velocity.x
   self.position.y = self.position.y + self.velocity.y
   self.position.z = self.position.z + self.velocity.z
+  
+  gameSecretary:updateObject(self)
 end
 
 --

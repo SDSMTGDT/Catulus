@@ -1,18 +1,7 @@
+require "common/class"
 require "PhysObject"
 
-Block = {}
-Block.__index = Block
-
-setmetatable(Block, {
-    __index = PhysObject,
-    __metatable = PhysObject,
-    __call = function(cls, ...)
-      local self = setmetatable({}, cls)
-      self:_init(...)
-      return self
-    end,
-  }
-)
+Block = buildClass(PhysObject)
 
 function Block:_init(x, y, w, h)
   PhysObject._init( self )

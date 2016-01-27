@@ -1,18 +1,7 @@
+require "common/class"
 require "PhysObject"
 
-Actor = {}
-Actor.__index = Actor
-
-setmetatable(Actor, {
-    __index = PhysObject,
-    __metatable = PhysObject,
-    __call = function(cls, ...)
-      local self = setmetatable({}, cls)
-      self:_init(...)
-      return self
-    end,
-  }
-)
+Actor = buildClass(PhysObject)
 
 function Actor:_init( )
   PhysObject._init( self )

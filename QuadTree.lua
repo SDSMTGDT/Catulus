@@ -1,26 +1,18 @@
--- Required fluff for classes
-QuadTree = {}
-QuadTree.__index = QuadTree
+require "common/class"
+require "common/functions"
 
-setmetatable(QuadTree, {
-    __call = function(cls, ...)
-      local self = setmetatable({}, cls)
-      self:_init(...)
-      return self
-    end,
-  }
-)
+QuadTree = buildClass()
 
 -- 
 -- QuadTree constructor
 --
-function QuadTree: _init( lvl, top, right, bottom, left )
-
+function QuadTree:_init( lvl, top, right, bottom, left )
   self.maxObjects = 10
   self.maxLevels = 5
   
   self.level = lvl
   self.objects = {}
+  self.count = 0
 
   self.nodes = {nil, nil, nil, nil}
   
@@ -28,7 +20,6 @@ function QuadTree: _init( lvl, top, right, bottom, left )
   self.right = right
   self.bottom = bottom
   self.left = left
-  
 end
 
 --
@@ -71,14 +62,7 @@ end
 function QuadTree:getSize( )
   
   -- Add number of objects at current node
-  local count = 0
-  for key in pairs(self.objects) do
-    if type(key) == "table" then
-      count = count + table.getn(self.objects[key])
-    else
-      count = count + 1
-    end
-  end
+  local count = self.count
   
   -- Recursively count as well
   for _,subnode in ipairs(self.nodes) do
@@ -148,13 +132,16 @@ end
 --
 function QuadTree:insert( object, top, right, bottom, left )
   
+  -- Verify parameters
+  assertType(object, "object", PhysObject)
+  
   -- Optional arguments
   if left == nil then
     top, right, bottom, left = object:getBoundingBox()
   end
   
   -- Determine if table needs to be split
-  if table.getn(self.objects) >= self.maxObjects and self.level < self.maxLevels and self:isLeaf() == true then
+  if self.count >= self.maxObjects and self.level < self.maxLevels and self:isLeaf() then
     
     -- Split if not splitted so far
     self:split()
@@ -171,6 +158,7 @@ function QuadTree:insert( object, top, right, bottom, left )
         -- Insert object into child, delete from self
         self.nodes[index]:insert(self.objects[i])
         table.remove(self.objects, i)
+        self.count = self.count - 1
       else
         -- Object remains in current
         i = i + 1
@@ -192,6 +180,7 @@ function QuadTree:insert( object, top, right, bottom, left )
             -- Insert object into child, delete from self
             self.nodes[index]:insert(objects[i])
             table.remove(objects, i)
+            self.count = self.count - 1
           else
             -- Object remains in current
             i = i + 1
@@ -217,13 +206,14 @@ function QuadTree:insert( object, top, right, bottom, left )
   -- If not fitting in subnode, insert into current node, return
   -- Insert into appropriate bucket
   else
-    local class = getmetatable(object)
+    local class = object:getClass()
     if class ~= nil then
       if self.objects[class] == nil then self.objects[class] = {} end
       table.insert(self.objects[class], object)
     else
       table.insert(self.objects, object)
     end
+    self.count = self.count + 1
     return ""
   end
 end
@@ -235,7 +225,7 @@ function QuadTree:remove( object, path )
   if path == nil or path:len()==0 then
     
     -- Determine object's class
-    local class = getmetatable(object)
+    local class = object:getClass()
     
     if class == nil then
       
@@ -243,6 +233,7 @@ function QuadTree:remove( object, path )
       for i,o in ipairs(self.objects) do
         if o == object then
           table.remove(self.objects, i)
+          self.count = self.count - 1
           return true
         end
       end
@@ -253,6 +244,7 @@ function QuadTree:remove( object, path )
         for i,o in ipairs(self.objects[class]) do
           if o == object then
             table.remove(self.objects[class], i)
+            self.count = self.count - 1
             return true
           end
         end
@@ -286,11 +278,14 @@ end
 function QuadTree:retrieve( list, top, right, bottom, left, ... )
   local arg = {...}
   
-  local index = self:getIndex(top, right, bottom, left)
+  -- Short-circuit if bounds are outside of this tree
+  if self.top >= bottom or self.left >= right or left >= self.right or top >= self.bottom then
+    return list
+  end
   
   -- Recurse into subnodes
-  if index ~= 0 and self:isLeaf() == false then
-    self.nodes[index]:retrieve(list, top, right, bottom, left)
+  for _,subnode in ipairs(self.nodes) do
+    subnode:retrieve(list, top, right, bottom, left, ...)
   end
   
   -- Add all objects at current node that match type parameters
@@ -332,10 +327,9 @@ end
 -- QuadTree:draw
 --
 function QuadTree:draw( )
+  love.graphics.setColor(255, 255, 255)
   love.graphics.rectangle("line", self.left, self.top, self.right - self.left, self.bottom - self.top)
-  for i in pairs(self.nodes) do
-    if i ~= nil then
-      self.nodes[i]:draw()
-    end
+  for _,subnode in ipairs(self.nodes) do
+    subnode:draw()
   end
 end

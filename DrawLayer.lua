@@ -1,4 +1,4 @@
-require "enum"
+require "common/enum"
 
 -- Enum
 -- Defines depth for drawing layers

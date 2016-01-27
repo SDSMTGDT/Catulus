@@ -1,4 +1,4 @@
-require "functions"
+require "common/functions"
 
 function buildEnum(enum)
   local n = 1
