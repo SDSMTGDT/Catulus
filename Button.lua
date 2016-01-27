@@ -1,17 +1,7 @@
+require "class"
 require "Secretary"
 
--- Required fluff for classes
-Button = {}
-Button.__index = Button
-
-setmetatable(Button, {
-    __call = function(cls, ...)
-      local self = setmetatable({}, cls)
-      self:_init(...)
-      return self
-    end,
-  }
-)
+Button = buildClass()
 
 -- 
 -- Button constructor

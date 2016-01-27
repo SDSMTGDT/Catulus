@@ -1,19 +1,8 @@
+require "class"
 require "Actor"
 require "Animation"
 
-Enemy = {}
-Enemy.__index = Enemy
-
-setmetatable(Enemy, {
-    __index = Actor,
-    __metatable = Actor,
-    __call = function(cls, ...)
-      local self = setmetatable({}, cls)
-      self:_init(...)
-      return self
-    end,
-  }
-)
+Enemy = buildClass(Actor)
 
 function Enemy:_init( )
   Actor._init( self )

@@ -1,16 +1,6 @@
--- Required fluff for classes
-Room = {}
-Room.__index = Room
+require "class"
 
--- Syntax is very weird in this section, but it's necessary for classes
-setmetatable(Room, {
-    __call = function(cls, ...)
-      local self = setmetatable({}, cls)
-      self:_init(...)
-      return self
-    end,
-  }
-)
+Room = buildClass()
 
 ---------------------------------
 -- BEGIN Room CLASS DEFINITION --

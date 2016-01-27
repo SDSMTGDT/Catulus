@@ -1,15 +1,6 @@
--- Required fluff for classes
-QuadTree = {}
-QuadTree.__index = QuadTree
+require "class"
 
-setmetatable(QuadTree, {
-    __call = function(cls, ...)
-      local self = setmetatable({}, cls)
-      self:_init(...)
-      return self
-    end,
-  }
-)
+QuadTree = buildClass()
 
 -- 
 -- QuadTree constructor

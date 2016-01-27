@@ -1,22 +1,11 @@
+require "class"
 require "Actor"
 require "Animation"
 require "Enemy"
 require "Block"
 require "Bullet"
 
-Player = {}
-Player.__index = Player
-
-setmetatable(Player, {
-    __index = Actor,
-    __metatable = Actor,
-    __call = function(cls, ...)
-      local self = setmetatable({}, cls)
-      self:_init(...)
-      return self
-    end,
-  }
-)
+Player = buildClass(Actor)
 
 
 

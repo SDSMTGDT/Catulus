@@ -1,18 +1,8 @@
+require "class"
 require "Secretary"
 require "Button"
 
--- Required fluff for classes
-Menu = {}
-Menu.__index = Menu
-
-setmetatable(Menu, {
-    __call = function(cls, ...)
-      local self = setmetatable({}, cls)
-      self:_init(...)
-      return self
-    end,
-  }
-)
+Menu = buildClass()
 
 function Menu:_init( title, x, y, w, h )
   
