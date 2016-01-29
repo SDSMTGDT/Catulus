@@ -8,9 +8,11 @@ require "LevelBuilder"
 require "Button"
 require "Menu"
 require "Debugger"
+require "Prop"
 
 player = nil
 room = nil
+proptest = nil
 enemies = {}
 pauseMenu = nil
 rootSecretary = Secretary()
@@ -28,6 +30,7 @@ function love.load( )
   file:close()
   
   player = Player()
+  proptest = Prop(50, 96, "fishidle")
   room = buildLevelFromFile("level1.txt")
   
   rootSecretary:registerEventListener(room, room.adjustCanvas, EventType.PRE_DRAW)
