@@ -4,16 +4,17 @@ require "Secretary"
 
 Prop = buildClass( )
 
-function Prop:_init( x, y, filename )
+function Prop:_init( x, y, imgname, layer )
 
+  layer = layer or DrawLayer.BACKGROUND_PROPS
   self.x = x
   self.y = y
   
-  self.animation = Animation( filename )
+  self.animation = Animation( imgname )
 
   gameSecretary:registerEventListener(self, self.onStep, EventType.STEP)
   gameSecretary:registerEventListener(self, self.draw, EventType.DRAW)
-  gameSecretary:setDrawLayer(self, DrawLayer.BACKGROUND_PROPS)
+  gameSecretary:setDrawLayer(self, layer)
   
 end
 
