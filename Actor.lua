@@ -65,8 +65,8 @@ function Actor:onPostPhysics( )
   if room ~= nil then
     if speed > 0 and l + speed >= room.width then
       speed = 0 - self.position.x - self.size.width + speed
-    elseif speed < 0 and r + speed <= 0 then
-      speed = room.width + self.size.width + (speed * 2)
+    elseif speed <= 1 and r + speed <= 0 then
+      speed = room.width + self.size.width + (speed * 4)
     end
   end
   
@@ -80,7 +80,7 @@ function Actor:onPostPhysics( )
   end
     -- If future position is clear, make our move
   if jump == true then
-      self.position.x = self.position.x+speed
+    self.position.x = self.position.x+speed
   end
   
 end

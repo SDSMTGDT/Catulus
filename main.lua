@@ -30,11 +30,8 @@ function love.load( )
   file:close()
   
   player = Player()
-  proptest = Prop(50, 96, "fishidle")
+  proptest = Prop(50, 96, "fishidle", DrawLayer.MAIN)
   room = buildLevelFromFile("level1.txt")
-  
-  rootSecretary:registerEventListener(room, room.adjustCanvas, EventType.PRE_DRAW)
-  rootSecretary:registerEventListener(room, room.onWindowResize, EventType.WINDOW_RESIZE)
   
   rootSecretary:registerEventListener({}, function(_, key, isrepeat)
       

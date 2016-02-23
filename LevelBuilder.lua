@@ -34,6 +34,7 @@ function buildLevelFromFile(filename)
   -- Build the level
   love.window.setMode(width * 16, height * 16, {resizable=true})
   room:setDimensions(width * 16, height * 16)
+  print (width*16)
   
   for i = 1, height do
     for j = 1, width do

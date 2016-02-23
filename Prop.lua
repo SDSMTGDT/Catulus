@@ -25,7 +25,8 @@ function Prop:onStep( )
 end
 
 function Prop:draw( )
-
+  
+  love.graphics.setColor(255, 255, 255)
   self.animation:draw(self.x , self.y, 0 )
 
 end
