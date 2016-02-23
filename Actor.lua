@@ -63,10 +63,10 @@ function Actor:onPostPhysics( )
   
   -- Adjust step for screen wrapping
   if room ~= nil then
-    if speed > 0 and l + speed >= room.width then
+    if speed > 0 and l >= room.width then
       speed = 0 - self.position.x - self.size.width + speed
-    elseif speed <= 1 and r + speed <= 0 then
-      speed = room.width + self.size.width + (speed * 4)
+    elseif speed < 0 and r <= 0 then
+      speed = room.width + self.size.width + (speed * 2)
     end
   end
   
