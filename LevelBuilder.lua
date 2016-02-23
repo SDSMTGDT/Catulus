@@ -2,15 +2,14 @@ require "Room"
 
 function buildLevelFromFile(filename)
   assert(type(filename) == "string", "Unexpected argument type expected")
-  
-  --local file = io.open(love.filesystem.getSourceBaseDirectory().."/"..love.filesystem.getIdentity().."/levels/"..filename, "r")
-  local file = love.filesystem.newFile("levels/" .. filename)
+   
+  local file = love.filesystem.newFile( "levels/" .. filename )
   file:open("r")
   
   local width = 0
   local height = 0
-  
   local map = {}
+  local line = {}
   local room = Room()
   
   local linenum = 0
@@ -35,6 +34,7 @@ function buildLevelFromFile(filename)
   -- Build the level
   love.window.setMode(width * 16, height * 16, {resizable=true})
   room:setDimensions(width * 16, height * 16)
+  print (width*16)
   
   for i = 1, height do
     for j = 1, width do

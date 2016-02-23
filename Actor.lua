@@ -39,23 +39,22 @@ function Actor:onPostPhysics( )
   local list = gameSecretary:getCollisions( t, r, b, l, Block )
   
   for i,o in ipairs(list) do
-    if self ~= o then
-      
-      -- Store other's bounding box
-      local t, r, b, l = o:getBoundingBox()
 
-      -- Collision! Are we dropping down?
-      if self.velocity.y > 0 then
-        self.position.y = t - self.size.height
-        self.velocity.y = 0
+    -- Store other's bounding box
+    local t, r, b, l = o:getBoundingBox()
 
-      -- Collision! Are we flying up?
-      elseif self.velocity.y < 0 then
-        self.position.y = b
-        self.velocity.y = 0
-      end
+    -- Collision! Are we dropping down?
+    if self.velocity.y > 0 then
+      self.position.y = t - self.size.height
+      self.velocity.y = 0
+
+    -- Collision! Are we flying up?
+    elseif self.velocity.y < 0 then
+      self.position.y = b
+      self.velocity.y = 0
     end
   end
+  
   -- ****************************************************************************
   
   -- Get our bounding box again
@@ -64,9 +63,9 @@ function Actor:onPostPhysics( )
   
   -- Adjust step for screen wrapping
   if room ~= nil then
-    if speed > 0 and l + speed >= room.width then
+    if speed > 0 and l >= room.width then
       speed = 0 - self.position.x - self.size.width + speed
-    elseif speed < 0 and r + speed <= 0 then
+    elseif speed < 0 and r <= 0 then
       speed = room.width + self.size.width + (speed * 2)
     end
   end
@@ -81,7 +80,7 @@ function Actor:onPostPhysics( )
   end
     -- If future position is clear, make our move
   if jump == true then
-      self.position.x = self.position.x+speed
+    self.position.x = self.position.x+speed
   end
   
 end

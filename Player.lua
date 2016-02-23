@@ -19,7 +19,9 @@ function Player:_init( )
   self.animations = {}
   self.animations.walk = Animation( "fishanim" )
   self.animations.idle = Animation( "fishidle" )
-  self.animations.jump = Animation( "fishjump" )
+  self.animations.idle.rate = 6
+  self.animations.fall = Animation( "fishfall" )
+  self.animations.rise = Animation( "fishrise" )
   self.animations.current = self.animations.idle
   
   gameSecretary:registerEventListener(self, self.onCollisionCheck, EventType.POST_PHYSICS)
@@ -43,9 +45,15 @@ function Player:onStep( )
     self:setHorizontalStep( 0 )
   end
   
+  local t, r, b, l = self:getBoundingBox(0, 1)
+  local list = gameSecretary:getCollisions(t, r, b, l, Block)
+  local midair = (table.getn(list) == 0)
+  
   -- Set sprite state
-  if self.velocity.y ~= 0 then
-    self.animations.current = self.animations.jump
+  if midair and self.velocity.y <= 0 then
+    self.animations.current = self.animations.rise
+  elseif midair then
+    self.animations.current = self.animations.fall
   elseif self.horizontalStep ~= 0 then
     self.animations.current = self.animations.walk
   else
@@ -104,7 +112,6 @@ end
 
 
 function Player:onCollisionCheck( )
-  
   local t, r, b, l = self:getBoundingBox( )
   local others = gameSecretary:getCollisions( t, r, b, l, Enemy )
   for _, other in ipairs(others) do
@@ -125,5 +132,4 @@ function Player:onCollisionCheck( )
     end
   end
   
-  Actor.onPostPhysics( self )
 end
