@@ -4,6 +4,7 @@ require "Secretary"
 Debugger = buildClass(Entity)
 
 function Debugger:_init()
+  Entity._init(self)
   self.fps = 0
   self.physObjectCount = 0
   self.lastTime = love.timer.getTime()

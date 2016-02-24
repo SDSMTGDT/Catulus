@@ -39,6 +39,10 @@ function Actor:onPostPhysics( )
     return
   end
   
+  if self:getSecretary() == nil then
+    return
+  end
+  
   -- Get own bounding box
   local t, r, b, l = self:getBoundingBox()
   

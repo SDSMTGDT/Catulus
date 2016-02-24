@@ -5,6 +5,7 @@ require "Secretary"
 Prop = buildClass(Entity)
 
 function Prop:_init( x, y, imgname, layer )
+  Entity._init(self)
 
   self.layer = layer or DrawLayer.BACKGROUND_PROPS
   self.x = x

@@ -5,6 +5,7 @@ require "Button"
 Menu = buildClass()
 
 function Menu:_init( title, x, y, w, h )
+  Object:_init(self)
   
   -- Validate parameters
   assertType(title, "title", "string")

@@ -10,6 +10,8 @@ Room = buildClass(Entity)
 -- Constructor
 --
 function Room:_init( )
+  Entity._init(self)
+  
   self.width = 0
   self.height = 0
   

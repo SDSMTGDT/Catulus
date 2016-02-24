@@ -12,6 +12,8 @@ PhysObject = buildClass(Entity)
 -- Constructor
 --
 function PhysObject:_init( )
+  Entity:_init(self)
+  
   -- Declare object properties
   self.visible = true
   self.size = {}

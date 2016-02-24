@@ -8,7 +8,8 @@ Button = buildClass(Entity)
 -- Button constructor
 --
 function Button:_init( text, x, y, w, h, action )
-
+  Entity._init(self)
+  
   self.text = text or ""
   self.x = x or 0
   self.y = y or 0
