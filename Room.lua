@@ -1,6 +1,6 @@
 require "common/class"
 
-Room = buildClass()
+Room = buildClass(Entity)
 
 ---------------------------------
 -- BEGIN Room CLASS DEFINITION --
@@ -21,11 +21,18 @@ function Room:_init( )
   
   -- internal list of owned objects
   self.objects = {}
+end
+
+function Room:registerWithSecretary(secretary)
+  Entity.registerWithSecretary(self, secretary)
   
-  rootSecretary:registerEventListener(self, self.adjustCanvas, EventType.PRE_DRAW)
-  rootSecretary:registerEventListener(self, self.onWindowResize, EventType.WINDOW_RESIZE)
-  rootSecretary:registerEventListener(self, self.drawBars, EventType.DRAW)
-  rootSecretary:setDrawLayer(self, DrawLayer.OVERLAY)
+  -- Register for event callbacks
+  secretary:registerEventListener(self, self.adjustCanvas, EventType.PRE_DRAW)
+  secretary:registerEventListener(self, self.onWindowResize, EventType.WINDOW_RESIZE)
+  secretary:registerEventListener(self, self.drawBars, EventType.DRAW)
+  secretary:setDrawLayer(self, DrawLayer.OVERLAY)
+  
+  return self
 end
 
 --

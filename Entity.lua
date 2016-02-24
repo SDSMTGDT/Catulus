@@ -25,6 +25,8 @@ function Entity:registerWithSecretary(secretary)
   
   -- Store reference to secretary we are registered with
   self.secretary = secretary
+  
+  return self
 end
 
 function Entity:deregisterWithSecretary()

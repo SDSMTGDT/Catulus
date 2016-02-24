@@ -18,7 +18,7 @@ pauseMenu = nil
 rootSecretary = Secretary()
 gameSecretary = Secretary()
 rootSecretary:registerChildSecretary(gameSecretary)
-debugger = Debugger()
+debugger = Debugger():registerWithSecretary(rootSecretary)
 
 function love.load( )
   
@@ -29,8 +29,8 @@ function love.load( )
   end
   file:close()
   
-  player = Player()
-  proptest = Prop(50, 96, "fishidle", DrawLayer.MAIN)
+  player = Player():registerWithSecretary(gameSecretary)
+  proptest = Prop(50, 96, "fishidle", DrawLayer.MAIN):registerWithSecretary(gameSecretary)
   room = buildLevelFromFile("level1.txt")
   
   rootSecretary:registerEventListener({}, function(_, key, isrepeat)
@@ -53,7 +53,7 @@ function love.load( )
       -- Spawn enemy
       elseif key == "return" then
         if gameSecretary.paused then return end
-        local enemy = Enemy()
+        local enemy = Enemy():registerWithSecretary(gameSecretary)
         table.insert(enemies, enemy)
         enemy:setPosition(64, 64)
         if math.random(2) == 1 then
@@ -71,7 +71,7 @@ end
 
 function clearEnemies()
   for k,enemy in pairs(enemies) do
-    gameSecretary:remove(enemy)
+    enemy:destroy()
     enemies[k] = nil
   end
 end

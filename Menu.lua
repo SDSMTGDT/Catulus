@@ -134,7 +134,7 @@ function Menu.createPauseMenu( )
       32,
       function()
         menu:destroy()
-      end))
+      end):registerWithSecretary(rootSecretary))
   
   menu:addItem(Button("Level 1",
       menu.x + menu.border + menu.padding,
@@ -149,7 +149,7 @@ function Menu.createPauseMenu( )
         gameSecretary:remove(room)
         room = buildLevelFromFile("level1.txt")
         menu:destroy()
-      end))
+      end):registerWithSecretary(rootSecretary))
   
   
   menu:addItem(Button("Level 2",
@@ -165,7 +165,7 @@ function Menu.createPauseMenu( )
         gameSecretary:remove(room)
         room = buildLevelFromFile("level2.txt")
         menu:destroy()
-      end))
+      end):registerWithSecretary(rootSecretary))
   
   menu:addItem(Button("Quit",
       menu.x + menu.border + menu.padding,
@@ -174,7 +174,7 @@ function Menu.createPauseMenu( )
       32,
       function()
         love.event.quit()
-      end))
+      end):registerWithSecretary(rootSecretary))
   
   return menu
 end

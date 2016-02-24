@@ -11,8 +11,15 @@ function Bullet:_init( x, y, r, s )
   self:setSize(4, 4)
   
   self.life = 30
+end
+
+function Bullet:registerWithSecretary(secretary)
+  PhysObject.registerWithSecretary(self, secretary)
   
-  gameSecretary:registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
+  -- Register for event callbacks
+  secretary:registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
+  
+  return self
 end
 
 function Bullet:actOn( other )
@@ -39,7 +46,7 @@ end
 function Bullet:onPostPhysics( )
   if self.dieSoon then
     self:actOn( self.dieReason )
-    gameSecretary:remove( self )
+    self:destroy()
     return
   end
   
@@ -51,7 +58,7 @@ function Bullet:onPostPhysics( )
   
   -- self-destruct if collides with wall or enemy
   local t, r, b, l = self:getBoundingBox()
-  local others = gameSecretary:getCollisions( t, r, b, l, Enemy, Block )
+  local others = self:getSecretary():getCollisions( t, r, b, l, Enemy, Block )
   for _,other in ipairs(others) do
     if instanceOf(other, Block) then
       self:die()
