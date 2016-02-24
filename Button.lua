@@ -1,13 +1,15 @@
 require "common/class"
+require "Entity"
 require "Secretary"
 
-Button = buildClass()
+Button = buildClass(Entity)
 
 -- 
 -- Button constructor
 --
 function Button:_init( text, x, y, w, h, action )
-
+  Entity._init(self)
+  
   self.text = text or ""
   self.x = x or 0
   self.y = y or 0
@@ -24,13 +26,20 @@ function Button:_init( text, x, y, w, h, action )
   self.actions.click = action
   self.actions.hover = nil
   self.actions.unhover = nil
+end
+
+function Button:registerWithSecretary(secretary)
+  Entity.registerWithSecretary(self, secretary)
   
-  rootSecretary:registerEventListener(self, self.onKeyboardDown, EventType.KEYBOARD_DOWN)
-  rootSecretary:registerEventListener(self, self.onKeyboardUp, EventType.KEYBOARD_UP)
-  rootSecretary:registerEventListener(self, self.onMouseMove, EventType.MOUSE_MOVE)
-  rootSecretary:registerEventListener(self, self.onMouseDown, EventType.MOUSE_DOWN)
-  rootSecretary:registerEventListener(self, self.onMouseUp, EventType.MOUSE_UP)
-  rootSecretary:registerEventListener(self, self.draw, EventType.DRAW)
+  -- Register for event callbacks
+  secretary:registerEventListener(self, self.onKeyboardDown, EventType.KEYBOARD_DOWN)
+  secretary:registerEventListener(self, self.onKeyboardUp, EventType.KEYBOARD_UP)
+  secretary:registerEventListener(self, self.onMouseMove, EventType.MOUSE_MOVE)
+  secretary:registerEventListener(self, self.onMouseDown, EventType.MOUSE_DOWN)
+  secretary:registerEventListener(self, self.onMouseUp, EventType.MOUSE_UP)
+  secretary:registerEventListener(self, self.draw, EventType.DRAW)
+  
+  return self
 end
 
 

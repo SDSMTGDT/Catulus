@@ -23,12 +23,18 @@ function Player:_init( )
   self.animations.fall = Animation( "fishfall" )
   self.animations.rise = Animation( "fishrise" )
   self.animations.current = self.animations.idle
+end
+
+function Player:registerWithSecretary(secretary)
+  Actor.registerWithSecretary(self, secretary)
   
-  gameSecretary:registerEventListener(self, self.onCollisionCheck, EventType.POST_PHYSICS)
-  gameSecretary:registerEventListener(self, self.onStep, EventType.STEP)
-  gameSecretary:registerEventListener(self, self.onKeyPress, EventType.KEYBOARD_DOWN)
-  gameSecretary:setDrawLayer(self, DrawLayer.SPOTLIGHT)
+  -- Register for event callbacks
+  secretary:registerEventListener(self, self.onCollisionCheck, EventType.POST_PHYSICS)
+  secretary:registerEventListener(self, self.onStep, EventType.STEP)
+  secretary:registerEventListener(self, self.onKeyPress, EventType.KEYBOARD_DOWN)
+  secretary:setDrawLayer(self, DrawLayer.SPOTLIGHT)
   
+  return self
 end
 
 
@@ -46,7 +52,7 @@ function Player:onStep( )
   end
   
   local t, r, b, l = self:getBoundingBox(0, 1)
-  local list = gameSecretary:getCollisions(t, r, b, l, Block)
+  local list = self:getSecretary():getCollisions(t, r, b, l, Block)
   local midair = (table.getn(list) == 0)
   
   -- Set sprite state
@@ -78,7 +84,7 @@ function Player:onKeyPress( key, isrepeat )
     
     local ground = false
     local t, r, b, l = self:getBoundingBox(0, 1, 0)
-    local others = gameSecretary:getCollisions( t, r, b, l, Block )
+    local others = self:getSecretary():getCollisions( t, r, b, l, Block )
     
     if table.getn(others) > 0 then
       ground = true
@@ -92,9 +98,9 @@ function Player:onKeyPress( key, isrepeat )
   -- Shoot
   if key == "j" then
     if self.facing == "left" then
-      Bullet( self.position.x, self.position.y + self.size.height/2, 0, -32 )
+      Bullet( self.position.x, self.position.y + self.size.height/2, 0, -32 ):registerWithSecretary(self:getSecretary())
     elseif self.facing == "right" then
-      Bullet( self.position.x + self.size.width, self.position.y + self.size.height/2, 0, 32 )
+      Bullet( self.position.x + self.size.width, self.position.y + self.size.height/2, 0, 32 ):registerWithSecretary(self:getSecretary())
     end
   end
 end
@@ -113,7 +119,7 @@ end
 
 function Player:onCollisionCheck( )
   local t, r, b, l = self:getBoundingBox( )
-  local others = gameSecretary:getCollisions( t, r, b, l, Enemy )
+  local others = self:getSecretary():getCollisions( t, r, b, l, Enemy )
   for _, other in ipairs(others) do
     
     -- Test for goomba stomp
@@ -128,7 +134,7 @@ function Player:onCollisionCheck( )
       end
 
       -- Destroy the enemy
-      gameSecretary:remove( other )
+      other:destroy()
     end
   end
   

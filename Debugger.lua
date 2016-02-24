@@ -1,19 +1,26 @@
 require "common/class"
 require "Secretary"
 
-Debugger = buildClass()
+Debugger = buildClass(Entity)
 
 function Debugger:_init()
+  Entity._init(self)
   self.fps = 0
   self.physObjectCount = 0
   self.lastTime = love.timer.getTime()
+end
+
+function Debugger:registerWithSecretary(secretary)
+  Entity.registerWithSecretary(self, secretary)
   
-  rootSecretary:registerEventListener(self, self.step, EventType.STEP)
-  rootSecretary:registerEventListener(self, self.draw, EventType.DRAW)
+  secretary:registerEventListener(self, self.step, EventType.STEP)
+  secretary:registerEventListener(self, self.draw, EventType.DRAW)
+  
+  return self
 end
 
 function Debugger:step()
-  self.physObjectCount = gameSecretary.tree:getSize()
+  self.physObjectCount = self:getSecretary().tree:getSize()
   self.fps = love.timer.getFPS()
 end
 

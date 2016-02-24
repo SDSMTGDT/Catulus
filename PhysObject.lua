@@ -1,7 +1,8 @@
 require "common/class"
+require "Entity"
 require "Secretary"
 
-PhysObject = buildClass()
+PhysObject = buildClass(Entity)
 
 ---------------------------------------
 -- BEGIN PhysObject CLASS DEFINITION --
@@ -11,6 +12,8 @@ PhysObject = buildClass()
 -- Constructor
 --
 function PhysObject:_init( )
+  Entity:_init(self)
+  
   -- Declare object properties
   self.visible = true
   self.size = {}
@@ -37,11 +40,17 @@ function PhysObject:_init( )
   self.acceleration.x = 0
   self.acceleration.y = 0
   self.acceleration.z = 0
+end
+
+function PhysObject:registerWithSecretary(secretary)
+  Entity.registerWithSecretary(self, secretary)
   
-  -- Register with object manager
-  gameSecretary:registerPhysObject(self)
-  gameSecretary:registerEventListener(self, self.update, EventType.PHYSICS)
-  gameSecretary:registerEventListener(self, self.draw, EventType.DRAW)
+  -- Register for collisions and event callbacks
+  secretary:registerPhysObject(self)
+  secretary:registerEventListener(self, self.update, EventType.PHYSICS)
+  secretary:registerEventListener(self, self.draw, EventType.DRAW)
+  
+  return self
 end
 
 --

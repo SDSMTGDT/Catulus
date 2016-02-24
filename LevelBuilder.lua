@@ -10,7 +10,7 @@ function buildLevelFromFile(filename)
   local height = 0
   local map = {}
   local line = {}
-  local room = Room()
+  local room = Room():registerWithSecretary(rootSecretary)
   
   local linenum = 0
   for line in file:lines() do
@@ -82,7 +82,7 @@ function buildLevelFromFile(filename)
         
         -- Create block with expanded dimensions
         -- Note: j-1 and i-1 are positions (i & j are 1 indexed)
-        table.insert(room.objects, Block( (j-1) * 16, (i-1) * 16, bWidth * 16, bHeight * 16 ))
+        table.insert(room.objects, Block( (j-1) * 16, (i-1) * 16, bWidth * 16, bHeight * 16 ):registerWithSecretary(gameSecretary))
 		
         -- #DebugTime!!
         print("Created block at ("..j..","..i.."), dimensions "..(bWidth).."x"..(bHeight))

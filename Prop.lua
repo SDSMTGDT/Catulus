@@ -2,20 +2,28 @@ require "common/class"
 require "Animation"
 require "Secretary"
 
-Prop = buildClass( )
+Prop = buildClass(Entity)
 
 function Prop:_init( x, y, imgname, layer )
+  Entity._init(self)
 
-  layer = layer or DrawLayer.BACKGROUND_PROPS
+  self.layer = layer or DrawLayer.BACKGROUND_PROPS
   self.x = x
   self.y = y
   
   self.animation = Animation( imgname )
-
-  gameSecretary:registerEventListener(self, self.onStep, EventType.STEP)
-  gameSecretary:registerEventListener(self, self.draw, EventType.DRAW)
-  gameSecretary:setDrawLayer(self, layer)
   
+end
+
+function Prop:registerWithSecretary(secretary)
+  Entity.registerWithSecretary(self, secretary)
+  
+  -- Register for event callbacks
+  secretary:registerEventListener(self, self.onStep, EventType.STEP)
+  secretary:registerEventListener(self, self.draw, EventType.DRAW)
+  secretary:setDrawLayer(self, self.layer)
+  
+  return self
 end
 
 function Prop:onStep( )

@@ -11,6 +11,10 @@ setmetatable(Object, {
     end,
   })
 
+function Object:_init()
+  -- Nothing else to do; optional default constructor
+end
+
 function Object:getClass()
   return getmetatable(self)
 end
