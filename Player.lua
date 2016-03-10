@@ -23,6 +23,12 @@ function Player:_init( )
   self.animations.fall = Animation( "fishfall" )
   self.animations.rise = Animation( "fishrise" )
   self.animations.current = self.animations.idle
+  
+  self.heart = love.graphics.newImage("gfx/Heart.png")
+  self.noHeart = love.graphics.newImage("gfx/Heart_empty.png")
+  
+  self.lifeTotal = 3
+  self.invincibilityTimer = 120
 end
 
 function Player:registerWithSecretary(secretary)
@@ -73,6 +79,11 @@ function Player:onStep( )
     self.animations.current.xScale = 1
   end
   
+  -- Decrement Invincibility time if > 0
+  if self.invincibilityTimer > 0 then
+    self.invincibilityTimer = self.invincibilityTimer - 1
+  end
+  
   self.animations.current:update()
 end
 
@@ -112,7 +123,20 @@ function Player:draw( )
   
   -- Draw selected animation
   love.graphics.setColor(255, 255, 255)
-  self.animations.current:draw( x+self.size.width/2, y, self.size.width/2 )
+  if self.invincibilityTimer % 4 == 0 then
+    self.animations.current:draw( x+self.size.width/2, y, self.size.width/2 )
+  end
+  
+  -- Draw hearts
+  for i = 1, 3 do
+    if( i <= self.lifeTotal ) then
+      --draw full heart at location 
+	  love.graphics.draw(self.heart, 32*i, 32)
+    else
+      --draw empty heart at location
+	  love.graphics.draw(self.noHeart, 32*i, 32 )
+    end
+  end	
 end
 
 
@@ -135,6 +159,10 @@ function Player:onCollisionCheck( )
 
       -- Destroy the enemy
       other:destroy()
+	-- If not goomba stomp and not invincible decrement life and set timer
+	elseif self.invincibilityTimer == 0 then
+	  self.lifeTotal = self.lifeTotal - 1
+	  self.invincibilityTimer = 120
     end
   end
   
