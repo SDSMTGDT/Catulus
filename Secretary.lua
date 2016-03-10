@@ -360,6 +360,25 @@ end
 
 
 
+--
+-- Sets the current pause status of the secretary
+--
+-- paused: `true` if the secretary should be paused, `false` if it should become unpaused.
+--
+function Secretary:setPaused(paused)
+  self.paused = paused
+end
+
+
+
+--
+-- Gets whether the secretary is currently paused.
+--
+-- returns: `true` if the secretary is paused, `false` if not.
+--
+function Secretary:isPaused()
+  return self.paused
+end
 
 
 

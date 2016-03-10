@@ -45,6 +45,7 @@ function Actor:onPostPhysics( )
   
   -- Get own bounding box
   local t, r, b, l = self:getBoundingBox()
+  local room = game.room
   
   -- Get block collisions
   local list = self:getSecretary():getCollisions( t, r, b, l, Block )

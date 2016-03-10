@@ -1,4 +1,5 @@
 require "common/class"
+require "Entity"
 
 Room = buildClass(Entity)
 
@@ -23,7 +24,11 @@ function Room:_init( )
   
   -- internal list of owned objects
   self.objects = {}
+  self.enemySpawnPoints = {}
+  self.playerSpawnPoints = {}
 end
+
+
 
 function Room:registerWithSecretary(secretary)
   Entity.registerWithSecretary(self, secretary)
@@ -37,6 +42,42 @@ function Room:registerWithSecretary(secretary)
   return self
 end
 
+
+
+function Room:registerChildrenWithSecretary(secretary)
+  for _,object in ipairs(self.objects) do
+    object:registerWithSecretary(secretary)
+  end
+end
+
+
+
+function Room:addObject(object)
+  assertType(object, "object", Entity)
+  
+  table.insert(self.objects, object)
+end
+
+
+
+function Room:addEnemySpawnPoint(x, y)
+  assertType(x, "x", "number")
+  assertType(y, "y", "number")
+  
+  table.insert(self.enemySpawnPoints, {x=x,y=y})
+end
+
+
+
+function Room:addPlayerSpawnPoint(x, y)
+  assertType(x, "x", "number")
+  assertType(y, "y", "number")
+  
+  table.insert(self.playerSpawnPoints, {x=x,y=y})
+end
+
+
+
 --
 -- Adjust room dimensions
 --
@@ -47,6 +88,8 @@ function Room:setDimensions( w, h )
   -- Allow onWindowResize to recalculate values
   self:onWindowResize(love.graphics.getWidth(), love.graphics.getHeight())
 end
+
+
 
 --
 -- Adjust to window resizes
@@ -67,11 +110,15 @@ function Room:onWindowResize( w, h )
   end
 end
 
+
+
 function Room:drawingPoint(x, y)
   x = x or 0
   y = y or 0
   return (x - self.offset.x) / self.scale, (y - self.offset.y) / self.scale
 end
+
+
 
 function Room:drawingScale(w, h)
   w = w or 1
@@ -79,12 +126,16 @@ function Room:drawingScale(w, h)
   return w * self.scale, h * self.scale
 end
 
+
+
 -- Adjust love's drawing offset and scale
 function Room:adjustCanvas( )
   love.graphics.origin()
   love.graphics.translate( self.offset.x, self.offset.y )
   love.graphics.scale( self.scale, self.scale )
 end
+
+
 
 -- Draw black bars surrounding the room
 function Room:drawBars( )
