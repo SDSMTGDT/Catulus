@@ -142,6 +142,7 @@ end
 
 
 function Player:onCollisionCheck( )
+  local stomped = false
   local t, r, b, l = self:getBoundingBox( )
   local others = self:getSecretary():getCollisions( t, r, b, l, Enemy )
   for _, other in ipairs(others) do
@@ -149,6 +150,7 @@ function Player:onCollisionCheck( )
     -- Test for goomba stomp
     if self.velocity.y > other.velocity.y and b < other.position.y + other.size.height then
 
+	  stomped = true
       -- Bounce off enemy's head, jump higher if user is holding down jump button
       self:setPosition( self.position.x, other.position.y - self.size.height, self.position.z )
       if love.keyboard.isDown( " " ) then
@@ -159,11 +161,14 @@ function Player:onCollisionCheck( )
 
       -- Destroy the enemy
       other:destroy()
+	end
+	
 	-- If not goomba stomp and not invincible decrement life and set timer
-	elseif self.invincibilityTimer == 0 then
+	if self.invincibilityTimer == 0 and stomped == false then
 	  self.lifeTotal = self.lifeTotal - 1
 	  self.invincibilityTimer = 120
     end
+
   end
   
 end
