@@ -1,5 +1,6 @@
 require "common/class"
 require "PhysObject"
+require "common/functions"
 
 Actor = buildClass(PhysObject)
 
@@ -21,7 +22,7 @@ function Actor:registerWithSecretary(secretary)
 end
 
 function Actor:setHorizontalStep( s )
-  assert( type(s) == "number", "Argument must be number!!!!" )
+  assertType(s, "s", "number")
   self.horizontalStep = s
 end
 
