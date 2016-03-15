@@ -15,12 +15,17 @@ function Debugger:registerWithSecretary(secretary)
   
   secretary:registerEventListener(self, self.step, EventType.STEP)
   secretary:registerEventListener(self, self.draw, EventType.DRAW)
+  secretary:setDrawLayer(self, DrawLayer.OVERLAY)
   
   return self
 end
 
 function Debugger:step()
-  self.physObjectCount = self:getSecretary().tree:getSize()
+  if game:isRunning() then
+    self.physObjectCount = game.secretary.tree:getSize()
+  else
+    self.physObjectCount = 0
+  end
   self.fps = love.timer.getFPS()
 end
 
