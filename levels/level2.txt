@@ -3,7 +3,7 @@
 BBBBBBBBBBBBBBBB
 B      BB      B
 B      BB      B
-B      BB      B
+B  E   BB   E  B
 B      BB      B
 B      BB      B
 B      BB      B

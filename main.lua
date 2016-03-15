@@ -9,16 +9,14 @@ require "Button"
 require "Menu"
 require "Debugger"
 require "Prop"
+require "Game"
 
-player = nil
 room = nil
 proptest = nil
-enemies = {}
 pauseMenu = nil
 rootSecretary = Secretary()
-gameSecretary = Secretary()
-rootSecretary:registerChildSecretary(gameSecretary)
 debugger = Debugger():registerWithSecretary(rootSecretary)
+game = Game(rootSecretary)
 
 function love.load( )
   
@@ -29,49 +27,25 @@ function love.load( )
   end
   file:close()
   
-  player = Player():registerWithSecretary(gameSecretary)
-  proptest = Prop(50, 96, "fishidle", DrawLayer.MAIN):registerWithSecretary(gameSecretary)
-  room = buildLevelFromFile("level1.txt")
+  game:loadLevel("level1.txt")
+  game:startGame()
   
   rootSecretary:registerEventListener({}, function(_, key, isrepeat)
       
       -- Display pause menu
       if key == "escape" then
-        if pauseMenu == nil then
-          pauseMenu = Menu.createPauseMenu()
-
-          local destroy = pauseMenu.destroy
-          pauseMenu.destroy = function(self)
-            pauseMenu = nil
-            destroy(self)
-          end
-        else
-          pauseMenu:destroy()
-          pauseMenu = nil
-        end
-        
-      -- Spawn enemy
+        game:pause()
       elseif key == "return" then
-        if gameSecretary.paused then return end
-        local enemy = Enemy():registerWithSecretary(gameSecretary)
-        table.insert(enemies, enemy)
-        enemy:setPosition(64, 64)
-        if math.random(2) == 1 then
-          enemy:moveLeft()
-        else
-          enemy:moveRight()
+        if game:isPaused() == false then
+          local e = Enemy():registerWithSecretary(game.secretary)
+          local p = game.room.enemySpawnPoints[math.random(table.getn(game.room.enemySpawnPoints))]
+          e:setPosition(p.x, p.y)
+          if math.random(2) == 1 then
+            e:moveLeft()
+          else
+            e:moveRight()
+          end
         end
-      
-      -- Clear enemies
-      elseif key == "backspace" then
-        clearEnemies()
       end
     end, EventType.KEYBOARD_DOWN)
-end
-
-function clearEnemies()
-  for k,enemy in pairs(enemies) do
-    enemy:destroy()
-    enemies[k] = nil
-  end
 end

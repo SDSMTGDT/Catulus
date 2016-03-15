@@ -181,7 +181,7 @@ function PhysObject:update( )
   self.position.y = self.position.y + self.velocity.y
   self.position.z = self.position.z + self.velocity.z
   
-  gameSecretary:updateObject(self)
+  self:getSecretary():updateObject(self)
 end
 
 --
