@@ -89,6 +89,19 @@ end
 
 
 
+function Game:pause()
+  if self:isPaused() then
+    return
+  end
+  if self:isRunning() == false then
+    return
+  end
+  
+  Menu.createPauseMenu(self.rootSecretary, self.secretary, self.room, self)
+end
+
+
+
 function Game:loadLevel(levelName)
   self.room = buildLevelFromFile(levelName)
   self.room:registerWithSecretary(self.rootSecretary)

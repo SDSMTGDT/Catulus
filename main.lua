@@ -34,7 +34,7 @@ function love.load( )
       
       -- Display pause menu
       if key == "escape" then
-        game:setPaused(game:isPaused() == false)
+        game:pause()
       elseif key == "return" then
         if game:isPaused() == false then
           local e = Enemy():registerWithSecretary(game.secretary)
