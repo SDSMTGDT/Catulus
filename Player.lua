@@ -28,7 +28,8 @@ function Player:_init( )
   self.noHeart = love.graphics.newImage("gfx/Heart_empty.png")
   
   self.lifeTotal = 3
-  self.invincibilityTimer = 120
+  self.invincibilityTimer = 60
+  self.stuntimer = 0
 end
 
 function Player:registerWithSecretary(secretary)
@@ -47,10 +48,10 @@ end
 
 function Player:onStep( )
   
-  if love.keyboard.isDown( "a" ) and love.keyboard.isDown( "d" ) == false then
+  if love.keyboard.isDown( "a" ) and love.keyboard.isDown( "d" ) == false and self.stuntimer == 0 then
     self:setHorizontalStep( -self.velocity.max.x )
     self.facing = "left"
-  elseif love.keyboard.isDown( "d" ) and love.keyboard.isDown( "a" ) == false then
+  elseif love.keyboard.isDown( "d" ) and love.keyboard.isDown( "a" ) == false and self.stuntimer == 0 then
     self:setHorizontalStep( self.velocity.max.x )
     self.facing = "right"
   else
@@ -84,6 +85,13 @@ function Player:onStep( )
     self.invincibilityTimer = self.invincibilityTimer - 1
   end
   
+  -- Check stuntimer if >0 decrement, otherwise set x velocity back to 0
+  if self.stuntimer > 0 then
+    self.stuntimer = self.stuntimer - 1
+  else
+    self:setVelocity( 0, self.velocity.y )
+  end
+  
   self.animations.current:update()
 end
 
@@ -91,7 +99,7 @@ end
 
 function Player:onKeyPress( key, isrepeat )
   --Jump
-  if key == " " then
+  if key == " " and self.stuntimer == 0 then
     
     local ground = false
     local t, r, b, l = self:getBoundingBox(0, 1, 0)
@@ -106,8 +114,8 @@ function Player:onKeyPress( key, isrepeat )
     end
   end
   
-  -- Shoot
-  if key == "j" then
+    -- Shoot
+  if key == "j" and self.stuntimer ==0 then
     if self.facing == "left" then
       Bullet( self.position.x, self.position.y + self.size.height/2, 0, -32 ):registerWithSecretary(self:getSecretary())
     elseif self.facing == "right" then
@@ -131,10 +139,10 @@ function Player:draw( )
   for i = 1, 3 do
     if( i <= self.lifeTotal ) then
       --draw full heart at location 
-	  love.graphics.draw(self.heart, 32*i, 32)
+	  love.graphics.draw(self.heart, 36*i, 32)
     else
       --draw empty heart at location
-	  love.graphics.draw(self.noHeart, 32*i, 32 )
+	  love.graphics.draw(self.noHeart, 36*i, 32 )
     end
   end	
 end
@@ -167,6 +175,14 @@ function Player:onCollisionCheck( )
 	if self.invincibilityTimer == 0 and stomped == false then
 	  self.lifeTotal = self.lifeTotal - 1
 	  self.invincibilityTimer = 120
+	  self.stuntimer = 30
+	  self:setPosition( self.position.x, self.position.y-1 )
+	  --check relative location of the enemy
+	  if other.position.x > self.position.x then
+	    self:setVelocity( -3, -4 )
+	  else
+	    self:setVelocity( 3, -4 )
+	  end
     end
 
   end
