@@ -1,5 +1,6 @@
 require "Secretary"
 require "LoveEvents"
+require "Camera"
 require "Player"
 require "Block"
 require "Enemy"
@@ -11,12 +12,14 @@ require "Debugger"
 require "Prop"
 require "Game"
 
+
 room = nil
 proptest = nil
 pauseMenu = nil
 rootSecretary = Secretary()
 debugger = Debugger():registerWithSecretary(rootSecretary)
 game = Game(rootSecretary)
+camera = Camera()
 
 function love.load( )
   
@@ -27,6 +30,9 @@ function love.load( )
   end
   file:close()
   
+  camera:setDimensions(love.graphics.getWidth(), love.graphics.getHeight())
+  camera:registerWithSecretary(rootSecretary)
+  
   game:loadLevel("level1.txt")
   game:startGame()
   
@@ -35,17 +41,6 @@ function love.load( )
       -- Display pause menu
       if key == "escape" then
         game:pause()
-      elseif key == "return" then
-        if game:isPaused() == false then
-          local e = Enemy():registerWithSecretary(game.secretary)
-          local p = game.room.enemySpawnPoints[math.random(table.getn(game.room.enemySpawnPoints))]
-          e:setPosition(p.x, p.y)
-          if math.random(2) == 1 then
-            e:moveLeft()
-          else
-            e:moveRight()
-          end
-        end
       end
     end, EventType.KEYBOARD_DOWN)
 end

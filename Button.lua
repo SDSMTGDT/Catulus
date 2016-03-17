@@ -104,7 +104,7 @@ end
 --
 function Button:onMouseMove( x, y )
   
-  x, y = self.room:drawingPoint(x, y)
+  x, y = camera:drawingPoint(x, y)
   
   -- Trigger mouse hover events
   if x >= self.x and x < self.x + self.width and y >= self.y and y < self.y + self.height then
@@ -143,7 +143,7 @@ end
 -- Button:onMousePressed
 --
 function Button:onMouseDown( x, y, button )
-  x, y = self.room:drawingPoint(x, y)
+  x, y = camera:drawingPoint(x, y)
   
   if button ~= "l" then return end
   
@@ -156,7 +156,7 @@ end
 -- Button:onMouseUp
 --
 function Button:onMouseUp( x, y, button )
-  x, y = self.room:drawingPoint(x, y)
+  x, y = camera:drawingPoint(x, y)
   
   if button ~= "l" then return end
   

@@ -36,6 +36,7 @@ function Game:startGame()
   self.rootSecretary:registerChildSecretary(self.secretary)
   
   if self.room ~= nil then
+    self.room:registerWithSecretary(self.secretary)
     self.room:registerChildrenWithSecretary(self.secretary)
   end
   
@@ -104,9 +105,10 @@ end
 
 function Game:loadLevel(levelName)
   self.room = buildLevelFromFile(levelName)
-  self.room:registerWithSecretary(self.rootSecretary)
+  camera:setDimensions(self.room.width, self.room.height)
   
   if self:isRunning() then
+    self.room:registerWithSecretary(self.secretary)
     self.room:registerChildrenWithSecretary(self.secretary)
   end
 end
