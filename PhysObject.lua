@@ -191,6 +191,9 @@ function PhysObject:draw( )
   -- Must be defined on a per-object basis
 end
 
+--
+-- Method to determine if the current object collides with the provided boudning box.
+--
 function PhysObject:collidesWith( t2, r2, b2, l2 )
   local t1, r1, b1, l1 = self:getBoundingBox()
   
