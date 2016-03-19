@@ -23,6 +23,13 @@ function Player:_init( )
   self.animations.fall = Animation( "fishfall" )
   self.animations.rise = Animation( "fishrise" )
   self.animations.current = self.animations.idle
+  
+  self.heart = love.graphics.newImage("gfx/Heart.png")
+  self.noHeart = love.graphics.newImage("gfx/Heart_empty.png")
+  
+  self.lifeTotal = 3
+  self.invincibilityTimer = 60
+  self.stuntimer = 0
 end
 
 function Player:registerWithSecretary(secretary)
@@ -41,14 +48,16 @@ end
 
 function Player:onStep( )
   
-  if love.keyboard.isDown( "a" ) and love.keyboard.isDown( "d" ) == false then
-    self:setHorizontalStep( -self.velocity.max.x )
-    self.facing = "left"
-  elseif love.keyboard.isDown( "d" ) and love.keyboard.isDown( "a" ) == false then
-    self:setHorizontalStep( self.velocity.max.x )
-    self.facing = "right"
-  else
-    self:setHorizontalStep( 0 )
+  if self.stuntimer == 0 then
+    if love.keyboard.isDown( "a" ) and love.keyboard.isDown( "d" ) == false then
+      self:setHorizontalStep( -self.velocity.max.x )
+      self.facing = "left"
+    elseif love.keyboard.isDown( "d" ) and love.keyboard.isDown( "a" ) == false then
+      self:setHorizontalStep( self.velocity.max.x )
+      self.facing = "right"
+    else
+      self:setHorizontalStep( 0 )
+    end
   end
   
   local t, r, b, l = self:getBoundingBox(0, 1)
@@ -73,6 +82,18 @@ function Player:onStep( )
     self.animations.current.xScale = 1
   end
   
+  -- Decrement Invincibility time if > 0
+  if self.invincibilityTimer > 0 then
+    self.invincibilityTimer = self.invincibilityTimer - 1
+  end
+  
+  -- Check stuntimer if >0 decrement, otherwise set x velocity back to 0
+  if self.stuntimer > 0 then
+    self.stuntimer = self.stuntimer - 1
+  else
+    self:setVelocity( 0, self.velocity.y )
+  end
+  
   self.animations.current:update()
 end
 
@@ -80,7 +101,7 @@ end
 
 function Player:onKeyPress( key, isrepeat )
   --Jump
-  if key == " " then
+  if key == " " and self.stuntimer == 0 then
     
     local ground = false
     local t, r, b, l = self:getBoundingBox(0, 1, 0)
@@ -95,8 +116,8 @@ function Player:onKeyPress( key, isrepeat )
     end
   end
   
-  -- Shoot
-  if key == "j" then
+    -- Shoot
+  if key == "j" and self.stuntimer ==0 then
     if self.facing == "left" then
       Bullet( self.position.x, self.position.y + self.size.height/2, 0, -32 ):registerWithSecretary(self:getSecretary())
     elseif self.facing == "right" then
@@ -112,12 +133,26 @@ function Player:draw( )
   
   -- Draw selected animation
   love.graphics.setColor(255, 255, 255)
-  self.animations.current:draw( x+self.size.width/2, y, self.size.width/2 )
+  if self.invincibilityTimer % 4 == 0 then
+    self.animations.current:draw( x+self.size.width/2, y, self.size.width/2 )
+  end
+  
+  -- Draw hearts
+  for i = 1, 3 do
+    if( i <= self.lifeTotal ) then
+      --draw full heart at location 
+	  love.graphics.draw(self.heart, 36*i, 32)
+    else
+      --draw empty heart at location
+	  love.graphics.draw(self.noHeart, 36*i, 32 )
+    end
+  end	
 end
 
 
 
 function Player:onCollisionCheck( )
+  local stomped = false
   local t, r, b, l = self:getBoundingBox( )
   local others = self:getSecretary():getCollisions( t, r, b, l, Enemy )
   for _, other in ipairs(others) do
@@ -125,6 +160,7 @@ function Player:onCollisionCheck( )
     -- Test for goomba stomp
     if self.velocity.y > other.velocity.y and b < other.position.y + other.size.height then
 
+	  stomped = true
       -- Bounce off enemy's head, jump higher if user is holding down jump button
       self:setPosition( self.position.x, other.position.y - self.size.height, self.position.z )
       if love.keyboard.isDown( " " ) then
@@ -135,7 +171,24 @@ function Player:onCollisionCheck( )
 
       -- Destroy the enemy
       other:destroy()
+	end
+	
+	-- If not goomba stomp and not invincible decrement life and set timer
+	if self.invincibilityTimer == 0 and stomped == false then
+	  self.lifeTotal = self.lifeTotal - 1
+	  self.invincibilityTimer = 120
+	  self.stuntimer = 30
+	  self:setPosition( self.position.x, self.position.y-1 )
+	  --check relative location of the enemy
+	  if other.position.x > self.position.x then
+	    self:setVelocity( 0, -4 )
+        self:setHorizontalStep(-3)
+	  else
+	    self:setVelocity( 0, -4 )
+        self:setHorizontalStep(3)
+	  end
     end
+
   end
   
 end

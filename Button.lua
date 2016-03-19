@@ -7,7 +7,7 @@ Button = buildClass(Entity)
 -- 
 -- Button constructor
 --
-function Button:_init( text, x, y, w, h, action )
+function Button:_init( text, x, y, w, h, room, action )
   Entity._init(self)
   
   self.text = text or ""
@@ -15,6 +15,7 @@ function Button:_init( text, x, y, w, h, action )
   self.y = y or 0
   self.width = w or 32
   self.height = h or 32
+  self.room = room
   self.padding = 4
   self.border = 4
   
@@ -103,7 +104,7 @@ end
 --
 function Button:onMouseMove( x, y )
   
-  x, y = room:drawingPoint(x, y)
+  x, y = camera:drawingPoint(x, y)
   
   -- Trigger mouse hover events
   if x >= self.x and x < self.x + self.width and y >= self.y and y < self.y + self.height then
@@ -142,7 +143,7 @@ end
 -- Button:onMousePressed
 --
 function Button:onMouseDown( x, y, button )
-  x, y = room:drawingPoint(x, y)
+  x, y = camera:drawingPoint(x, y)
   
   if button ~= "l" then return end
   
@@ -155,7 +156,7 @@ end
 -- Button:onMouseUp
 --
 function Button:onMouseUp( x, y, button )
-  x, y = room:drawingPoint(x, y)
+  x, y = camera:drawingPoint(x, y)
   
   if button ~= "l" then return end
   

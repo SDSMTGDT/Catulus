@@ -12,7 +12,7 @@ PhysObject = buildClass(Entity)
 -- Constructor
 --
 function PhysObject:_init( )
-  Entity:_init(self)
+  Entity._init(self)
   
   -- Declare object properties
   self.visible = true
@@ -181,7 +181,7 @@ function PhysObject:update( )
   self.position.y = self.position.y + self.velocity.y
   self.position.z = self.position.z + self.velocity.z
   
-  gameSecretary:updateObject(self)
+  self:getSecretary():updateObject(self)
 end
 
 --
@@ -191,6 +191,9 @@ function PhysObject:draw( )
   -- Must be defined on a per-object basis
 end
 
+--
+-- Method to determine if the current object collides with the provided boudning box.
+--
 function PhysObject:collidesWith( t2, r2, b2, l2 )
   local t1, r1, b1, l1 = self:getBoundingBox()
   

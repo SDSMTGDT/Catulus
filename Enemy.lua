@@ -35,15 +35,12 @@ function Enemy:stopMoving()
 end
 
 function Enemy:onStep()
-  local speed = self:getHorizontalStep()
-  local t, r, b, l = self:getBoundingBox(speed, 0, 0)
-  local list = self:getSecretary():getCollisions( t, r, b, l, Block )
-  
-  if table.getn(list) > 0 then
-    self:setHorizontalStep(-speed)
-  end
-  
-  self.anim:update( )
+  self.anim:update()
+end
+
+function Enemy:collisionWithWall(wall)
+  Actor.collisionWithWall(self, wall)
+  self:setHorizontalStep(-self:getHorizontalStep())
 end
 
 function Enemy:draw()

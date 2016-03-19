@@ -1,13 +1,17 @@
 require "common/class"
 require "Secretary"
 require "Button"
+require "Entity"
+require "Room"
+require "Game"
 
-Menu = buildClass()
+Menu = buildClass(Entity)
 
-function Menu:_init( title, x, y, w, h )
+function Menu:_init( gameSecretary, title, x, y, w, h )
   Object:_init(self)
   
   -- Validate parameters
+  assertType(gameSecretary, "gameSecretary", Secretary)
   assertType(title, "title", "string")
   assertType(x, "x", "number")
   assertType(y, "y", "number")
@@ -15,6 +19,7 @@ function Menu:_init( title, x, y, w, h )
   assertType(h, "h", "number")
   
   -- Initialize properties
+  self.gameSecretary = gameSecretary
   self.title = title
   self.x = x
   self.y = y
@@ -23,27 +28,33 @@ function Menu:_init( title, x, y, w, h )
   self.border = 0
   self.padding = 0
   self.items = {n = 0, selected = 0}
-  
-  -- Register events
-  rootSecretary:registerEventListener(self, self.onKeyboardDown, EventType.KEYBOARD_DOWN)
-  rootSecretary:registerEventListener(self, self.draw, EventType.DRAW)
-  rootSecretary:setDrawLayer(self, DrawLayer.UI)
-  
 end
 
 
 
 function Menu:destroy( )
+  Entity.destroy(self)
   
   -- Destroy menu items
   for i,item in ipairs(self.items) do
-    rootSecretary:remove(item)
+    item:destroy()
   end
   
   -- Destroy self
-  rootSecretary:remove(self)
-  gameSecretary.paused = false
+  self.gameSecretary:setPaused(false)
+end
+
+
+
+function Menu:registerWithSecretary(secretary)
+  Entity.registerWithSecretary(self, secretary)
   
+  -- Register events
+  secretary:registerEventListener(self, self.onKeyboardDown, EventType.KEYBOARD_DOWN)
+  secretary:registerEventListener(self, self.draw, EventType.DRAW)
+  secretary:setDrawLayer(self, DrawLayer.UI)
+  
+  return self
 end
 
 
@@ -56,7 +67,7 @@ function Menu:addItem( item )
   -- Add item to menu
   table.insert(self.items, item)
   self.items.n = self.items.n + 1
-  rootSecretary:setDrawLayer(item, DrawLayer.UI)
+  self:getSecretary():setDrawLayer(item, DrawLayer.UI)
   
 end
 
@@ -87,6 +98,10 @@ function Menu:onKeyboardDown( key, isRepeat )
     else
       self.items.selected = self.items.selected + 1
     end
+  
+    -- Destroy self
+  elseif key == "escape" then
+    self:destroy()
   end
   
   -- Select new button
@@ -115,12 +130,16 @@ end
 -- STATIC MENU CREATION FUNCTIONS
 --
 
-function Menu.createPauseMenu( )
+function Menu.createPauseMenu( rootSecretary, gameSecretary, room, game )
   
+  assertType(rootSecretary, "rootSecretary", Secretary)
+  assertType(gameSecretary, "gameSecretary", Secretary)
+  assertType(room, "room", Room)
+  assertType(game, "game", Game)
   gameSecretary.paused = true
   
   -- Create new instance of menu
-  local menu = Menu("Pause Menu", 20, 20, 200, 200)
+  local menu = Menu(gameSecretary, "Pause Menu", 20, 20, 200, 200):registerWithSecretary(rootSecretary)
   menu.padding = 8
   menu.border = 4
   
@@ -133,6 +152,7 @@ function Menu.createPauseMenu( )
       menu.y + menu.border + menu.padding,
       menu.width - menu.border*2 - menu.padding*2,
       32,
+      room,
       function()
         menu:destroy()
       end):registerWithSecretary(rootSecretary))
@@ -142,13 +162,11 @@ function Menu.createPauseMenu( )
       menu.y + menu.border + menu.padding*2 + 32*1,
       menu.width - menu.border*2 - menu.padding*2,
       32,
+      room,
       function()
-        clearEnemies()
-        for _,obj in pairs(room.objects) do
-          gameSecretary:remove(obj)
-        end
-        gameSecretary:remove(room)
-        room = buildLevelFromFile("level1.txt")
+        game:endGame()
+        game:loadLevel("level1.txt")
+        game:startGame()
         menu:destroy()
       end):registerWithSecretary(rootSecretary))
   
@@ -158,13 +176,11 @@ function Menu.createPauseMenu( )
       menu.y + menu.border + menu.padding*3 + 32*2,
       menu.width - menu.border*2 - menu.padding*2,
       32,
+      room,
       function()
-        clearEnemies()
-        for _,obj in pairs(room.objects) do
-          gameSecretary:remove(obj)
-        end
-        gameSecretary:remove(room)
-        room = buildLevelFromFile("level2.txt")
+        game:endGame()
+        game:loadLevel("level2.txt")
+        game:startGame()
         menu:destroy()
       end):registerWithSecretary(rootSecretary))
   
@@ -173,6 +189,7 @@ function Menu.createPauseMenu( )
       menu.y + menu.height - menu.border - menu.padding - 32,
       menu.width - menu.border*2 - menu.padding*2,
       32,
+      room,
       function()
         love.event.quit()
       end):registerWithSecretary(rootSecretary))

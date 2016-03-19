@@ -360,6 +360,25 @@ end
 
 
 
+--
+-- Sets the current pause status of the secretary
+--
+-- paused: `true` if the secretary should be paused, `false` if it should become unpaused.
+--
+function Secretary:setPaused(paused)
+  self.paused = paused
+end
+
+
+
+--
+-- Gets whether the secretary is currently paused.
+--
+-- returns: `true` if the secretary is paused, `false` if not.
+--
+function Secretary:isPaused()
+  return self.paused
+end
 
 
 
@@ -514,9 +533,10 @@ function Secretary:executeCallbacks( callbacks, ... )
   callbacks.n = lastIndex
   
   -- Empty any event queue we got
-  for i = 1,self.queue.n do
-    self.queue[i].func(unpack(self.queue[i].args))
-    self.queue[i] = nil
+  local queue = self.queue
+  for i = 1,queue.n do
+    queue[i].func(unpack(queue[i].args))
+    queue[i] = nil
   end
-  self.queue.n = 0
+  queue.n = 0
 end

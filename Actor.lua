@@ -1,5 +1,6 @@
 require "common/class"
 require "PhysObject"
+require "common/functions"
 
 Actor = buildClass(PhysObject)
 
@@ -21,7 +22,7 @@ function Actor:registerWithSecretary(secretary)
 end
 
 function Actor:setHorizontalStep( s )
-  assert( type(s) == "number", "Argument must be number!!!!" )
+  assertType(s, "s", "number")
   self.horizontalStep = s
 end
 
@@ -31,6 +32,10 @@ end
 
 function Actor:die( reason )
   self:destroy()
+end
+
+function Actor:collisionWithWall(wall)
+  -- Nothing else to do
 end
 
 function Actor:onPostPhysics( )
@@ -45,6 +50,7 @@ function Actor:onPostPhysics( )
   
   -- Get own bounding box
   local t, r, b, l = self:getBoundingBox()
+  local room = game.room
   
   -- Get block collisions
   local list = self:getSecretary():getCollisions( t, r, b, l, Block )
@@ -83,15 +89,20 @@ function Actor:onPostPhysics( )
   
   -- Make sure future location is clear
   local jump = true
+  local block = nil
   list = self:getSecretary():getCollisions( t, r, b, l, Block )
   
-  if table.getn(list) > 0 then
+  if list[1] ~= nil then
     -- We're going to collide with the environment; cancel movement
     jump = false
+    block = list[1]
   end
-    -- If future position is clear, make our move
+  
+  -- If future position is clear, make our move
   if jump == true then
     self.position.x = self.position.x+speed
+  else
+    self:collisionWithWall(block)
   end
   
 end

@@ -1,8 +1,8 @@
 require "Room"
 
 function buildLevelFromFile(filename)
-  assert(type(filename) == "string", "Unexpected argument type expected")
-   
+  assertType(filename, "filename", "string")
+  
   local file = love.filesystem.newFile( "levels/" .. filename )
   file:open("r")
   
@@ -10,7 +10,7 @@ function buildLevelFromFile(filename)
   local height = 0
   local map = {}
   local line = {}
-  local room = Room():registerWithSecretary(rootSecretary)
+  local room = Room()
   
   local linenum = 0
   for line in file:lines() do
@@ -34,7 +34,6 @@ function buildLevelFromFile(filename)
   -- Build the level
   love.window.setMode(width * 16, height * 16, {resizable=true})
   room:setDimensions(width * 16, height * 16)
-  print (width*16)
   
   for i = 1, height do
     for j = 1, width do
@@ -82,20 +81,18 @@ function buildLevelFromFile(filename)
         
         -- Create block with expanded dimensions
         -- Note: j-1 and i-1 are positions (i & j are 1 indexed)
-        table.insert(room.objects, Block( (j-1) * 16, (i-1) * 16, bWidth * 16, bHeight * 16 ):registerWithSecretary(gameSecretary))
+        local block = Block( (j-1) * 16, (i-1) * 16, bWidth * 16, bHeight * 16 )
+        room:addObject(block)
 		
-        -- #DebugTime!!
-        print("Created block at ("..j..","..i.."), dimensions "..(bWidth).."x"..(bHeight))
-        
       elseif (map[i][j] == "P") then
         
         -- Depends on a player actually existing
-        player:setPosition( (j-1) * 16, (i-1) * 16 )
-        player:setVelocity( 0, 0 )
+        room:addPlayerSpawnPoint((j-1) * 16, (i-1) * 16)
         
       elseif (map[i][j] == "E") then
         
         -- Enemy spawn point
+        room:addEnemySpawnPoint((j-1) * 16, (i-1) * 16)
         
       end
       
