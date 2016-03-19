@@ -27,8 +27,9 @@ function Player:_init( )
   self.heart = love.graphics.newImage("gfx/Heart.png")
   self.noHeart = love.graphics.newImage("gfx/Heart_empty.png")
   
-  self.lifeTotal = 3
-  self.invincibilityTimer = 60
+  self.lifeMax   = 3
+  self.lifeTotal = self.lifeMax
+  self.invincibilityTimer = 0
   self.stuntimer = 0
 end
 
@@ -138,7 +139,7 @@ function Player:draw( )
   end
   
   -- Draw hearts
-  for i = 1, 3 do
+  for i = 1,self.lifeMax do
     if( i <= self.lifeTotal ) then
       --draw full heart at location 
 	  love.graphics.draw(self.heart, 36*i, 32)
