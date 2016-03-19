@@ -13,6 +13,12 @@ function Camera:_init( )
   self.offset.y = 0
   self.width = 1
   self.height = 1
+  self.track = nil
+  self.bound = {}
+  self.bound.xmin = 0
+  self.bound.xmax = 0
+  self.bound.ymax = 0
+  self.bound.ymin = 0
 end
 
 --
@@ -42,6 +48,7 @@ function Camera:registerWithSecretary(secretary)
   -- Register for event callbacks
   secretary:registerEventListener(self, self.adjustCanvas, EventType.PRE_DRAW)
   secretary:registerEventListener(self, self.onWindowResize, EventType.WINDOW_RESIZE)
+  secretary:registerEventListener(self, self.onStep, EventType.STEP)
   
   return self
 end
@@ -67,7 +74,7 @@ end
 -- Adjust love's drawing offset and scale
 function Camera:adjustCanvas( )
   love.graphics.origin()
-  love.graphics.translate( self.offset.x, self.offset.y )
+  love.graphics.translate( -self.offset.x, -self.offset.y )
   love.graphics.scale( self.scale, self.scale )
 end
 
@@ -75,5 +82,31 @@ end
 function Camera:setDimensions(w, h)
   self.width = w or 1
   self.height = h or 1
+  love.window.setMode(self.width, self.height, {resizable=true})
 end
 
+
+function Camera:onStep( )
+  if self.track ~= nil then
+    local x, y, z = self.track:getPosition()
+    self.offset.y = y - self.height / 2
+  end
+  
+  if self.offset.y < self.bound.ymin then
+    self.offset.y = self.bound.ymin
+  elseif self.offset.y + self.height > self.bound.ymax then
+    self.offset.y = self.bound.ymax - self.height
+  elseif self.offset.x < self.bound.xmin then
+    self.offset.x = self.bound.xmin
+  elseif self.offset.x > self.bound.xmax - self.width then
+    self.offset.x = self.bound.xmax - self.width
+  end
+    
+  
+end
+
+
+function Camera:track(object)
+  assertType(object, "object", PhysObject)
+  self.track = object
+end
