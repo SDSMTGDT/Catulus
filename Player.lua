@@ -48,14 +48,16 @@ end
 
 function Player:onStep( )
   
-  if love.keyboard.isDown( "a" ) and love.keyboard.isDown( "d" ) == false and self.stuntimer == 0 then
-    self:setHorizontalStep( -self.velocity.max.x )
-    self.facing = "left"
-  elseif love.keyboard.isDown( "d" ) and love.keyboard.isDown( "a" ) == false and self.stuntimer == 0 then
-    self:setHorizontalStep( self.velocity.max.x )
-    self.facing = "right"
-  else
-    self:setHorizontalStep( 0 )
+  if self.stuntimer == 0 then
+    if love.keyboard.isDown( "a" ) and love.keyboard.isDown( "d" ) == false then
+      self:setHorizontalStep( -self.velocity.max.x )
+      self.facing = "left"
+    elseif love.keyboard.isDown( "d" ) and love.keyboard.isDown( "a" ) == false then
+      self:setHorizontalStep( self.velocity.max.x )
+      self.facing = "right"
+    else
+      self:setHorizontalStep( 0 )
+    end
   end
   
   local t, r, b, l = self:getBoundingBox(0, 1)
@@ -179,9 +181,11 @@ function Player:onCollisionCheck( )
 	  self:setPosition( self.position.x, self.position.y-1 )
 	  --check relative location of the enemy
 	  if other.position.x > self.position.x then
-	    self:setVelocity( -3, -4 )
+	    self:setVelocity( 0, -4 )
+        self:setHorizontalStep(-3)
 	  else
-	    self:setVelocity( 3, -4 )
+	    self:setVelocity( 0, -4 )
+        self:setHorizontalStep(3)
 	  end
     end
 
