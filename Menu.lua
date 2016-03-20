@@ -130,11 +130,11 @@ end
 -- STATIC MENU CREATION FUNCTIONS
 --
 
-function Menu.createPauseMenu( rootSecretary, gameSecretary, room, game )
+function Menu.createPauseMenu( rootSecretary, gameSecretary, camera, game )
   
   assertType(rootSecretary, "rootSecretary", Secretary)
   assertType(gameSecretary, "gameSecretary", Secretary)
-  assertType(room, "room", Room)
+  assertType(camera, "camera", Camera)
   assertType(game, "game", Game)
   gameSecretary.paused = true
   
@@ -144,15 +144,15 @@ function Menu.createPauseMenu( rootSecretary, gameSecretary, room, game )
   menu.border = 4
   
   -- Center menu
-  menu.x = (room.width - menu.width) / 2
-  menu.y = (room.height - menu.height) / 2
+  menu.x = (camera.width - menu.width) / 2
+  menu.y = (camera.height - menu.height + camera.offset.y) / 2
   
   menu:addItem(Button("Continue",
       menu.x + menu.border + menu.padding,
       menu.y + menu.border + menu.padding,
       menu.width - menu.border*2 - menu.padding*2,
       32,
-      room,
+      camera,
       function()
         menu:destroy()
       end):registerWithSecretary(rootSecretary))
@@ -162,7 +162,7 @@ function Menu.createPauseMenu( rootSecretary, gameSecretary, room, game )
       menu.y + menu.border + menu.padding*2 + 32*1,
       menu.width - menu.border*2 - menu.padding*2,
       32,
-      room,
+      camera,
       function()
         game:endGame()
         game:loadLevel("level1.txt")
@@ -176,7 +176,7 @@ function Menu.createPauseMenu( rootSecretary, gameSecretary, room, game )
       menu.y + menu.border + menu.padding*3 + 32*2,
       menu.width - menu.border*2 - menu.padding*2,
       32,
-      room,
+      camera,
       function()
         game:endGame()
         game:loadLevel("level2.txt")
@@ -189,7 +189,7 @@ function Menu.createPauseMenu( rootSecretary, gameSecretary, room, game )
       menu.y + menu.height - menu.border - menu.padding - 32,
       menu.width - menu.border*2 - menu.padding*2,
       32,
-      room,
+      camera,
       function()
         love.event.quit()
       end):registerWithSecretary(rootSecretary))

@@ -104,7 +104,7 @@ function Game:pause()
     return
   end
   
-  Menu.createPauseMenu(self.rootSecretary, self.secretary, self.room, self)
+  Menu.createPauseMenu(self.rootSecretary, self.secretary, camera, self)
 end
 
 

@@ -58,7 +58,7 @@ end
 function Camera:drawingPoint(x, y)
   x = x or 0
   y = y or 0
-  return (x - self.offset.x) / self.scale, (y - self.offset.y) / self.scale
+  return (x - self.offset.x) / self.scale, (y + self.offset.y) / self.scale
 end
 
 
