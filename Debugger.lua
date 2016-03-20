@@ -37,6 +37,6 @@ function Debugger:draw()
   
   -- Draws debug text
   love.graphics.setColor(255, 255, 255)
-  love.graphics.print("FPS: "..self.fps, 10, 10)
-  love.graphics.print("Entities: "..self.physObjectCount, 10, 30)
+  love.graphics.print("FPS: "..self.fps, 10, 10 + camera.offset.y)
+  love.graphics.print("Entities: "..self.physObjectCount, 10, 30 + camera.offset.y)
 end

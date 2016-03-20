@@ -142,10 +142,10 @@ function Player:draw( )
   for i = 1,self.lifeMax do
     if( i <= self.lifeTotal ) then
       --draw full heart at location 
-	  love.graphics.draw(self.heart, 36*i, 32)
+	  love.graphics.draw(self.heart, 36*i, 32 + camera.offset.y)
     else
       --draw empty heart at location
-	  love.graphics.draw(self.noHeart, 36*i, 32 )
+	  love.graphics.draw(self.noHeart, 36*i, 32 + camera.offset.y)
     end
   end	
 end
