@@ -50,6 +50,8 @@ function Game:startGame()
   camera.bound.ymin = 0
   camera.bound.ymax = self.room.height
   camera:track(self.player)
+  
+  sound.music:play()
 end
 
 

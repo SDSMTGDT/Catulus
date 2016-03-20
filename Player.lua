@@ -31,6 +31,8 @@ function Player:_init( )
   self.lifeTotal = self.lifeMax
   self.invincibilityTimer = 0
   self.stuntimer = 0
+  
+  self.sounds = {}
 end
 
 function Player:registerWithSecretary(secretary)
@@ -171,7 +173,7 @@ function Player:onCollisionCheck( )
       end
 
       -- Destroy the enemy
-      other:destroy()
+      other:die()
 	end
 	
 	-- If not goomba stomp and not invincible decrement life and set timer
@@ -180,6 +182,7 @@ function Player:onCollisionCheck( )
 	  self.invincibilityTimer = 120
 	  self.stuntimer = 30
 	  self:setPosition( self.position.x, self.position.y-1 )
+      sound:play(sound.sounds.playerDamage)
 	  --check relative location of the enemy
 	  if other.position.x > self.position.x then
 	    self:setVelocity( 0, -4 )

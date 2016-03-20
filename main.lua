@@ -11,6 +11,7 @@ require "Menu"
 require "Debugger"
 require "Prop"
 require "Game"
+require "Sound"
 
 
 room = nil
@@ -20,6 +21,7 @@ rootSecretary = Secretary()
 debugger = Debugger():registerWithSecretary(rootSecretary)
 game = Game(rootSecretary)
 camera = Camera()
+sound = Sound()
 
 function love.load( )
   
