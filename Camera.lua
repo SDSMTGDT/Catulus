@@ -13,7 +13,7 @@ function Camera:_init( )
   self.offset.y = 0
   self.width = 1
   self.height = 1
-  self.track = nil
+  self.subject = nil
   self.bound = {}
   self.bound.xmin = 0
   self.bound.xmax = 0
@@ -87,8 +87,8 @@ end
 
 
 function Camera:onStep( )
-  if self.track ~= nil then
-    local x, y, z = self.track:getPosition()
+  if self.subject ~= nil then
+    local x, y, z = self.subject:getPosition()
     self.offset.y = y - self.height / 2
   end
   
@@ -108,5 +108,5 @@ end
 
 function Camera:track(object)
   assertType(object, "object", PhysObject)
-  self.track = object
+  self.subject = object
 end
