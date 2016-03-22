@@ -4,6 +4,7 @@ require "Animation"
 require "Enemy"
 require "Block"
 require "Bullet"
+require "fx/Effect"
 
 Player = buildClass(Actor)
 
@@ -169,7 +170,9 @@ function Player:onCollisionCheck( )
       else
         self:setVelocity( self.velocity.x, other.velocity.y - 4, self.velocity.z )
       end
-
+      
+      local smoke = Effect(6, other.position.x, other.position.y, "smokepuff", DrawLayer.BACKGROUND_PROPS)	
+	  smoke:registerWithSecretary( self:getSecretary( ) )
       -- Destroy the enemy
       other:destroy()
 	end

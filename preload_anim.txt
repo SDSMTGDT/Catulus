@@ -3,3 +3,4 @@ fishanim
 fishidle
 fishrise
 fishfall
+smokepuff

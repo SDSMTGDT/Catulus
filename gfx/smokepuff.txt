@@ -1,0 +1,6 @@
+Smoke_puff_frame_1.png
+Smoke_puff_frame_2.png
+Smoke_puff_frame_3.png
+Smoke_puff_frame_4.png
+Smoke_puff_frame_5.png
+Smoke_puff_frame_6.png
