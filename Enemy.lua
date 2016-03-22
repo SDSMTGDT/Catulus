@@ -52,5 +52,5 @@ end
 
 function Enemy:die( reason )
   sound:play(sound.sounds.stomp)
-  self:destroy()
+  Actor.die(self, reason)
 end
