@@ -144,8 +144,8 @@ function Menu.createPauseMenu( rootSecretary, gameSecretary, camera, game )
   menu.border = 4
   
   -- Center menu
-  menu.x = (camera.width - menu.width) / 2
-  menu.y = (camera.height - menu.height + camera.offset.y) / 2
+  menu.x = camera.offset.x + (camera.width - menu.width) / 2
+  menu.y = camera.offset.y + (camera.height - menu.height) / 2
   
   menu:addItem(Button("Continue",
       menu.x + menu.border + menu.padding,
