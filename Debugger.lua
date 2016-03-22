@@ -33,10 +33,10 @@ function Debugger:draw()
   
   -- Draws a black background
   love.graphics.setColor(0, 0, 0, 127)
-  love.graphics.rectangle("fill", 0, 0, 150, 75)
+  love.graphics.rectangle("fill", camera.offset.x + 0, camera.offset.y + 0, 150, 75)
   
   -- Draws debug text
   love.graphics.setColor(255, 255, 255)
-  love.graphics.print("FPS: "..self.fps, 10, 10 + camera.offset.y)
-  love.graphics.print("Entities: "..self.physObjectCount, 10, 30 + camera.offset.y)
+  love.graphics.print("FPS: "..self.fps, camera.offset.x + 10, camera.offset.y + 10)
+  love.graphics.print("Entities: "..self.physObjectCount, camera.offset.x + 10, camera.offset.y + 30)
 end
