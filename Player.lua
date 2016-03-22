@@ -32,10 +32,10 @@ function Player:_init( )
   self.invincibilityTimer = 0
   self.stuntimer = 0
   
-  self.jumpTime = 1.0
-  self.jumpMaxTime = 1.0
-  self.jumpDecay = .1
-  self.jumpConstant = .65
+  self.jumpTime = 0
+  self.jumpMaxTime = 2 --Flight time
+  self.jumpDecay = .1 --Timer decay
+  self.jumpConstant = 6 --Jump velocity
   self.goombaJump = 0
   
   self.sounds = {}
@@ -89,7 +89,7 @@ function Player:onStep( )
 	  if self.goombaJump == self.jumpMaxTime then
 		self.goombaJump = 0
 	  end
-		self.velocity.y = self.velocity.y - self.jumpConstant * ((self.jumpTime + self.jumpMaxTime) / self.jumpMaxTime)
+		self.velocity.y = -self.jumpConstant
 		self.jumpTime = self.jumpTime - self.jumpDecay
 	else
 	  self.jumpTime = 0
@@ -98,12 +98,6 @@ function Player:onStep( )
 	if ground == true and self.velocity.y == 0 then
 	  self.goombaJump = 0
 	  self.jumpTime = self.jumpMaxTime
-	end
-	
-	
-	if self.velocity.y > 0 then
-		
-	
 	end
   end
   
