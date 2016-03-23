@@ -30,13 +30,11 @@ function Player:_init( )
   self.lifeMax   = 3
   self.lifeTotal = self.lifeMax
   self.invincibilityTimer = 0
-  self.stuntimer = 0
+  self.stunTimer = 0
   
   self.jumpTime = 0
-  self.jumpMaxTime = 2 --Flight time
-  self.jumpDecay = .1 --Timer decay
-  self.jumpConstant = 6 --Jump velocity
-  self.goombaJump = 0
+  self.jumpMaxTime = 16   -- Flight time
+  self.jumpConstant = -6  -- Jump velocity
   
   self.sounds = {}
 end
@@ -57,7 +55,15 @@ end
 
 function Player:onStep( )
   
-  if self.stuntimer == 0 then
+  -- Detect if player is on the ground
+  local t, r, b, l = self:getBoundingBox(0, 1)
+  local list = self:getSecretary():getCollisions(t, r, b, l, Block)
+  local midair = (table.getn(list) == 0)
+  
+  -- Process player controls if player is not stunned
+  if self.stunTimer == 0 then
+    
+    -- Horizontal movement
     if love.keyboard.isDown( "a" ) and love.keyboard.isDown( "d" ) == false then
       self:setHorizontalStep( -self.velocity.max.x )
       self.facing = "left"
@@ -70,40 +76,15 @@ function Player:onStep( )
 	
 	
 	-- Jump Logic
-	
-	local ground = false
-	local t, r, b, l = self:getBoundingBox(0, 1, 0)
-	local others = self:getSecretary():getCollisions( t, r, b, l, Block )
-		
-	if table.getn(others) > 0 then
-	  ground = true
-	end
-	
-	if self.goombaJump == 1 and self.velocity.y >= -1 then
-	  self.goombaJump = 0
-	elseif self.goombaJump == 1 then
-	  self.jumpTime = self.jumpMaxTime * 0.55
-	end
-	
-	if self.jumpTime > 0 and love.keyboard.isDown(" ") and (ground == true or self.velocity.y < 0 or self.goombaJump == 1) then
-	  if self.goombaJump == self.jumpMaxTime then
-		self.goombaJump = 0
-	  end
-		self.velocity.y = -self.jumpConstant
-		self.jumpTime = self.jumpTime - self.jumpDecay
-	else
-	  self.jumpTime = 0
-	end
-	
-	if ground == true and self.velocity.y == 0 then
-	  self.goombaJump = 0
-	  self.jumpTime = self.jumpMaxTime
+    if self.jumpTime > 0 then
+      if love.keyboard.isDown(" ") and midair then
+        self.jumpTime = self.jumpTime - 1
+        self.velocity.y = self.jumpConstant
+      else
+        self.jumpTime = 0
+      end
 	end
   end
-  
-  local t, r, b, l = self:getBoundingBox(0, 1)
-  local list = self:getSecretary():getCollisions(t, r, b, l, Block)
-  local midair = (table.getn(list) == 0)
   
   -- Set sprite state
   if midair and self.velocity.y <= 0 then
@@ -128,11 +109,9 @@ function Player:onStep( )
     self.invincibilityTimer = self.invincibilityTimer - 1
   end
   
-  -- Check stuntimer if >0 decrement, otherwise set x velocity back to 0
-  if self.stuntimer > 0 then
-    self.stuntimer = self.stuntimer - 1
-  else
-    self:setVelocity( 0, self.velocity.y )
+  -- Check stunTimer if >0 decrement, otherwise set x velocity back to 0
+  if self.stunTimer > 0 then
+    self.stunTimer = self.stunTimer - 1
   end
   
   self.animations.current:update()
@@ -141,24 +120,23 @@ end
 
 
 function Player:onKeyPress( key, isrepeat )
-  --Jump
-  --if key == " " and self.stuntimer == 0 then
-  --  
-  --  local ground = false
-  --  local t, r, b, l = self:getBoundingBox(0, 1, 0)
-  --  local others = self:getSecretary():getCollisions( t, r, b, l, Block )
-  --  
-  --  if table.getn(others) > 0 then
-  --    ground = true
-  --  end
-  --  
-  --  if ground then
-  --    self.velocity.y = self.velocity.y - 10
-  --  end
-  --end
   
-    -- Shoot
-  if key == "j" and self.stuntimer ==0 then
+  -- Jump
+  if key == " " and isrepeat == false then
+    
+    -- Get list of blocks beneath player
+    local t, r, b, l = self:getBoundingBox(0, 1)
+    local others = self:getSecretary():getCollisions( t, r, b, l, Block )
+    local ground = (table.getn(others) ~= 0)
+    
+    if ground then
+      self.velocity.y = self.jumpConstant
+      self.jumpTime = self.jumpMaxTime
+    end
+  end
+  
+  -- Shoot
+  if key == "j" and self.stunTimer ==0 then
     if self.facing == "left" then
       Bullet( self.position.x, self.position.y + self.size.height/2, 0, -32 ):registerWithSecretary(self:getSecretary())
     elseif self.facing == "right" then
@@ -202,10 +180,11 @@ function Player:onCollisionCheck( )
     if self.velocity.y > other.velocity.y and b < other.position.y + other.size.height then
 
 	  stomped = true
-	  self.goombaJump = 1
+
       -- Bounce off enemy's head, jump higher if user is holding down jump button
       self:setPosition( self.position.x, other.position.y - self.size.height, self.position.z )
-      self:setVelocity( self.velocity.x, other.velocity.y - 4, self.velocity.z )
+      self.velocity.y = self.jumpConstant
+      self.jumpTime = self.jumpMaxTime
 
       -- Destroy the enemy
       other:die()
@@ -215,7 +194,7 @@ function Player:onCollisionCheck( )
 	if self.invincibilityTimer == 0 and stomped == false then
 	  self.lifeTotal = self.lifeTotal - 1
 	  self.invincibilityTimer = 120
-	  self.stuntimer = 30
+	  self.stunTimer = 30
 	  self:setPosition( self.position.x, self.position.y-1 )
 	  if self.lifeTotal > 0 then
 		sound:play(sound.sounds.playerDamage)
