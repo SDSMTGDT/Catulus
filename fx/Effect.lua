@@ -1,3 +1,5 @@
+require "common/class"
+require "Prop"
 
 Effect = buildClass(Prop)
 
@@ -17,14 +19,10 @@ end
 
 function Effect:onStep( )
   if self.frameCount <= 0 then
-    Prop:destroy( )
+    self:destroy( )
   else
-    Prop:onStep( )
+    Prop.onStep(self)
     self.frameCount = self.frameCount - 1
   end
   
-end
-
-function Effect:onDraw( )
-  Prop:draw( )
 end
