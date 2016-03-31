@@ -8,6 +8,7 @@ function Debugger:_init()
   self.fps = 0
   self.physObjectCount = 0
   self.lastTime = love.timer.getTime()
+  self.kittens = 0
 end
 
 function Debugger:registerWithSecretary(secretary)
@@ -27,6 +28,7 @@ function Debugger:step()
     self.physObjectCount = 0
   end
   self.fps = love.timer.getFPS()
+  self.kittens = game.player.capturedKittens
 end
 
 function Debugger:draw()
@@ -39,4 +41,5 @@ function Debugger:draw()
   love.graphics.setColor(255, 255, 255)
   love.graphics.print("FPS: "..self.fps, 10, 10)
   love.graphics.print("Entities: "..self.physObjectCount, 10, 30)
+  love.graphics.print("Kittens Captured: "..self.kittens, 10, 50)
 end

@@ -4,6 +4,7 @@ require "Animation"
 require "Enemy"
 require "Block"
 require "Bullet"
+require "CapturePod"
 
 Player = buildClass(Actor)
 
@@ -31,6 +32,8 @@ function Player:_init( )
   self.lifeTotal = self.lifeMax
   self.invincibilityTimer = 0
   self.stuntimer = 0
+  
+  self.capturedKittens = 0
 end
 
 function Player:registerWithSecretary(secretary)
@@ -120,9 +123,9 @@ function Player:onKeyPress( key, isrepeat )
     -- Shoot
   if key == "j" and self.stuntimer ==0 then
     if self.facing == "left" then
-      Bullet( self.position.x, self.position.y + self.size.height/2, 0, -32 ):registerWithSecretary(self:getSecretary())
+      CapturePod( self.position.x, self.position.y + self.size.height/2, 0, -32 ):registerWithSecretary(self:getSecretary())
     elseif self.facing == "right" then
-      Bullet( self.position.x + self.size.width, self.position.y + self.size.height/2, 0, 32 ):registerWithSecretary(self:getSecretary())
+      CapturePod( self.position.x + self.size.width, self.position.y + self.size.height/2, 0, 32 ):registerWithSecretary(self:getSecretary())
     end
   end
 end
@@ -192,4 +195,9 @@ function Player:onCollisionCheck( )
 
   end
   
+end
+
+
+function Player:addKitten()
+  self.capturedKittens = self.capturedKittens + 1
 end
