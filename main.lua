@@ -33,7 +33,7 @@ function love.load( )
   camera:setDimensions(love.graphics.getWidth(), love.graphics.getHeight())
   camera:registerWithSecretary(rootSecretary)
   
-  game:loadLevel("level1.txt")
+  game:loadLevel("level1")
   game:startGame()
   
   rootSecretary:registerEventListener({}, function(_, key, isrepeat)
