@@ -205,13 +205,21 @@ end
 -- Adds a function to the callback table, indexing by event type and by owning
 -- object.
 --
+-- Additional parameters can be supplied that are context-sensitive. If
+-- `eventType` is `DRAW`, then only one additional optional parameter will be
+-- accepted: the layer at which to draw the object.
+--
+-- If `eventType` is `DESTROY`, then only one optional paramter wll be accepted:
+-- a previously registered object whose destruction is to be monitered.
+--
 -- object: Table that "owns" the listener function
 -- listener: Function to be called on event trigger. The "object" parameter will
 --           be passed as the first argument, followed by any other parameters
 --           that are required for the given event type.
 -- eventType: type of event the listener is listening for.
 --
-function Secretary:registerEventListener( object, listener, eventType )
+function Secretary:registerEventListener( object, listener, eventType, ... )
+  local arg = {...}
   
   -- Verify arguments
   assertType(object, "object", "table")
@@ -219,6 +227,23 @@ function Secretary:registerEventListener( object, listener, eventType )
   assert (eventType ~= nil, "Argument 'eventType' cannot be nil")
   eventType = EventType.fromId(eventType)
   assert (eventType ~= nil, "eventType must be a valid EventType")
+  
+  -- Verify optional arguments
+  local drawLayer = DrawLayer.MAIN
+  local watchObject = object
+  
+  if eventType == EventType.DRAW and arg[1] ~= nil then
+    
+    -- User is registering for drawing, optional parameter can be layer
+    drawLayer = DrawLayer.fromId(arg[1])
+    assert (drawLayer ~= nil, "optional parameter 1 must be a valid DrawLayer")
+  elseif eventType == EventType.DESTROY and arg[1] ~= nil then
+    
+    -- Users is registering for desruction, optional parameter can be object to watch
+    watchObject = arg[1]
+    assertType(watchObject, "watchObject", "table")
+    assert(self.callbacks[watchObject] ~= nil)
+  end
   
   -- Postpone if processing events
   if self.postpone then
@@ -240,13 +265,20 @@ function Secretary:registerEventListener( object, listener, eventType )
   
   -- Customize callback object based on callback type
   if eventType == EventType.DRAW then
-    callback.drawLayer = DrawLayer.MAIN
+    callback.drawLayer = drawLayer
+  elseif eventType == EventType.DESTROY then
+    callback.watchObject = watchObject
   end
   
   -- Insert callback into callback table indexed by event type
   local callbacks = self.callbacks[eventType]
   if eventType == EventType.DRAW then
     callbacks = callbacks[callback.drawLayer]
+  elseif eventType == EventType.DESTROY then
+    if callbacks[callback.watchObject] == nil then
+      callbacks[callback.watchObject] = {n = 0}
+    end
+    callbacks = callbacks[callback.watchObject]
   end
   local n = callbacks.n + 1
   callbacks[n] = callback
@@ -348,6 +380,8 @@ function Secretary:unregisterAllListeners( object )
     if callback then
       if callback.eventType == EventType.DRAW then
         self.callbacks[callback.eventType][callback.drawLayer][callback.index] = nil
+      elseif callback.eventType == EventType.DESTROY then
+        self.callbacks[callback.eventType][callback.watchObject][callback.index] = nil
       else
         self.callbacks[callback.eventType][callback.index] = nil
       end

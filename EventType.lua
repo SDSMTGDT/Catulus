@@ -18,7 +18,8 @@ EventType = {
   "JOYSTICK_ADD",
   "JOYSTICK_REMOVE",
   "WINDOW_RESIZE",
-  "PRE_DRAW"
+  "PRE_DRAW",
+  "DESTROY"
 }
 
 buildEnum(EventType)
