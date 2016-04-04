@@ -119,7 +119,6 @@ end
 
 
 function Room:spawnKitty()
-  
   if self:getSecretary():isPaused() == false then
     local e = Enemy():registerWithSecretary(self:getSecretary())
     local p = self.enemySpawnPoints[math.random(table.getn(self.enemySpawnPoints))]
@@ -129,6 +128,10 @@ function Room:spawnKitty()
     else
       e:moveRight()
     end
+    
+    self:getSecretary():registerEventListener(self, function(self, kitty)
+        print("kitty got deaded: ", kitty)
+    end, EventType.DESTROY, e)
   end
 end
   

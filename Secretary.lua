@@ -205,13 +205,21 @@ end
 -- Adds a function to the callback table, indexing by event type and by owning
 -- object.
 --
+-- Additional parameters can be supplied that are context-sensitive. If
+-- `eventType` is `DRAW`, then only one additional optional parameter will be
+-- accepted: the layer at which to draw the object.
+--
+-- If `eventType` is `DESTROY`, then only one optional paramter wll be accepted:
+-- a previously registered object whose destruction is to be monitered.
+--
 -- object: Table that "owns" the listener function
 -- listener: Function to be called on event trigger. The "object" parameter will
 --           be passed as the first argument, followed by any other parameters
 --           that are required for the given event type.
 -- eventType: type of event the listener is listening for.
 --
-function Secretary:registerEventListener( object, listener, eventType )
+function Secretary:registerEventListener( object, listener, eventType, ... )
+  local arg = {...}
   
   -- Verify arguments
   assertType(object, "object", "table")
@@ -220,15 +228,33 @@ function Secretary:registerEventListener( object, listener, eventType )
   eventType = EventType.fromId(eventType)
   assert (eventType ~= nil, "eventType must be a valid EventType")
   
+  -- Verify optional arguments
+  local drawLayer = DrawLayer.MAIN
+  local watchObject = object
+  
+  if eventType == EventType.DRAW and arg[1] ~= nil then
+    
+    -- User is registering for drawing, optional parameter can be layer
+    drawLayer = DrawLayer.fromId(arg[1])
+    assert (drawLayer ~= nil, "optional parameter 1 must be a valid DrawLayer")
+  elseif eventType == EventType.DESTROY and arg[1] ~= nil then
+    
+    -- Users is registering for desruction, optional parameter can be object to watch
+    watchObject = arg[1]
+    assertType(watchObject, "watchObject", Entity)
+  end
+  
   -- Postpone if processing events
   if self.postpone then
     self.queue.n = self.queue.n + 1
     self.queue[self.queue.n] = {
       func = self.registerEventListener,
-      args = {self, object, listener, eventType}
+      args = {self, object, listener, eventType, unpack(arg)}
     }
     return
   end
+  
+  assert(watchObject == object or self.callbacks[watchObject] ~= nil)
   
   -- Create callback object
   local callback = {
@@ -240,13 +266,20 @@ function Secretary:registerEventListener( object, listener, eventType )
   
   -- Customize callback object based on callback type
   if eventType == EventType.DRAW then
-    callback.drawLayer = DrawLayer.MAIN
+    callback.drawLayer = drawLayer
+  elseif eventType == EventType.DESTROY then
+    callback.watchObject = watchObject
   end
   
   -- Insert callback into callback table indexed by event type
   local callbacks = self.callbacks[eventType]
   if eventType == EventType.DRAW then
     callbacks = callbacks[callback.drawLayer]
+  elseif eventType == EventType.DESTROY then
+    if callbacks[callback.watchObject] == nil then
+      callbacks[callback.watchObject] = {n = 0}
+    end
+    callbacks = callbacks[callback.watchObject]
   end
   local n = callbacks.n + 1
   callbacks[n] = callback
@@ -262,8 +295,9 @@ function Secretary:registerEventListener( object, listener, eventType )
   n = self.callbacks[object].n + 1
   self.callbacks[object][n] = callback
   self.callbacks[object].n = n
-  
 end
+
+
 
 --
 -- Moves an object's draw callback(s) to a new draw layer.
@@ -317,6 +351,8 @@ function Secretary:setDrawLayer( object, drawLayer, listener )
   end
 end
 
+
+
 --
 -- Deletes all callbacks associated with the given object.
 --
@@ -343,11 +379,30 @@ function Secretary:unregisterAllListeners( object )
     return
   end
   
+  -- Enqueue destroy callbacks for current object
+  local destroyCallbacks = self.callbacks[EventType.DESTROY][object]
+  if destroyCallbacks ~= nil then
+    for i,callback in ipairs(destroyCallbacks) do
+      if callback then
+        self.queue.n = self.queue.n + 1
+        self.queue[self.queue.n] = {
+          func = callback.listener,
+          args = {callback.object, callback.watchObject}
+        }
+      end
+    end
+    self.callbacks[EventType.DESTROY][object] = nil
+  end
+  
   -- Remove each callback from it's eventType table
   for i,callback in ipairs(callbacks) do
     if callback then
       if callback.eventType == EventType.DRAW then
         self.callbacks[callback.eventType][callback.drawLayer][callback.index] = nil
+      elseif callback.eventType == EventType.DESTROY then
+        if self.callbacks[callback.eventType][callback.watchObject] ~= nil then
+          self.callbacks[callback.eventType][callback.watchObject][callback.index] = nil
+        end
       else
         self.callbacks[callback.eventType][callback.index] = nil
       end
@@ -533,10 +588,11 @@ function Secretary:executeCallbacks( callbacks, ... )
   callbacks.n = lastIndex
   
   -- Empty any event queue we got
-  local queue = self.queue
-  for i = 1,queue.n do
-    queue[i].func(unpack(queue[i].args))
-    queue[i] = nil
+  while self.queue.n > 0 do
+    local queue = self.queue
+    self.queue = {n = 0}
+    for i = 1,queue.n do
+      queue[i].func(unpack(queue[i].args))
+    end
   end
-  queue.n = 0
 end
