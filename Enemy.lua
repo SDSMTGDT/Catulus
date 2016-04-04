@@ -49,3 +49,8 @@ function Enemy:draw()
   love.graphics.setColor(255, 255, 255)
   self.anim:draw( x , y )
 end
+
+function Enemy:die( reason )
+  sound:play(sound.sounds.stomp)
+  Actor.die(self, reason)
+end

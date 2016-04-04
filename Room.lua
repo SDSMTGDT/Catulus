@@ -21,6 +21,7 @@ function Room:_init( )
   self.enemySpawnPoints = {}
   self.playerSpawnPoints = {}
   
+  
   self.timer = 0
 end
 

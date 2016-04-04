@@ -44,6 +44,14 @@ function Game:startGame()
   self.player = Player():registerWithSecretary(self.secretary)
   self.player:setPosition(pos.x, pos.y)
   self.player:setVelocity(0, 0)
+  
+  camera.bound.xmin = 0
+  camera.bound.xmax = self.room.width
+  camera.bound.ymin = 0
+  camera.bound.ymax = self.room.height
+  camera:track(self.player)
+  
+  sound.music:play()
 end
 
 
@@ -98,14 +106,14 @@ function Game:pause()
     return
   end
   
-  Menu.createPauseMenu(self.rootSecretary, self.secretary, self.room, self)
+  Menu.createPauseMenu(self.rootSecretary, self.secretary, camera, self)
 end
 
 
 
 function Game:loadLevel(levelName)
   self.room = buildLevelFromFile(levelName)
-  camera:setDimensions(self.room.width, self.room.height)
+  camera:setDimensions(self.room.width, self.room.height - 50)
   
   if self:isRunning() then
     self.room:registerWithSecretary(self.secretary)

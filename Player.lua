@@ -31,6 +31,14 @@ function Player:_init( )
   self.lifeTotal = self.lifeMax
   self.invincibilityTimer = 0
   self.stuntimer = 0
+  
+  self.jumpTime = 1.0
+  self.jumpMaxTime = 1.0
+  self.jumpDecay = .1
+  self.jumpConstant = .65
+  self.goombaJump = 0
+  
+  self.sounds = {}
 end
 
 function Player:registerWithSecretary(secretary)
@@ -59,6 +67,44 @@ function Player:onStep( )
     else
       self:setHorizontalStep( 0 )
     end
+	
+	
+	-- Jump Logic
+	
+	local ground = false
+	local t, r, b, l = self:getBoundingBox(0, 1, 0)
+	local others = self:getSecretary():getCollisions( t, r, b, l, Block )
+		
+	if table.getn(others) > 0 then
+	  ground = true
+	end
+	
+	if self.goombaJump == 1 and self.velocity.y >= -1 then
+	  self.goombaJump = 0
+	elseif self.goombaJump == 1 then
+	  self.jumpTime = self.jumpMaxTime * 0.55
+	end
+	
+	if self.jumpTime > 0 and love.keyboard.isDown(" ") and (ground == true or self.velocity.y < 0 or self.goombaJump == 1) then
+	  if self.goombaJump == self.jumpMaxTime then
+		self.goombaJump = 0
+	  end
+		self.velocity.y = self.velocity.y - self.jumpConstant * ((self.jumpTime + self.jumpMaxTime) / self.jumpMaxTime)
+		self.jumpTime = self.jumpTime - self.jumpDecay
+	else
+	  self.jumpTime = 0
+	end
+	
+	if ground == true and self.velocity.y == 0 then
+	  self.goombaJump = 0
+	  self.jumpTime = self.jumpMaxTime
+	end
+	
+	
+	if self.velocity.y > 0 then
+		
+	
+	end
   end
   
   local t, r, b, l = self:getBoundingBox(0, 1)
@@ -102,20 +148,20 @@ end
 
 function Player:onKeyPress( key, isrepeat )
   --Jump
-  if key == " " and self.stuntimer == 0 then
-    
-    local ground = false
-    local t, r, b, l = self:getBoundingBox(0, 1, 0)
-    local others = self:getSecretary():getCollisions( t, r, b, l, Block )
-    
-    if table.getn(others) > 0 then
-      ground = true
-    end
-    
-    if ground then
-      self.velocity.y = self.velocity.y - 10
-    end
-  end
+  --if key == " " and self.stuntimer == 0 then
+  --  
+  --  local ground = false
+  --  local t, r, b, l = self:getBoundingBox(0, 1, 0)
+  --  local others = self:getSecretary():getCollisions( t, r, b, l, Block )
+  --  
+  --  if table.getn(others) > 0 then
+  --    ground = true
+  --  end
+  --  
+  --  if ground then
+  --    self.velocity.y = self.velocity.y - 10
+  --  end
+  --end
   
     -- Shoot
   if key == "j" and self.stuntimer ==0 then
@@ -142,10 +188,10 @@ function Player:draw( )
   for i = 1,self.lifeMax do
     if( i <= self.lifeTotal ) then
       --draw full heart at location 
-	  love.graphics.draw(self.heart, 36*i, 32)
+	  love.graphics.draw(self.heart, 36*i, 32 + camera.offset.y)
     else
       --draw empty heart at location
-	  love.graphics.draw(self.noHeart, 36*i, 32 )
+	  love.graphics.draw(self.noHeart, 36*i, 32 + camera.offset.y)
     end
   end	
 end
@@ -162,16 +208,13 @@ function Player:onCollisionCheck( )
     if self.velocity.y > other.velocity.y and b < other.position.y + other.size.height then
 
 	  stomped = true
+	  self.goombaJump = 1
       -- Bounce off enemy's head, jump higher if user is holding down jump button
       self:setPosition( self.position.x, other.position.y - self.size.height, self.position.z )
-      if love.keyboard.isDown( " " ) then
-        self:setVelocity( self.velocity.x, other.velocity.y - 8, self.velocity.z )
-      else
-        self:setVelocity( self.velocity.x, other.velocity.y - 4, self.velocity.z )
-      end
+      self:setVelocity( self.velocity.x, other.velocity.y - 4, self.velocity.z )
 
       -- Destroy the enemy
-      other:destroy()
+      other:die()
 	end
 	
 	-- If not goomba stomp and not invincible decrement life and set timer
@@ -180,6 +223,11 @@ function Player:onCollisionCheck( )
 	  self.invincibilityTimer = 120
 	  self.stuntimer = 30
 	  self:setPosition( self.position.x, self.position.y-1 )
+	  if self.lifeTotal > 0 then
+		sound:play(sound.sounds.playerDamage)
+	  else
+		self:die()
+	  end
 	  --check relative location of the enemy
 	  if other.position.x > self.position.x then
 	    self:setVelocity( 0, -4 )
@@ -192,4 +240,11 @@ function Player:onCollisionCheck( )
 
   end
   
+end
+
+
+
+function Player:die(reason)
+  sound.sounds.playerDeath:play()
+  self:destroy()
 end

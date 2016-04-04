@@ -13,7 +13,7 @@ Entity = buildClass()
 -- `Entity` constructor. Initializes data members.
 --
 function Entity:_init()
-  Object:_init(self)
+  Object._init(self)
   
   -- Assigned secretary object
   self.secretary = nil
@@ -25,10 +25,10 @@ end
 -- Registers this entity with a `Secretary` object. This will also deregister this
 -- object from any previously registered `Secretary`.
 --
--- - param secretary Secretary: The `Secretary` object to register with.
+-- Parameter secretary: The `Secretary` object to register with.
 --
--- - return: This same object so that this method can be called inline and
---           without affecting normal function.
+-- Return: This same object so that this method can be called inline without
+--         affecting normal function.
 --
 function Entity:registerWithSecretary(secretary)
   
@@ -69,9 +69,9 @@ end
 -- Gets the `Secretary` object with which this object has been previously
 -- registered using a call to the `registerWithSecretary()` method.
 --
--- - return: The `Secretary` object that this object is registered with or `nil`
---           if this object has not been registered or if
---           `deregisterWithSecretary()` has been more recently called.
+-- Return: The `Secretary` object that this object is registered with or `nil`
+--         if this object has not been registered or if
+--         `deregisterWithSecretary()` has been more recently called.
 --
 function Entity:getSecretary()
   return self.secretary
