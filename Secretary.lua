@@ -241,8 +241,7 @@ function Secretary:registerEventListener( object, listener, eventType, ... )
     
     -- Users is registering for desruction, optional parameter can be object to watch
     watchObject = arg[1]
-    assertType(watchObject, "watchObject", "table")
-    assert(self.callbacks[watchObject] ~= nil)
+    assertType(watchObject, "watchObject", Entity)
   end
   
   -- Postpone if processing events
@@ -250,10 +249,12 @@ function Secretary:registerEventListener( object, listener, eventType, ... )
     self.queue.n = self.queue.n + 1
     self.queue[self.queue.n] = {
       func = self.registerEventListener,
-      args = {self, object, listener, eventType}
+      args = {self, object, listener, eventType, unpack(arg)}
     }
     return
   end
+  
+  assert(watchObject == object or self.callbacks[watchObject] ~= nil)
   
   -- Create callback object
   local callback = {
@@ -294,8 +295,9 @@ function Secretary:registerEventListener( object, listener, eventType, ... )
   n = self.callbacks[object].n + 1
   self.callbacks[object][n] = callback
   self.callbacks[object].n = n
-  
 end
+
+
 
 --
 -- Moves an object's draw callback(s) to a new draw layer.
@@ -349,6 +351,8 @@ function Secretary:setDrawLayer( object, drawLayer, listener )
   end
 end
 
+
+
 --
 -- Deletes all callbacks associated with the given object.
 --
@@ -375,13 +379,30 @@ function Secretary:unregisterAllListeners( object )
     return
   end
   
+  -- Enqueue destroy callbacks for current object
+  local destroyCallbacks = self.callbacks[EventType.DESTROY][object]
+  if destroyCallbacks ~= nil then
+    for i,callback in ipairs(destroyCallbacks) do
+      if callback then
+        self.queue.n = self.queue.n + 1
+        self.queue[self.queue.n] = {
+          func = callback.listener,
+          args = {callback.object, callback.watchObject}
+        }
+      end
+    end
+    self.callbacks[EventType.DESTROY][object] = nil
+  end
+  
   -- Remove each callback from it's eventType table
   for i,callback in ipairs(callbacks) do
     if callback then
       if callback.eventType == EventType.DRAW then
         self.callbacks[callback.eventType][callback.drawLayer][callback.index] = nil
       elseif callback.eventType == EventType.DESTROY then
-        self.callbacks[callback.eventType][callback.watchObject][callback.index] = nil
+        if self.callbacks[callback.eventType][callback.watchObject] ~= nil then
+          self.callbacks[callback.eventType][callback.watchObject][callback.index] = nil
+        end
       else
         self.callbacks[callback.eventType][callback.index] = nil
       end
@@ -567,10 +588,11 @@ function Secretary:executeCallbacks( callbacks, ... )
   callbacks.n = lastIndex
   
   -- Empty any event queue we got
-  local queue = self.queue
-  for i = 1,queue.n do
-    queue[i].func(unpack(queue[i].args))
-    queue[i] = nil
+  while self.queue.n > 0 do
+    local queue = self.queue
+    self.queue = {n = 0}
+    for i = 1,queue.n do
+      queue[i].func(unpack(queue[i].args))
+    end
   end
-  queue.n = 0
 end
