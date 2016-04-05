@@ -10,11 +10,11 @@ Room = buildClass(Entity)
 --
 -- Constructor
 --
-function Room:_init( )
+function Room:_init( width, height )
   Entity._init(self)
   
-  self.width = 0
-  self.height = 0
+  self.width = width or 0
+  self.height = height or 0
   
   -- internal list of owned objects
   self.objects = {}
@@ -23,6 +23,10 @@ function Room:_init( )
   
   
   self.timer = 0
+  
+  
+  love.window.setMode(width * 16, height * 16, {resizable=true})
+  self:setDimensions(width * 16, height * 16)
 end
 
 
@@ -120,19 +124,29 @@ end
 
 
 function Room:spawnKitty()
+  
+  --Make sure there are spawn points before spawning
   if self:getSecretary():isPaused() == false then
-    local e = Enemy():registerWithSecretary(self:getSecretary())
-    local p = self.enemySpawnPoints[math.random(table.getn(self.enemySpawnPoints))]
-    e:setPosition(p.x, p.y)
-    if math.random(2) == 1 then
-      e:moveLeft()
-    else
-      e:moveRight()
+  
+    if table.getn(self.enemySpawnPoints) ~= 0 then
+      local e = Enemy():registerWithSecretary(self:getSecretary())
+      local p = self.enemySpawnPoints[math.random(table.getn(self.enemySpawnPoints))]
+      e:setPosition(p.x, p.y)
+      if math.random(2) == 1 then
+        e:moveLeft()
+      else
+        e:moveRight()
+      end
+      self:getSecretary():registerEventListener(self, function(self, kitty)
+          print("kitty got deaded: ", kitty)
+      end, EventType.DESTROY, e)
     end
     
-    self:getSecretary():registerEventListener(self, function(self, kitty)
-        print("kitty got deaded: ", kitty)
-    end, EventType.DESTROY, e)
   end
+end
+
+
+function Room:buildBlock(x, y, w, h)
+  self:addObject(Block( x, y, w, h))
 end
   
