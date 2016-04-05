@@ -18,8 +18,13 @@ function Room:_init( width, height )
   
   -- internal list of owned objects
   self.objects = {}
-  self.enemySpawnPoints = {}
+  self.enemySpawnPoints = {
+    CatEnemy = {},
+    DolphinEnemy = {},
+    Enemy = {}
+  }
   self.playerSpawnPoints = {}
+  self.enemies = {}
   
   self.timer = 0
   
@@ -122,20 +127,31 @@ function Room:onKeyPress(key, isrepeat)
 end
 
 
-function Room:spawnKitty()
+function Room:spawnEnemy()
   
   --Make sure there are spawn points before spawning
-  if table.getn(self.enemySpawnPoints) ~= 0 then
+  if table.getn(self.enemies) ~= 0 then
   
     if self:getSecretary():isPaused() == false then
-      local e = Enemy():registerWithSecretary(self:getSecretary())
-      local p = self.enemySpawnPoints[math.random(table.getn(self.enemySpawnPoints))]
-      e:setPosition(p.x, p.y)
-      if math.random(2) == 1 then
-        e:moveLeft()
-      else
-        e:moveRight()
+      enemyType = nil
+      enemyCount = 0
+      for _, count in pairs(self.enemies) do
+        enemyCount = enemyCount + count
       end
+      
+      enemyCount = math.random(enemyCount)
+      
+      for _, count in pairs(self.enemies) do
+          enemyCount = enemyCount - count
+
+          if enemyCount < 0 then
+            break
+          end
+      end
+
+        local e = enemyType():registerWithSecretary(self:getSecretary())
+        local p = self.enemySpawnPoints[enemyType][math.random(table.getn(self.enemySpawnPoints[enemyType]))]
+        e:setPosition(p.x, p.y)
     end
   end
 end
@@ -144,4 +160,13 @@ end
 function Room:buildBlock(x, y, w, h)
   self:addObject(Block( x, y, w, h))
 end
+
+
+function Room:addSpawn(spawn)
+  for index, value in pairs(spawn.enemyTypes) do
+    table.insert(self.enemySpawnPoints[value], spawn)
+  end
+end
+
+  
   

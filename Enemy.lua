@@ -11,6 +11,12 @@ function Enemy:_init( )
   self.anim = Animation( "catanim" )
   
   self:setSize(32, 32)
+  
+  if math.random(2) == 1 then
+    self:moveLeft()
+  else
+    self:moveRight()
+  end
 end
 
 function Enemy:registerWithSecretary(secretary)

@@ -34,7 +34,7 @@ levelScript["level1"] = function()
   
   --Add Enemy spawns
   ---------------------------------------------------------------------
-  
+  room:addSpawn(Spawn( 5 * 16, 5 * 16, Enemy))
   
   
   

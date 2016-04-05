@@ -1,3 +1,7 @@
+require "common/class"
+require "Spawn"
+
+
 levelScript = {}
 
 
