@@ -147,6 +147,6 @@ end
 
 
 function Room:buildBlock(x, y, w, h)
-  self:addObject(Block( x, y, w, h))
+  self:addObject(SolidBlock( x, y, w, h))
 end
   

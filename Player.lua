@@ -2,7 +2,6 @@ require "common/class"
 require "Actor"
 require "Animation"
 require "Enemy"
-require "Block"
 require "Bullet"
 
 Player = buildClass(Actor)
