@@ -171,7 +171,7 @@ function Player:onCollisionCheck( )
         self:setVelocity( self.velocity.x, other.velocity.y - 4, self.velocity.z )
       end
       
-      local smoke = Effect(6, other.position.x, other.position.y, "smokepuff", DrawLayer.BACKGROUND_PROPS)	
+      local smoke = Effect(6, other.position.x, other.position.y-16, "smokepuff", DrawLayer.BACKGROUND_PROPS)	
 	  smoke:registerWithSecretary( self:getSecretary( ) )
       -- Destroy the enemy
       other:destroy()
