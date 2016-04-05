@@ -57,8 +57,13 @@ function Player:onStep( )
   
   -- Detect if player is on the ground
   local t, r, b, l = self:getBoundingBox(0, 1)
-  local list = self:getSecretary():getCollisions(t, r, b, l, Block)
-  local midair = (table.getn(list) == 0)
+  local list = nil
+  local midair = (self.velocity.y ~= 0)
+  
+  if midair == false then
+    list = self:getSecretary():getCollisions(t, r, b, l, Block)
+    midair = (table.getn(list) == 0)
+  end
   
   -- Process player controls if player is not stunned
   if self.stunTimer == 0 then
