@@ -1,4 +1,6 @@
 require "Room"
+require "SolidBlock"
+require "PassthroughBlock"
 
 function buildLevelFromFile(filename)
   assertType(filename, "filename", "string")
@@ -80,8 +82,12 @@ function buildLevelFromFile(filename)
         
         -- Create block with expanded dimensions
         -- Note: j-1 and i-1 are positions (i & j are 1 indexed)
-        local block = Block( (j-1) * 16, (i-1) * 16, bWidth * 16, bHeight * 16 )
-        room:addObject(block)
+        room:addObject(SolidBlock( (j-1) * 16, (i-1) * 16, bWidth * 16, bHeight * 16 ))
+        
+      elseif (map[i][j] == "D") then
+        
+        -- "Passthrough block"
+        room:addObject(PassthroughBlock((j-1) * 16, (i-1) * 16, 16, 16))
 		
       elseif (map[i][j] == "P") then
         

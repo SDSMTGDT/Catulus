@@ -53,22 +53,33 @@ function Actor:onPostPhysics( )
   local room = game.room
   
   -- Get block collisions
-  local list = self:getSecretary():getCollisions( t, r, b, l, Block )
+  local list = self:getSecretary():getCollisions( t, r, b, l, SolidBlock, PassthroughBlock )
   
   for i,o in ipairs(list) do
 
     -- Store other's bounding box
     local t, r, b, l = o:getBoundingBox()
 
-    -- Collision! Are we dropping down?
-    if self.velocity.y > 0 then
-      self.position.y = t - self.size.height
-      self.velocity.y = 0
+    if (instanceOf(o, PassthroughBlock)) then
+      
+      -- Collision! Are we dropping down?
+      if self.position.y + self.size.height > t and self.position.y + self.size.height - self.velocity.y <= t then
+        self.position.y = t - self.size.height
+        self.velocity.y = 0
+      end
+      
+    elseif (instanceOf(o, SolidBlock)) then
+      
+      -- Collision! Are we dropping down?
+      if self.velocity.y > 0 then
+        self.position.y = t - self.size.height
+        self.velocity.y = 0
 
-    -- Collision! Are we flying up?
-    elseif self.velocity.y < 0 then
-      self.position.y = b
-      self.velocity.y = 0
+      -- Collision! Are we flying up?
+      elseif self.velocity.y < 0 then
+        self.position.y = b
+        self.velocity.y = 0
+      end
     end
   end
   
@@ -90,7 +101,7 @@ function Actor:onPostPhysics( )
   -- Make sure future location is clear
   local jump = true
   local block = nil
-  list = self:getSecretary():getCollisions( t, r, b, l, Block )
+  list = self:getSecretary():getCollisions( t, r, b, l, SolidBlock )
   
   if list[1] ~= nil then
     -- We're going to collide with the environment; cancel movement
