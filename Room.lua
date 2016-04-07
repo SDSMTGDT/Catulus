@@ -18,13 +18,10 @@ function Room:_init( width, height )
   
   -- internal list of owned objects
   self.objects = {}
-  self.enemySpawnPoints = {
-    CatEnemy = {},
-    DolphinEnemy = {},
-    Enemy = {}
-  }
+  self.enemySpawnPoints = {}
   self.playerSpawnPoints = {}
   self.enemies = {}
+  self.enemiesCount = 0
   
   self.timer = 0
   
@@ -116,24 +113,24 @@ function Room:onStep( )
   self.timer = self.timer + 1
   if self.timer == 100 then
     self.timer = 0
-    self:spawnKitty()
+    self:spawnEnemy()
   end
 end
 
 function Room:onKeyPress(key, isrepeat)
   if key == "return" and isrepeat == false then
-    self:spawnKitty()
+    self:spawnEnemy()
   end
 end
 
 
 function Room:spawnEnemy()
   
-  --Make sure there are spawn points before spawning
-  if table.getn(self.enemies) ~= 0 then
+  --Make sure there are any enemies to spawn
+  if self.enemiesCount ~= 0 then
   
     if self:getSecretary():isPaused() == false then
-      enemyType = nil
+      local enemyType = nil
       enemyCount = 0
       for _, count in pairs(self.enemies) do
         enemyCount = enemyCount + count
@@ -141,17 +138,24 @@ function Room:spawnEnemy()
       
       enemyCount = math.random(enemyCount)
       
-      for _, count in pairs(self.enemies) do
+      for index, count in pairs(self.enemies) do
           enemyCount = enemyCount - count
 
           if enemyCount < 0 then
+            enemyType = index
             break
           end
       end
 
-        local e = enemyType():registerWithSecretary(self:getSecretary())
-        local p = self.enemySpawnPoints[enemyType][math.random(table.getn(self.enemySpawnPoints[enemyType]))]
-        e:setPosition(p.x, p.y)
+      local e = enemyType():registerWithSecretary(self:getSecretary())
+      local p = self.enemySpawnPoints[enemyType][math.random(table.getn(self.enemySpawnPoints[enemyType]))]
+      e:setPosition(p.x, p.y)
+      print("Enemy Spawned")
+      
+      if self.enemies[enemyType] == 0 then
+        self.enemies[enemyType] = nil
+        self.enemiesCount = self.enemiesCount - 1
+      end
     end
   end
 end
@@ -164,9 +168,16 @@ end
 
 function Room:addSpawn(spawn)
   for index, value in pairs(spawn.enemyTypes) do
-    table.insert(self.enemySpawnPoints[value], spawn)
+    if self.enemySpawnPoints[value] == nil then
+      self.enemySpawnPoints[value] = {spawn}
+    else
+      table.insert(self.enemySpawnPoints[value], spawn)
+    end
   end
 end
 
-  
-  
+
+function Room:addEnemies(enemy, count)
+  self.enemies[enemy] = count
+  self.enemiesCount = self.enemiesCount + 1
+end

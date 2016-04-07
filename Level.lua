@@ -1,5 +1,6 @@
 require "common/class"
 require "Spawn"
+require "Enemy"
 
 
 levelScript = {}

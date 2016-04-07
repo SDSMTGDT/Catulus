@@ -1,11 +1,10 @@
 levelScript["level1"] = function()
   --Room dimensions
-  local width = 48
-  local height = 36
+  width = 48
+  height = 36
   --Player spawn location
-  local playerSpawn_x = 3 * 16
-  local playerSpawn_y = 5 * 16
-  
+  playerSpawn_x = 8 * 16
+  playerSpawn_y = 5 * 16
   
   
   --Initilize room
@@ -18,13 +17,13 @@ levelScript["level1"] = function()
   --Box in the room
   ---------------------------------------------------------------------
   --build a floor
-  room:buildBlock( 0, 32, width * 16 , 32 )
+  room:buildBlock( 0, height * 16 - 32, width * 16 , 32 )
   --build a ceiling
-  room:buildBlock( 0, height * 16, width * 16, 16 )
+  room:buildBlock( 0, 0, width * 16, 16 )
   --build left wall
-  room:buildBlock( 32, 16, 32, height * 16 )
+  room:buildBlock( 32, height - 16, 32, height * 16 )
   --build right wall
-  room:buildBlock( 16 * (width + 1), 16, 16, height * 16 )
+  room:buildBlock( 16 * (width + 1), height - 16, 16, height * 16 )
   
   
   --Add stepping blocks
@@ -32,10 +31,14 @@ levelScript["level1"] = function()
   room:buildBlock( 16 * 16, 5 * 16, 5 * 16, 32)
   
   
-  --Add Enemy spawns
+  --Add Enemy Spawns
   ---------------------------------------------------------------------
   room:addSpawn(Spawn( 5 * 16, 5 * 16, Enemy))
   
+  
+  --Add Enemy Counts
+  ---------------------------------------------------------------------
+  room:addEnemies(Enemy, 10)
   
   
   

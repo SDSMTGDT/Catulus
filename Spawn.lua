@@ -1,5 +1,6 @@
 require "common/class"
 require "PhysObject"
+require "Enemy"
 
 Spawn = buildClass()
 
