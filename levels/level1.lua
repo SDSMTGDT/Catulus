@@ -38,7 +38,7 @@ levelScript["level1"] = function()
   
   --Add Enemy Counts
   ---------------------------------------------------------------------
-  room:addEnemies(Enemy, 10)
+  room:addEnemies(Enemy, 1)
   
   
   

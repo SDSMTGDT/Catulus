@@ -125,36 +125,34 @@ end
 
 
 function Room:spawnEnemy()
-  
   --Make sure there are any enemies to spawn
-  if self.enemiesCount ~= 0 then
+  if self.enemiesCount > 0 then
   
     if self:getSecretary():isPaused() == false then
       local enemyType = nil
-      enemyCount = 0
+      totalEnemies = 0
       for _, count in pairs(self.enemies) do
-        enemyCount = enemyCount + count
+        totalEnemies = totalEnemies + count
       end
       
-      enemyCount = math.random(enemyCount)
+      enemyCount = math.random(totalEnemies)
+      enemyType = nil
       
       for index, count in pairs(self.enemies) do
           enemyCount = enemyCount - count
 
-          if enemyCount < 0 then
+          if enemyCount <= 0 then
             enemyType = index
             break
           end
       end
-
-      local e = enemyType():registerWithSecretary(self:getSecretary())
-      local p = self.enemySpawnPoints[enemyType][math.random(table.getn(self.enemySpawnPoints[enemyType]))]
-      e:setPosition(p.x, p.y)
-      print("Enemy Spawned")
       
-      if self.enemies[enemyType] == 0 then
-        self.enemies[enemyType] = nil
-        self.enemiesCount = self.enemiesCount - 1
+      if enemyType ~= nil then
+
+        local e = enemyType():registerWithSecretary(self:getSecretary())
+        local p = self.enemySpawnPoints[enemyType][math.random(table.getn(self.enemySpawnPoints[enemyType]))]
+        e:setPosition(p.x, p.y)
+        self.enemies[enemyType] = self.enemies[enemyType] - 1
       end
     end
   end
@@ -178,6 +176,14 @@ end
 
 
 function Room:addEnemies(enemy, count)
-  self.enemies[enemy] = count
-  self.enemiesCount = self.enemiesCount + 1
+  if enemy == nil or count == nil then
+    return
+  end
+  
+  if self.enemies[enemy] == nil then
+    self.enemies[enemy] = count
+    self.enemiesCount = self.enemiesCount + 1
+  else
+    self.enemies[enemy] = self.enemies[enemy] + count
+  end
 end
