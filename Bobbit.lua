@@ -11,12 +11,12 @@ function Bobbit:_init( segNum )
   self.segments = {}
   self.animation = Animation()
   self.segmentCount = segNum
-  self.swayDistance = 10
-  self.extensionDistance = 32
+  self.origPosx = self.get
+  self.maxExtend = nil
+  self.maxRetract = nil
   
   for i = 1, self.segmentCount do
     self.segments[i] = Segment( )
-	self.segments[i].swayFactor = i
   end
 end
 
@@ -28,28 +28,16 @@ function Bobbit:registerWithSecretary( )
   
   
   secretary:registerEventListener( self, self.draw, EventType.DRAW )
-  secretary:registerEventListener( self, self.dictate, EvenType.STEP )
+  secretary:registerEventListener( self, self.onStep, EvenType.STEP )
 
 end
 
+function Bobbit:onStep( )
 
-function Bobbit:dictate( )
-
-
-  --issue commands to all the segments
-  for i = 1, self.segmentCount do
-    if math.abs(self.segments[i].extension) > self.extensionDistance then
-      self.segments[i].extendCommand = ~self.segments[i].extendCommand
-	end
-	
-	if math.abs(self.segments[i].sway) > self.swayDistance then
-	  self.segments[i].swayCommand = ~self.segments[i].swayCommand
-	end	
-  end
+  
 
 
 end
-
 
 function Bobbit:draw( )
 
