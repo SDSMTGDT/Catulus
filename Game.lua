@@ -1,7 +1,7 @@
 require "common/functions"
 require "common/class"
 require "Secretary"
-require "LevelBuilder"
+require "Level"
 
 Game = buildClass()
 
@@ -112,8 +112,8 @@ end
 
 
 function Game:loadLevel(levelName)
-  self.room = buildLevelFromFile(levelName)
-  camera:setDimensions(self.room.width, self.room.height - 50)
+  self.room = Level(levelName)
+  camera:setDimensions(self.room.width, self.room.height)
   
   if self:isRunning() then
     self.room:registerWithSecretary(self.secretary)
