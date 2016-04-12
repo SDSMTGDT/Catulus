@@ -33,12 +33,14 @@ levelScript["level1"] = function()
   
   --Add Enemy Spawns
   ---------------------------------------------------------------------
-  room:addSpawn(Spawn( 5 * 16, 5 * 16, Enemy))
+  room:addSpawn(Spawn( 5 * 16, 5 * 16, Kitty, Penguin))
+  
   
   
   --Add Enemy Counts
   ---------------------------------------------------------------------
-  room:addEnemies(Enemy, 1)
+  room:addEnemies(Kitty, 5)
+  room:addEnemies(Penguin, 5)
   
   
   
