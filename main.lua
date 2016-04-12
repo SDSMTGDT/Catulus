@@ -11,7 +11,7 @@ require "Menu"
 require "Debugger"
 require "Prop"
 require "Game"
-
+require "Bobbit"
 
 room = nil
 proptest = nil
@@ -20,6 +20,9 @@ rootSecretary = Secretary()
 debugger = Debugger():registerWithSecretary(rootSecretary)
 game = Game(rootSecretary)
 camera = Camera()
+
+bobtest = Bobbit(3, 100, 100)
+bobtest:registerWithSecretary( rootSecretary )
 
 function love.load( )
   
