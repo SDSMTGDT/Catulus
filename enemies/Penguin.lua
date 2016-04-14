@@ -8,7 +8,7 @@ function Penguin:_init( )
   self.animations.waddle = Animation("penguinanim")
   self.animations.waddle.rate = 10
   self.animations.fall = Animation("penguinfall")
-  
+  self.animations.fall.rate = 5
   self.animations.current = self.animations.waddle
 
   self:setSize(32, 48)
@@ -23,7 +23,9 @@ function Penguin:_init( )
 end 
 
 function Penguin:jump()
-  self.velocity.y = -self.jumpConstant
+  if self.velocity.y == 0 then
+    self.velocity.y = -self.jumpConstant
+  end
 end
 
 function Penguin:moveRight()
