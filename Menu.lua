@@ -165,7 +165,7 @@ function Menu.createPauseMenu( rootSecretary, gameSecretary, camera, game )
       camera,
       function()
         game:endGame()
-        game:loadLevel("level1.txt")
+        game:loadLevel("level1")
         game:startGame()
         menu:destroy()
       end):registerWithSecretary(rootSecretary))
