@@ -21,7 +21,7 @@ debugger = Debugger():registerWithSecretary(rootSecretary)
 game = Game(rootSecretary)
 camera = Camera()
 
-bobtest = Bobbit(3, 100, 100)
+bobtest = Bobbit(7,300, 300)
 bobtest:registerWithSecretary( rootSecretary )
 
 function love.load( )
