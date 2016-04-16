@@ -37,6 +37,7 @@ function love.load( )
   
   game:loadLevel("level1")
   game:startGame()
+  game:mainMenu()
   
   rootSecretary:registerEventListener({}, function(_, key, isrepeat)
       

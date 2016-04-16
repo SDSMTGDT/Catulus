@@ -102,6 +102,7 @@ function Game:pause()
   if self:isPaused() then
     return
   end
+  
   if self:isRunning() == false then
     return
   end
@@ -119,4 +120,9 @@ function Game:loadLevel(levelName)
     self.room:registerWithSecretary(self.secretary)
     self.room:registerChildrenWithSecretary(self.secretary)
   end
+end
+
+
+function Game:mainMenu()
+    Menu:createMainMenu(rootSecretary, game.secretary, camera, game)
 end

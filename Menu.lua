@@ -9,7 +9,7 @@ Menu = buildClass(Entity)
 
 function Menu:_init( gameSecretary, title, x, y, w, h )
   Object:_init(self)
-  
+    
   -- Validate parameters
   assertType(gameSecretary, "gameSecretary", Secretary)
   assertType(title, "title", "string")
@@ -195,4 +195,34 @@ function Menu.createPauseMenu( rootSecretary, gameSecretary, camera, game )
       end):registerWithSecretary(rootSecretary))
   
   return menu
+end
+
+
+function Menu:createMainMenu(rootSecretary, gameSecretary, camera, game)
+  assertType(rootSecretary, "rootSecretary", Secretary)
+  assertType(gameSecretary, "gameSecretary", Secretary)
+  assertType(camera, "camera", Camera)
+  assertType(game, "game", Game)
+  gameSecretary.paused = true
+  
+    -- Create new instance of menu
+  local menu = Menu(gameSecretary, "Main Menu", 0, 0, game.room.width, game.room.height):registerWithSecretary(rootSecretary)
+  menu.padding = 8
+  menu.border = 4
+  
+    -- Center menu
+  menu.x = camera.offset.x + (camera.width - menu.width) / 2
+  menu.y = camera.offset.y + (camera.height - menu.height) / 2
+  
+  menu:addItem(Button("Start Game",
+      menu.x + menu.border + menu.padding,
+      menu.y + menu.height / 2 - 16,
+      menu.width - menu.border*2 - menu.padding*2,
+      32,
+      camera,
+      function()
+        game:startGame()
+        menu:destroy()
+      end):registerWithSecretary(rootSecretary))
+  
 end
