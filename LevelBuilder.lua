@@ -1,6 +1,7 @@
 require "Room"
 require "SolidBlock"
 require "PassthroughBlock"
+require "MovingPlatform"
 
 function buildLevelFromFile(filename)
   assertType(filename, "filename", "string")

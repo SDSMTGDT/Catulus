@@ -162,6 +162,27 @@ function Room:spawnEnemy()
   end
 end
 
+function Room:spawnKitty()
+  
+  --Make sure there are spawn points before spawning
+  if self:getSecretary():isPaused() == false then
+  
+    if table.getn(self.enemySpawnPoints) ~= 0 then
+      local e = Enemy():registerWithSecretary(self:getSecretary())
+      local p = self.enemySpawnPoints[math.random(table.getn(self.enemySpawnPoints))]
+      e:setPosition(p.x, p.y)
+      if math.random(2) == 1 then
+        e:moveLeft()
+      else
+        e:moveRight()
+      end
+      self:getSecretary():registerEventListener(self, function(self, kitty)
+          print("kitty got deaded: ", kitty)
+      end, EventType.DESTROY, e)
+    end
+  end
+end
+
 
 function Room:buildBlock(x, y, w, h)
   self:addObject(SolidBlock( x, y, w, h))
