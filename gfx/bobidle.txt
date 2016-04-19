@@ -1,0 +1,8 @@
+Bob_idle_1.png
+Bob_idle_2.png
+Bob_idle_3.png
+Bob_idle_4.png
+Bob_idle_5.png
+Bob_idle_4.png
+Bob_idle_3.png
+Bob_idle_2.png

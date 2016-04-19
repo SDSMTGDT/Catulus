@@ -10,7 +10,7 @@ function Bobbit:_init( segNum, x, y )
   PhysObject._init(self)
 
   self.segments = {}
-  self.animation = Animation("fishfall")
+  self.animation = Animation("bobidle")
   self.segmentCount = segNum
   self.origin = {x, y}
   
@@ -19,13 +19,14 @@ function Bobbit:_init( segNum, x, y )
   self.maxExtend = 32*segNum
   self.maxRetract = 0
   self.currOffset = 0
+  self.amplitude = 10
   self.frequency = math.pi * (1/(segNum*16))
   self.extending = true
   
   self:setPosition( x, y )
   
   for i = 1, segNum do
-    self.segments[i] = Segment( i, segNum, x, y+(8*i) )
+    self.segments[i] = Segment( i, segNum, x, y+(2*i) )
   end
   --print( "Hello World".. " ".. x )
 
@@ -49,27 +50,21 @@ function Bobbit:onStep( )
 
   if self.extending == true then
     self.currOffset = self.currOffset+1
-    if self.currOffset >= self.maxExtend then
-	  self.extending = false
-	end
-	
-	  local x = self.origin[1]+math.floor( 10*math.sin(self.frequency*self.currOffset) )
-      local y = self.origin[2]-self.currOffset
-      --print( math.floor(math.sin(self.frequency*self.currOffset)))
-      --print( self.currOffset)
-      self:setPosition( x, y )
-  elseif self.extending == false then
-    self.currOffset =self.currOffset-1
-    if self.currOffset <= self.maxRetract then
-	  self.extending = true
-	end
-	  local x = self.origin[1]+math.floor( 10*math.sin(-self.frequency*self.currOffset) )
-      local y = self.origin[2]-self.currOffset
-      --print( math.floor(math.sin(self.frequency*self.currOffset)))
-      --print( self.currOffset)
-      self:setPosition( x, y )
+  else
+    self.currOffset = self.currOffset-1
   end
-    
+  
+  if self.currOffset >= self.maxExtend then
+	self.extending = false
+  elseif self.currOffset <= self.maxRetract then
+    self.extending = true
+  end
+	
+  local x = self.origin[1]+self.amplitude*math.sin(self.frequency*self.currOffset) 
+  local y = self.origin[2]-self.currOffset
+
+  self:setPosition( x, y )
+  self.animation:update( )
 
 
 end

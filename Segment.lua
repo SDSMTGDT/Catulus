@@ -16,10 +16,9 @@ function Segment:_init( segId, segNum, x, y )
   self.maxExtend = 32*segNum - 32*segId
   self.maxRetract = -32*segId
   self.currOffset = -32*segId
-  self.holdPeriod = 32*segId
+  self.amplitude = 10
   self.frequency = math.pi * (1/((segNum)*16))
   self.extending = true
-  self.holding = false
   self:setPosition( x, y )
   
   --print( "Hello World".. " ".. x )
@@ -37,35 +36,21 @@ function Segment:registerWithSecretary( secretary )
 end
 
 function Segment:onStep( )
-
-  if self.extending == true then   
-    self.currOffset = self.currOffset+1	
-    if self.currOffset >= self.maxExtend then
-	  self.extending = false
-	end
-	
-	  local x = self.origin[1]+math.floor( 10*math.sin(self.frequency*self.currOffset) )
-      local y = self.origin[2]-self.currOffset
-	  
-      --print( math.floor(math.sin(self.frequency*self.currOffset)))
-      --print( self.currOffset)
-      self:setPosition( x, y )
-  elseif self.extending == false then    
-      self.currOffset =self.currOffset-1
-    if self.currOffset <= self.maxRetract then
-	    self.extending = true
-	end
-	
-	  local x = self.origin[1]+math.floor( 10*math.sin(-self.frequency*self.currOffset) )	  
-      local y = self.origin[2]-self.currOffset
-		
-      --print( math.floor(math.sin(self.frequency*self.currOffset)))
-      --print( self.currOffset)
-      self:setPosition( x, y )
+  if self.extending == true then
+    self.currOffset = self.currOffset+1
+  else
+    self.currOffset = self.currOffset-1
   end
-    
-
-
+  
+  if self.currOffset >= self.maxExtend then
+	self.extending = false
+  elseif self.currOffset <= self.maxRetract then
+    self.extending = true
+  end
+	
+  local x = self.origin[1]+self.amplitude*math.sin(self.frequency*self.currOffset)
+  local y = self.origin[2]-self.currOffset
+  self:setPosition( x, y )
 end
 
 function Segment:draw( )
@@ -73,6 +58,8 @@ function Segment:draw( )
  local x, y = self:getPosition( )
    --print( "Hello World".. " ".. x )
  love.graphics.setColor( 255, 255, 255 )
- self.animation:draw(x, y)
+ if self.currOffset >= self.segmentNumber then
+  self.animation:draw(x, y)
+ end
 
 end
