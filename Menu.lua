@@ -221,6 +221,8 @@ function Menu:createMainMenu(rootSecretary, gameSecretary, camera, game)
       32,
       camera,
       function()
+        game:endGame()
+        game:loadLevel("level1")
         game:startGame()
         menu:destroy()
       end):registerWithSecretary(rootSecretary))

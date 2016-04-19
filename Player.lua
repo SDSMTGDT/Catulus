@@ -182,7 +182,7 @@ function Player:onCollisionCheck( )
   for _, other in ipairs(others) do
     
     -- Test for goomba stomp
-    if self.velocity.y > other.velocity.y and b < other.position.y + other.size.height then
+    if self.velocity.y > other.velocity.y and b < other.position.y + .25 * other.size.height then
 
 	  stomped = true
 
@@ -224,5 +224,6 @@ end
 
 function Player:die(reason)
   sound.sounds.playerDeath:play()
+  game:mainMenu()
   self:destroy()
 end

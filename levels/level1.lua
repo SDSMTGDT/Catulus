@@ -19,11 +19,11 @@ levelScript["level1"] = function()
   --build a floor
   room:buildBlock( 0, height * 16 - 32, width * 16 , 32 )
   --build a ceiling
-  room:buildBlock( 0, 32, width * 16, 32 )
+  room:buildBlock( 0, 0, width * 16, 32 )
   --build left wall
-  room:buildBlock( 0, height, 32, height * 16 )
+  room:buildBlock( 0, 0, 32, height * 16 )
   --build right wall
-  room:buildBlock( 16 * (width - 1), height, 16, height * 16 )
+  room:buildBlock( 16 * (width - 2), 0, 32, height * 16 )
   
   
   --Add stepping blocks

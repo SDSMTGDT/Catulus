@@ -61,7 +61,6 @@ function Penguin:onStep()
     
   Enemy.onStep(self)
   
-  
   if self.jumpTimer == 0 then
     self:jump()
     self.jumpTimer = self.jumpTimerMax
