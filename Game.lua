@@ -66,10 +66,12 @@ function Game:endGame()
   end
   
   self.rootSecretary:remove(self.secretary)
+  self.secretary = nil
   
   if self.room ~= nil then
-    self.rootSecretary:remove(self.room)
+    self.room:destroy()
   end
+  
 end
 
 
@@ -102,6 +104,7 @@ function Game:pause()
   if self:isPaused() then
     return
   end
+  
   if self:isRunning() == false then
     return
   end
@@ -110,13 +113,35 @@ function Game:pause()
 end
 
 
+function Game:mainMenu()
+    Menu:createMainMenu(rootSecretary, game.secretary, camera, game)
+end
 
-function Game:loadLevel(levelName)
-  self.room = Level(levelName)
+
+function Game:startLevel(levelName)
+  --Make sure levelname was passed
+  assert(levelName ~= nil, "Level name must be passed")
+  
+  --Load the level into a temporary variable
+  local room = Level(levelName)
+  
+  --Make sure room was loaded
+  assert(room ~= nil, "Error: Level could not be loaded")
+  
+  --End current level if there is one
+  if self:isRunning() == true then
+    self:endGame()
+  end
+  
+  --Initialize the level
+  self.room = room
   camera:setDimensions(self.room.width, self.room.height)
   
   if self:isRunning() then
     self.room:registerWithSecretary(self.secretary)
     self.room:registerChildrenWithSecretary(self.secretary)
   end
+  
+  --Start the game using the new level
+  self:startGame()
 end

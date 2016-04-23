@@ -21,9 +21,9 @@ levelScript["level1"] = function()
   --build a ceiling
   room:buildBlock( 0, 0, width * 16, 32 )
   --build left wall
-  room:buildBlock( 0, 32, 32, (height - 4) * 16 )
+  room:buildBlock( 0, 0, 32, height * 16 )
   --build right wall
-  room:buildBlock( (width - 2) * 16, 32, 32, (height - 4) * 16 )
+  room:buildBlock( 16 * (width - 2), 0, 32, height * 16 )
   
   
   --Add stepping blocks
@@ -43,12 +43,14 @@ levelScript["level1"] = function()
   
   --Add Enemy Spawns
   ---------------------------------------------------------------------
-  room:addSpawn(Spawn( 5 * 16, 5 * 16, Enemy))
+  room:addSpawn(Spawn( 5 * 16, 5 * 16, Kitty, Penguin))
+  
   
   
   --Add Enemy Counts
   ---------------------------------------------------------------------
-  room:addEnemies(Enemy, 1)
+  room:addEnemies(Kitty, 5)
+  room:addEnemies(Penguin, 5)
   
   
   

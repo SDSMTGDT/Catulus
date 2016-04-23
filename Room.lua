@@ -111,10 +111,10 @@ end
 
 function Room:onStep( )
   self.timer = self.timer + 1
-  if self.timer == 100 then
-    self.timer = 0
-    self:spawnEnemy()
-  end
+  --if self.timer == 100 then
+    --self.timer = 0
+    --self:spawnEnemy()
+  --end
 end
 
 function Room:onKeyPress(key, isrepeat)
