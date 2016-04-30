@@ -32,7 +32,11 @@ function Room:_init( width, height )
 end
 
 
-
+--
+--Register the room with secretary
+--
+--secretary: The secretary to register with
+--
 function Room:registerWithSecretary(secretary)
   Entity.registerWithSecretary(self, secretary)
   
@@ -52,8 +56,11 @@ function Room:registerChildrenWithSecretary(secretary)
   end
 end
 
-
-
+--
+--Adds an object to the Room
+--
+--object: An Entity object to add to the room
+--
 function Room:addObject(object)
   assertType(object, "object", Entity)
   
@@ -61,23 +68,17 @@ function Room:addObject(object)
 end
 
 
-
-function Room:addEnemySpawnPoint(x, y)
-  assertType(x, "x", "number")
-  assertType(y, "y", "number")
-  
-  table.insert(self.enemySpawnPoints, {x=x,y=y})
-end
-
-
-
+--
+--Add a spawn point for the player character to the room
+--
 function Room:addPlayerSpawnPoint(x, y)
+  --Make sure x and y are valid
   assertType(x, "x", "number")
   assertType(y, "y", "number")
   
+  --Add the spawn point
   table.insert(self.playerSpawnPoints, {x=x,y=y})
 end
-
 
 
 --
@@ -96,10 +97,10 @@ end
 
 -- Draw black bars surrounding the room
 function Room:drawBars( )
-  
+  --Set color
   love.graphics.setColor(0, 0, 0)
   
-  
+  --Draw the bars
   local w = 32
   love.graphics.rectangle("fill", -w, 0, w, self.height)
   love.graphics.rectangle("fill", self.width, 0, w, self.height)
@@ -109,14 +110,20 @@ function Room:drawBars( )
 end
 
 
+--This is called by the secretary each step
 function Room:onStep( )
   self.timer = self.timer + 1
-  --if self.timer == 100 then
-    --self.timer = 0
-    --self:spawnEnemy()
-  --end
+  
+  --Spawn an enemy every second or so
+  if self.timer == 100 then
+    self.timer = 0
+    self:spawnEnemy()
+  end
 end
 
+--
+--Spawn an enemy when enter is pressed
+--
 function Room:onKeyPress(key, isrepeat)
   if key == "return" and isrepeat == false then
     self:spawnEnemy()
@@ -124,36 +131,55 @@ function Room:onKeyPress(key, isrepeat)
 end
 
 
+--
+--Spawn an enemy at a random spawn point
+--
 function Room:spawnEnemy()
   --Make sure there are any enemies to spawn
   if self.enemiesCount > 0 then
   
+    --Make sure the game is not paused
     if self:getSecretary():isPaused() == false then
+      
+      --Add up the total amount of enemies in the level
       local enemyType = nil
       totalEnemies = 0
       for _, count in pairs(self.enemies) do
         totalEnemies = totalEnemies + count
       end
       
+      --Get a random number from 0 to totalEnemies
       enemyCount = math.random(totalEnemies)
       enemyType = nil
       
+      --Loop through all the enemies in the level
       for index, count in pairs(self.enemies) do
+          --Subtract the number of each type of enemy
           enemyCount = enemyCount - count
 
+          --If enemyCount is less than 0, spawn the type the loop is on
           if enemyCount <= 0 then
             enemyType = index
             break
           end
       end
       
+      --Check to make sure we got an enemy type
       if enemyType ~= nil then
-
+        
+        --Initialize new enemy and register with secretary
         local e = enemyType():registerWithSecretary(self:getSecretary())
+        
+        --Choose a random elegible spawn point
         local p = self.enemySpawnPoints[enemyType][math.random(table.getn(self.enemySpawnPoints[enemyType]))]
+        
+        --Give the enemy the position of the spawn point
         e:setPosition(p.x, p.y)
+        
+        --Remove the new enemy from spawnable enemies
         self.enemies[enemyType] = self.enemies[enemyType] - 1
         
+        --Register death event for the new enemy
         self:getSecretary():registerEventListener(self, function(self, kitty)
           print("kitty got deaded: ", kitty)
           end, EventType.DESTROY, e)
@@ -162,33 +188,16 @@ function Room:spawnEnemy()
   end
 end
 
-function Room:spawnKitty()
-  
-  --Make sure there are spawn points before spawning
-  if self:getSecretary():isPaused() == false then
-  
-    if table.getn(self.enemySpawnPoints) ~= 0 then
-      local e = Enemy():registerWithSecretary(self:getSecretary())
-      local p = self.enemySpawnPoints[math.random(table.getn(self.enemySpawnPoints))]
-      e:setPosition(p.x, p.y)
-      if math.random(2) == 1 then
-        e:moveLeft()
-      else
-        e:moveRight()
-      end
-      self:getSecretary():registerEventListener(self, function(self, kitty)
-          print("kitty got deaded: ", kitty)
-      end, EventType.DESTROY, e)
-    end
-  end
-end
-
-
+--
+--Creates a block and add it to the room
+--
 function Room:buildBlock(x, y, w, h)
   self:addObject(SolidBlock( x, y, w, h))
 end
 
-
+--
+--Add an enemy spawn point to the room
+--
 function Room:addSpawn(spawn)
   for index, value in pairs(spawn.enemyTypes) do
     if self.enemySpawnPoints[value] == nil then
@@ -200,6 +209,12 @@ function Room:addSpawn(spawn)
 end
 
 
+--
+--Add an enemy to the room
+--
+--enemy: The type of enemy to add to the room
+--count: The number of enemies to add the the room
+--
 function Room:addEnemies(enemy, count)
   if enemy == nil or count == nil then
     return

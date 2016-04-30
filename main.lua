@@ -23,6 +23,7 @@ game = Game(rootSecretary)
 camera = Camera()
 sound = Sound()
 
+--Entry point of the game
 function love.load( )
   
   -- Preload sprites
@@ -32,12 +33,15 @@ function love.load( )
   end
   file:close()
   
+  --Initialize the camera object
   camera:setDimensions(love.graphics.getWidth(), love.graphics.getHeight())
   camera:registerWithSecretary(rootSecretary)
   
+  --Begin the game and launch the main menu
   game:startLevel("level1")
   game:mainMenu()
   
+  --Register an event trigger for the pause menu
   rootSecretary:registerEventListener({}, function(_, key, isrepeat)
       
       -- Display pause menu
