@@ -23,7 +23,29 @@ game = Game(rootSecretary)
 camera = Camera()
 sound = Sound()
 
+
+function verifyVersion()
+  
+  -- Ensure function even exists (doesn't exist for older versions of Love2D)
+  if love.getVersion == nil then
+    return false
+  end
+  
+  local major, minor, revision, codename = love.getVersion()
+  if major < 0 or (major == 0 and minor < 10) then
+    return false
+  end
+end
+
+
 function love.load( )
+  
+  if verifyVersion() == false then
+    love.window.showMessageBox( "Update Love2D", "You are running an older version of Love2D. Update to version 10.0 or later" )
+    love.event.quit()
+    return
+  end
+  
   
   -- Preload sprites
   local file = love.filesystem.newFile("preload_anim.txt", "r")
@@ -38,7 +60,7 @@ function love.load( )
   game:startLevel("level1")
   game:mainMenu()
   
-  rootSecretary:registerEventListener({}, function(_, key, isrepeat)
+  rootSecretary:registerEventListener({}, function(_, key, scancode, isrepeat)
       
       -- Display pause menu
       if key == "escape" then

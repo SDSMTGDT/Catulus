@@ -73,7 +73,7 @@ end
 
 
 
-function Menu:onKeyboardDown( key, isRepeat )
+function Menu:onKeyboardDown( key, scancode, isRepeat )
   
   -- Short circuit
   if self.items.n == 0 then return end

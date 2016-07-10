@@ -13,6 +13,7 @@ EventType = {
   "MOUSE_DOWN",
   "MOUSE_UP",
   "MOUSE_MOVE",
+  "MOUSE_WHEEL",
   "JOYSTICK_DOWN",
   "JOYSTICK_UP",
   "JOYSTICK_ADD",

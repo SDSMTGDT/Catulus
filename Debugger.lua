@@ -31,7 +31,7 @@ function Debugger:step()
   self.fps = love.timer.getFPS()
 end
 
-function Debugger:onKeyPress(key, isrepeat)
+function Debugger:onKeyPress(key, scancode, isrepeat)
   
   -- Ignore repeat triggers
   if isrepeat then return false end

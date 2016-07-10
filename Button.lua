@@ -80,7 +80,7 @@ end
 --
 -- Button:onKeyboardDown
 --
-function Button:onKeyboardDown( key, isRepeat )
+function Button:onKeyboardDown( key, scancode, isRepeat )
   if self.selected and key == "return" then
     self.down = true  
   end
@@ -88,7 +88,7 @@ end
 
 --
 -- Button:onKeyboardUp
-function Button:onKeyboardUp( key )
+function Button:onKeyboardUp( key, scancode )
   if self.selected and key == "return" then
     if self.down then
       self.down = false
@@ -143,11 +143,15 @@ end
 -- Button:onMousePressed
 --
 function Button:onMouseDown( x, y, button )
+  local debug = false
+  if debug then print("Button:onMouseDown - "..button.." released") end
+  
   x, y = camera:drawingPoint(x, y)
   
-  if button ~= "l" then return end
+  if button ~= 1 and button ~= "l" then return end
   
   if x >= self.x and x < self.x + self.width and y >= self.y and y < self.y + self.height then
+    if debug then print("Button:onMouseDown - mouse down on button") end
     self.down = true
   end
 end
@@ -156,15 +160,19 @@ end
 -- Button:onMouseUp
 --
 function Button:onMouseUp( x, y, button )
+  local debug = false
+  if debug then print("Button:onMouseUp - "..button.." released") end
+  
   x, y = camera:drawingPoint(x, y)
   
-  if button ~= "l" then return end
+  if button ~= 1 and button ~= "l" then return end
   
   -- Update flags
   local down = self.down
   self.down = false
   
   if down and x >= self.x and x < self.x + self.width and y >= self.y and y < self.y + self.height then
+    if debug then print("Button:onMouseUp - mouse up on button, triggered onclick") end
     self:onClick()
   end
 end
@@ -173,7 +181,11 @@ end
 -- Button:onClick
 --
 function Button:onClick( )
+  local debug = false
+  if debug then print("Button:onClick") end
+  
   if self.actions.click ~= nil then
+    if debug then print("Button:onClick - triggered click action") end
     self.actions.click()
   end
 end

@@ -33,7 +33,7 @@ function Player:_init( )
   
   self.jumpTime = 0
   self.jumpMaxTime = 16   -- Flight time
-  self.jumpConstant = -6  -- Jump velocity
+  self.jumpConstant = -8  -- Jump velocity
   
   self.sounds = {}
 end
@@ -123,27 +123,43 @@ end
 
 
 
-function Player:onKeyPress( key, isrepeat )
+function Player:onKeyPress( key, scancode, isrepeat )
+  local debug = true
+  if debug then print("Player:onKeyPress - "..key.." pressed") end
   
   -- Jump
-  if key == " " and isrepeat == false then
+  if (key == " " or key == "space") and isrepeat == false then
+    if debug then print("Player:onKeyPress - entering jump logic") end
     
     -- Get list of blocks beneath player
     local t, r, b, l = self:getBoundingBox(0, 1)
     local others = self:getSecretary():getCollisions( t, r, b, l, Block )
-    local ground = (table.getn(others) ~= 0)
+    local ground = false
+    for i,other in ipairs(others) do
+      if self:collidesWith(other:getBoundingBox()) == false then
+        ground = true
+        break
+      end
+    end
     
     if ground then
+      if debug then print("Player:onKeyPress - on ground") end
       self.velocity.y = self.jumpConstant
       self.jumpTime = self.jumpMaxTime
+    else
+      if debug then print("Player:onKeyPress - not on ground") end
     end
   end
   
   -- Shoot
   if key == "j" and self.stunTimer ==0 then
+    if debug then print("Player:onKeyPress - entering shoot logic") end
+    
     if self.facing == "left" then
+      if debug then print("Player:onKeyPressed - player facing left") end
       Bullet( self.position.x, self.position.y + self.size.height/2, 0, -32 ):registerWithSecretary(self:getSecretary())
     elseif self.facing == "right" then
+      if debug then print("Player:onKeyPressed - player facing right") end
       Bullet( self.position.x + self.size.width, self.position.y + self.size.height/2, 0, 32 ):registerWithSecretary(self:getSecretary())
     end
   end

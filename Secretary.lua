@@ -474,33 +474,39 @@ function Secretary:onPostPhysics()
 end
 
 -- Called when a keyboard button is pressed
-function Secretary:onKeyboardDown( key, isrepeat )
+function Secretary:onKeyboardDown( key, scancode, isrepeat )
   if self.paused then return end
-  self:executeCallbacks(self.callbacks[EventType.KEYBOARD_DOWN], key, isrepeat)
+  self:executeCallbacks(self.callbacks[EventType.KEYBOARD_DOWN], key, scancode, isrepeat)
 end
 
 -- Called when a keyboard button is released
-function Secretary:onKeyboardUp( key )
+function Secretary:onKeyboardUp( key, scancode )
   if self.paused then return end
-  self:executeCallbacks(self.callbacks[EventType.KEYBOARD_UP], key )
+  self:executeCallbacks(self.callbacks[EventType.KEYBOARD_UP], key, scancode )
 end
 
 -- Called when a mouse button is pressed
-function Secretary:onMouseDown(x, y, button)
+function Secretary:onMouseDown(x, y, button, istouch)
   if self.paused then return end
-  self:executeCallbacks(self.callbacks[EventType.MOUSE_DOWN], x, y, button)
+  self:executeCallbacks(self.callbacks[EventType.MOUSE_DOWN], x, y, button, istouch)
 end
 
 -- Called when a mouse button is released
-function Secretary:onMouseUp(x, y, button)
+function Secretary:onMouseUp(x, y, button, istouch)
   if self.paused then return end
-  self:executeCallbacks(self.callbacks[EventType.MOUSE_UP], x, y, button)
+  self:executeCallbacks(self.callbacks[EventType.MOUSE_UP], x, y, button, istouch)
 end
 
 -- Called when the mouse is moved
-function Secretary:onMouseMove(x, y, dx, dy)
+function Secretary:onMouseMove(x, y, dx, dy, istouch)
   if self.paused then return end
-  self:executeCallbacks(self.callbacks[EventType.MOUSE_MOVE], x, y, dx, dy)
+  self:executeCallbacks(self.callbacks[EventType.MOUSE_MOVE], x, y, dx, dy, istouch)
+end
+
+-- Called when the mouse wheel moves
+function Secretary:onMouseWheelMove(x, y)
+  if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.MOUSE_WHEEL], x, y)
 end
 
 -- Called when a joystick button is pressed

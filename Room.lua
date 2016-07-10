@@ -117,7 +117,7 @@ function Room:onStep( )
   --end
 end
 
-function Room:onKeyPress(key, isrepeat)
+function Room:onKeyPress(key, scancode, isrepeat)
   if key == "return" and isrepeat == false then
     self:spawnEnemy()
   end

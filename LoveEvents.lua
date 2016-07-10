@@ -22,12 +22,12 @@ function love.draw( )
   rootSecretary:onDraw()
 end
 
-function love.keypressed( key, isrepeat )
-  rootSecretary:onKeyboardDown(key, isrepeat)
+function love.keypressed( key, scancode, isrepeat )
+  rootSecretary:onKeyboardDown(key, scancode, isrepeat)
 end
 
-function love.keyreleased( key )
-  rootSecretary:onKeyboardUp(key)
+function love.keyreleased( key, scancode )
+  rootSecretary:onKeyboardUp(key, scancode)
 end
 
 function love.mousepressed( x, y, button )
@@ -40,6 +40,10 @@ end
 
 function love.mousemoved( x, y, dx, dy )
   rootSecretary:onMouseMove(x, y, dx, dy)
+end
+
+function love.wheelmoved( x, y )
+  rootSecretary:onMouseWheelMove(x, y)
 end
 
 function love.joystickpressed( joystick, button )
